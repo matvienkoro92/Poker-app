@@ -528,6 +528,12 @@ function localCssFilesReferencedByEntrypoints() {
   walk("styles.css");
   localCssEntrypointsFromHtml().forEach(walk);
   lazyCssEntrypointsFromHtml().forEach(walk);
+  for (const file of fs.readdirSync(root).filter(name => name.endsWith(".html") && name !== "index.html")) {
+    for (const tag of read(file).matchAll(/<link\b[^>]*\bhref=["']([^"']+\.css(?:\?[^"']*)?)["'][^>]*>/gi)) {
+      const sheet = stripAssetUrl(tag[1]);
+      if (!sheet.includes("/")) walk(sheet);
+    }
+  }
   return out;
 }
 
@@ -632,7 +638,8 @@ add("Profile login button opens visible auth overlay", () =>
   hasAll("client", [
     "function openSharedAccountAuthFlow(opts)",
     "opts && opts.forceOverlay === true",
-    "if (forceOverlay || shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();",
+    "if (forceOverlay) { openOverlayAuthEntryScreen(); return; }",
+    "if (shouldUseOverlayAuthScreen()) openOverlayAuthEntryScreen();",
     "function handleSharedAccountAuthClick(e)",
     "openSharedAccountAuthFlow({ forceOverlay: true });",
     "window.__pokerOpenSharedAccountAuthFlow({ forceOverlay: true });",
@@ -832,7 +839,7 @@ add("Admin push broadcast can choose a click target section", () =>
 add("Chat shell is lazy-loaded from a hydrated HTML fragment", () =>
   hasAll("html", [
     'data-view="chat"',
-    'data-html-fragment="./html-fragments/chat.html"',
+    'data-html-fragment="./html-fragments/chat.html?v=',
     'data-html-fragment-view="chat"',
   ]) &&
   !has("html", 'id="chatDialogsView"') &&
@@ -863,7 +870,8 @@ add("Download HTML is lazy-loaded from a fragment", () =>
     'data-view="download"',
     'data-html-fragment-view="download"',
     'data-download-page="main"',
-    'data-download-page="poker21"',
+    'data-play-panel-target="poker21"',
+    'aria-label="Скачать Poker21 для Android"',
     'data-download-page="xpoker"',
     'data-download-page="pppoker"',
     'data-download-page="supremapoker"',
@@ -1201,38 +1209,15 @@ add("Chat sender label hides Telegram login when a name exists", () =>
   !has("chatHandlerRuntime", "function buildChatDisplayName")
 );
 
-add("Schedule keeps weekly, day and daily tournament order", () =>
-  hasAll("html", [
-    'data-view="schedule"',
-    'data-html-fragment="./html-fragments/schedule.html?v=',
-    'data-html-fragment-view="schedule"',
-  ]) &&
-  !has("html", 'schedule-section--week-tournament') &&
-  hasAll("scheduleFragment", [
-    'schedule-section--week-tournament',
-    "Нокаут Прогрессив</td>",
-    "10 000₽</td>",
-    "1 000 000₽</td>",
-    "Турниры дня в 18:00 МСК",
-    "<td>Турнир Тракториста</td>",
-    "<td>Нокаут</td>",
-    "<td>Четверг</td>",
-    "<td>Мистери</td>",
-    "R:300₽</td>",
-    "100 000₽</td>",
-    "<td>Субботний турнир</td>",
-    "R:350₽ / A:350₽</td>",
-    "5 билетов по 10 000₽</td>",
-    "<td>PKO/MKO</td>",
-    "25 000₽</td>",
-    "<td>PLO4</td>",
-    "20:00</td>",
-  ]) &&
-  has("appTournamentDay", 'guarantee: "1 000 000₽"') &&
-  has("appTournamentDay", /buyin:\s*"300₽",\s*guarantee:\s*"100 000₽"/) &&
-  !has("scheduleFragment", "schedule-section--xpoker-freerolls") &&
-  !has("scheduleFragment", "Rebuy (19:00)")
-);
+add("Schedule opens on demand and lists day, daily and monthly tournaments in order", () => {
+  const sections = [...files.scheduleFragment.matchAll(/<h2 class="schedule-section__title">([^<]+)<\/h2>/g)].map(match => match[1]);
+  return sections.join("|") === "Турниры дня|Ежедневные турниры|Турниры месяца" &&
+    has("html", 'data-html-fragment-view="schedule"') &&
+    !has("html", 'class="schedule-table"') &&
+    ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+      .every(day => has("scheduleFragment", "<td>" + day + "</td>")) &&
+    hasAll("scheduleFragment", ["18:00 МСК", "PLO6 Меджик", "MAIN EVENT PKO", "MAIN EVENT NLH"]);
+});
 
 add("Player card exposes Poker21, status and actions without player stats", () =>
   hasAll("globalModalsChatRatingFragment", [
@@ -1240,7 +1225,7 @@ add("Player card exposes Poker21, status and actions without player stats", () =
     'id="chatUserModalP21"',
     'id="chatUserModalStatusScale"',
     'id="chatUserModalWriteBtn"',
-    'id="chatUserModalVerifiedBadge"',
+    'id="chatUserModalStatusNick"',
   ]) &&
   !has("globalModalsChatRatingFragment", 'id="chatUserModalPlayerStats"') &&
   !has("globalModalsChatRatingFragment", "Статистика игрока:")
@@ -1304,8 +1289,8 @@ add("Global admin modal tail is lazy-loaded with re-init hooks", () =>
     'id="globalModalsFragmentHost"',
     './html-fragments/global-modals.html?v=',
     '<nav class="bottom-nav"',
-    'id="chatNavBtn"',
   ]) &&
+  has("chatFragment", 'id="chatNavBtn"') &&
   !has("html", 'id="adminReportModal"') &&
   !has("html", 'id="imageLightbox"') &&
   !has("globalModalsFragment", '<nav class="bottom-nav"') &&
@@ -1776,7 +1761,7 @@ add("Global dependency manifest covers exported browser globals", () => {
     if (!name || !domain) failures.push(`item ${index} needs name and domain`);
     else if (seen.has(key)) failures.push(`duplicate ${key}`);
     seen.add(key);
-    if (!exportedBy.length || !consumedBy.length) failures.push(`${key} needs exporters and consumers`);
+    if (!exportedBy.length || (!consumedBy.length && !String(item.standaloneApi || "").trim())) failures.push(`${key} needs exporters and consumers or a documented standalone API`);
     exportedBy.forEach((file) => {
       if (!fs.existsSync(path.join(root, file))) failures.push(`${key} exporter missing: ${file}`);
     });
@@ -2350,7 +2335,7 @@ add("Secondary utility views are lazy-loaded from HTML fragments", () =>
   hasAll("plastererGameFragment", ['id="plastererBoard"', 'data-view="plasterer-game"']) &&
   hasAll("pokerTasksFragment", ['id="pokerTasksStartBtn"', 'data-view="poker-tasks"']) &&
   hasAll("cashoutFragment", ['cashout-manager-block', 'data-view="cashout"']) &&
-  hasAll("scheduleFragment", ['schedule-section--week-tournament', 'data-view="schedule"']) &&
+  hasAll("scheduleFragment", ['schedule-section__title', 'data-view="schedule"']) &&
   fs.existsSync(path.join(root, "html-fragments", "bonus-game.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "cooler-game.html")) &&
   fs.existsSync(path.join(root, "html-fragments", "plasterer-game.html")) &&
@@ -2416,7 +2401,7 @@ add("Heavy feature views use JavaScript lazy gates", () =>
   hasAll("appLazyLoader", [
     '"chat": ["chat"]',
     '"winter-rating": ["rating-common", "rating-winter"]',
-    '"hall-of-fame": ["hall"]',
+    '"hall-of-fame": ["garage", "hall"]',
     '"raffles": ["raffles"]',
     '"profile": ["profile"]',
     '"poker-tasks": ["club-tasks"]',
@@ -2689,8 +2674,8 @@ add("CSS manifest owns every split stylesheet", () => {
     domainNames.length > 0 &&
     domainNames.every((name) => ownership[name] && ownership[name].owner && ownership[name].scope) &&
     rootCssFiles.every((file) => manifestFiles.includes(file)) &&
-    rootCssFiles.every((file) => referencedFiles.includes(file)) &&
-    manifestFiles.every((file) => referencedFiles.includes(file)) &&
+    (parsed.inactiveStylesheets || []).every(file => manifestFiles.includes(file) && !referencedFiles.includes(file)) &&
+    manifestFiles.every(file => referencedFiles.includes(file) || (parsed.inactiveStylesheets || []).includes(file)) &&
     manifestFiles.every((file) => fs.existsSync(path.join(root, file)));
 });
 
@@ -2894,7 +2879,7 @@ add("Heavy feature CSS is lazy-loaded outside the startup entrypoint", () =>
     'type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=',
     'type="application/poker-lazy-style" data-poker-lazy-domain="profile" href="./styles-profile.css?v=',
     'type="application/poker-lazy-style" data-poker-lazy-domain="cashout" data-poker-lazy-position="source" href="./styles-download.css?v=',
-    'type="application/poker-lazy-style" data-poker-lazy-domain="rating-summer" data-poker-lazy-position="source" href="./styles-rating-summer-beach.css?v=',
+    'type="application/poker-lazy-style" data-poker-lazy-domain="rating-current" data-poker-lazy-position="source" href="./styles-rating-summer-beach.css?v=',
   ]) &&
   hasAll("styles", [
     "styles-home-legacy-prelude.css?v=",

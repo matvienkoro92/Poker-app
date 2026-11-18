@@ -5,6 +5,8 @@ const fs = require("node:fs");
 const sharp = require("sharp");
 const assets = path.resolve(__dirname, "../assets");
 const images = [
+  ["daily-poker-character-no-stacks-v2.webp", "daily-poker-character-no-stacks-v2-720.webp", 720, 84],
+  ["last-longer-chip-transparent-v1.png", "last-longer-chip-transparent-v1-132.webp", 132, 84],
   ["home-lounge-chat-v1-light-v1.webp", "home-lounge-chat-v1-480.webp", 480],
   ["home-lounge-raffles-v1-light-v1.webp", "home-lounge-raffles-v1-480.webp", 480],
   ["home-lounge-players-v1-light-v1.webp", "home-lounge-players-v1-480.webp", 480],

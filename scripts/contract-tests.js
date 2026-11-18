@@ -292,6 +292,41 @@ class MemoryRedis {
       const keyCount = Math.max(0, parseInt(command[2], 10) || 0);
       const keys = command.slice(3, 3 + keyCount).map(String);
       const args = command.slice(3 + keyCount).map(String);
+      if (Object.values(require("../lib/tracking-link-counters")).includes(command[1])) {
+        const runLua = require("./contract-redis-lua");
+        return this.result(runLua(command[1], keys, args, parts => {
+          if (parts[0] === "SINTER") return [...this.s(parts[1])].filter(id => this.s(parts[2]).has(id));
+          if (parts[0] === "HEXISTS") return Number(this.h(parts[1]).has(parts[2]));
+          return this.exec(parts).result;
+        }));
+      }
+      if (command[1] === require("../lib/game-experience").SAVE_PROFILE) {
+        const [account, raw] = args;
+        const total = Number(this.h(keys[1]).get(account) || 0);
+        this.h(keys[0]).set(account, JSON.stringify({...JSON.parse(raw), gameExperience: total}));
+        return this.result(total);
+      }
+      if (command[1] === require("../lib/raffle-prize-totals").APPLY) {
+        const [mode, raw, totalsJson, expectedDigest, commandJson] = args;
+        const digest = text => crypto.createHash("sha1").update(text).digest("hex");
+        const source = this.kv.get(keys[0]);
+        if (mode === "reconcile" && (!source || digest(source) !== expectedDigest)) return {error: "raffle_changed"};
+        const old = JSON.parse(this.kv.get(keys[1]) || "{}");
+        const next = JSON.parse(totalsJson);
+        const totals = this.h(keys[2]);
+        const changes = new Map();
+        for (const id of new Set([...Object.keys(old), ...Object.keys(next)])) {
+          const value = Number(totals.get(id) || 0) + (next[id] || 0) - (old[id] || 0);
+          if (!Number.isSafeInteger(value) || value < 0) return {error: "invalid_prize_total"};
+          if (next[id] !== old[id]) changes.set(id, String(value));
+        }
+        const result = mode === "reconcile" ? this.result(1) : this.exec(JSON.parse(commandJson));
+        if (result.error) return result;
+        for (const [id, value] of changes) totals.set(id, value);
+        this.kv.set(keys[1], totalsJson);
+        this.h(keys[3]).set(keys[0], mode === "delete" ? "" : digest(mode === "reconcile" ? source : raw));
+        return result;
+      }
       if (String(command[1]).includes("create-account-v2")) {
         const existing = this.h(keys[0]).get(args[0]);
         if (existing) return this.result(existing);
@@ -534,12 +569,13 @@ class MemoryRedis {
     }
     if (cmd === "SCARD") return this.result(this.s(key).size);
     if (cmd === "ZADD") {
-      const nx = String(command[2]).toUpperCase() === "NX";
-      const offset = nx ? 3 : 2;
+      const option = String(command[2]).toUpperCase();
+      const offset = ["NX", "LT"].includes(option) ? 3 : 2;
       const member = String(command[offset + 1]);
-      if (nx && this.z(key).has(member)) return this.result(0);
+      const existed = this.z(key).has(member);
+      if (existed && (option === "NX" || option === "LT" && this.z(key).get(member) <= Number(command[offset]))) return this.result(0);
       this.z(key).set(member, Number(command[offset]) || 0);
-      return this.result(1);
+      return this.result(existed ? 0 : 1);
     }
     if (cmd === "ZREM") return this.result(this.z(key).delete(String(command[2])) ? 1 : 0);
     if (cmd === "ZRANGEBYSCORE") {
@@ -1106,7 +1142,7 @@ async function testAuthAndAdmin(redis) {
 
   shiftReportRes = await call(reportHandler, req("POST", {}, {
     requestId: "contract-report-2",
-    pwaSession: roman178ReportToken,
+    pwaSession: s.rakebackEditor,
     date: "15.06.2026",
     weekday: "Понедельник",
     deposit: 100,
@@ -1124,7 +1160,7 @@ async function testAuthAndAdmin(redis) {
     rakeback: 999,
     extraFields: [],
   }));
-  assert.strictEqual(shiftReportRes.statusCode, 200, "roman178 can create a report before rakeback is issued");
+  assert.strictEqual(shiftReportRes.statusCode, 200, "Vika can create a report before rakeback is issued");
   const rakebackSyncReportId = shiftReportRes.body && shiftReportRes.body.report && shiftReportRes.body.report.id;
   assert.strictEqual(shiftReportRes.body.report.rakeback, 0, "manual rakeback body is ignored without rows");
 
@@ -1544,6 +1580,10 @@ async function testCrmAppUserBlock(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "CRM owner can unblock app user");
   assert.strictEqual(r.body.blocked, false, "CRM unblock response marks unblocked");
+  const fullBalance = await call(user, req("GET", { pwaSession: s.user, path: "bonus-balance" }));
+  assert.ok(Array.isArray(fullBalance.body.recentOperations));
+  const headerBalance = await call(user, req("GET", { pwaSession: s.user, path: "bonus-balance", balanceOnly: "1" }));
+  assert.deepStrictEqual(headerBalance.body, { bonusBalance: fullBalance.body.bonusBalance });
 
   r = await call(chat, req("POST", {}, { pwaSession: s.user, with: "tg_1002", text: "after global unblock" }));
   assert.strictEqual(r.statusCode, 200, "unblocked app user can use chat again");
@@ -1641,13 +1681,14 @@ async function testSundayReportCollectsPendingWeeklyRakeback() {
     ],
   }, {
     id: "sunday_report",
+    authorId: "tg_1897001087",
     date: "26.07.2026",
     createdAt: "2026-07-26T18:00:00.000Z",
-  }, "tg_admin");
+  }, "tg_1897001087");
   assert.deepStrictEqual(
     result.rows.map((item) => item.groupId).sort(),
-    ["monday_pending", "sunday_pending"],
-    "Sunday report closes the week with all still-unaccounted rows for its author only"
+    ["another_owner", "monday_pending", "sunday_pending"],
+    "Vika’s Sunday report collects all pending rows for the week across owners"
   );
 }
 
@@ -2603,9 +2644,7 @@ async function testRaffleWinnerReadyPrivateCashReserve(redis) {
   }));
   assert.strictEqual(r.statusCode, 200, "admin can issue private cash raffle prize");
   assert.strictEqual(r.body.raffle.winners[0].winnerStatus, "ok", "admin green check issues private cash raffle prize");
-  for (let i = 0; i < 8 && !sentMessages.some((msg) => String(msg.body.text || "").includes("начислен на ваш ID")); i += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
+  await raffles.retryNotifications();
   assert.ok(
     sentMessages.some((msg) => {
       const text = String(msg.body.text || "");
@@ -2836,6 +2875,7 @@ async function testRaffleIssuedPushRetryDelivery(redis) {
     persistContractRaffle(redis, raffle);
     let result = await call(raffles, req("POST", {}, { pwaSession: sessionsValue.admin, action: "setWinnerStatus", raffleId: raffle.id, winnerUserId: "tg_1001", status: "ok" }));
     assert.equal(result.statusCode, 200);
+    await raffles.retryNotifications();
     assert.equal(sentMessages.filter(row => String(row.body.chat_id) === "1001").length, 1);
     assert.equal(pushes.length, 0);
     const queue = redis.z("poker_app:raffle_notification_retry_queue");
@@ -2902,9 +2942,7 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
     status: "ok",
   }));
   assert.strictEqual(r.statusCode, 200, "admin can mark winner prize issued");
-  for (let i = 0; i < 8 && !sentMessages.find((msg) => String(msg.body.chat_id) === "1001"); i += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
+  await raffles.retryNotifications();
   const winnerMessage = sentMessages.find((msg) => String(msg.body.chat_id) === "1001");
   assert.ok(winnerMessage, "winner receives prize issued bot message");
   const text = String(winnerMessage.body.text || "");
@@ -2921,7 +2959,7 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
     status: "ok",
   }));
   assert.strictEqual(r.statusCode, 200, "repeated ok status request succeeds");
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await raffles.retryNotifications();
   assert.strictEqual(
     sentMessages.filter((msg) => String(msg.body.chat_id) === "1001").length,
     1,
@@ -2964,9 +3002,7 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
     status: "ok",
   }));
   assert.strictEqual(r.statusCode, 200, "admin can mark username winner prize issued");
-  for (let i = 0; i < 8 && !sentMessages.find((msg) => String(msg.body.chat_id) === "1003"); i += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
+  await raffles.retryNotifications();
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1003").length, 1, "prize notification resolves explicit Telegram username");
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1004").length, 0, "prize notification skips mismatched account owner");
 
@@ -3016,8 +3052,8 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
     winnerSlotId: "initial_0",
     status: "ok",
   }));
-  assert.strictEqual(r.statusCode, 200, "admin can mark missed original winner without prize notification");
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.strictEqual(r.statusCode, 409, "expired winner cannot receive a prize after reroll");
+  await raffles.retryNotifications();
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1005").length, 0, "missed original winner does not receive cash prize issued notification");
 
   r = await call(raffles, req("POST", {}, {
@@ -3028,9 +3064,7 @@ async function testRaffleWinnerStatusPrizeNotification(redis) {
     status: "ok",
   }));
   assert.strictEqual(r.statusCode, 200, "admin can mark reroll winner prize issued");
-  for (let i = 0; i < 8 && !sentMessages.find((msg) => String(msg.body.chat_id) === "1006"); i += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
+  await raffles.retryNotifications();
   assert.strictEqual(sentMessages.filter((msg) => String(msg.body.chat_id) === "1006").length, 1, "reroll winner receives cash prize issued notification");
 }
 
@@ -6724,7 +6758,7 @@ async function testTrackingLinksFlow() {
   assert.strictEqual(r.body.links[0].totalClicks, 1, "tracking links list counts total clicks");
   assert.strictEqual(r.body.links[0].uniqueClicks, 1, "tracking links list counts unique clicks");
   assert.strictEqual(r.body.links[0].actionEvents, 1, "tracking links list counts events");
-  assert.strictEqual(r.body.links[0].activeVisitors, 1, "tracking links list counts active visitors");
+  assert.strictEqual(r.body.links[0].activeVisitors, 0, "one event does not qualify as visits to two distinct sections");
 
   r = await call(trackingLinks, req("GET", { pwaSession: s.admin, id: slug, visitors: "1" }));
   assert.strictEqual(r.statusCode, 200, "tracking visitors list succeeds");

@@ -354,4 +354,5 @@
  }
 ];
 for(const c of chapters){c.previewFrames=c.previewFrames||[{speaker:c.previewHeadline,text:c.before+' '+c.quote}];c.outroFrames=[{speaker:c.outroHeadline,text:c.after}];}
+Object.defineProperty(chapters,'activeOrder',{value:Object.freeze([0,1,2,3,5,6,7,8,9,10,12,13,14,11])});
 return chapters;});

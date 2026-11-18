@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const path = require('node:path');
 test('profile title uses nickname and never duplicates a technical ID', () => {
   const source = fs.readFileSync(path.join(__dirname, '../app-chat-user-modal.js'), 'utf8');
-  const c = { modalTitle: {}, modalAvatar: {style:{}}, modalAvatarPlaceholder: {}, modalLoginSub: {}, chatUserModalRatingNickFromData: d => d.pokerPlusNickname || '' };
+  const c = { modalTitle: {}, modalStatusNick: {}, modalAvatar: {style:{}}, modalAvatarPlaceholder: {}, modalLoginSub: {}, chatUserModalRatingNickFromData: d => d.pokerPlusNickname || '' };
   vm.createContext(c);
   vm.runInContext(source.slice(source.indexOf('  function syncChatUserModalTitleFromProfileData'), source.indexOf('  function updateChatUserModalFriendState')), c);
   assert.equal(c.syncChatUserModalTitleFromProfileData({userName:'ID403173',contactName:'ID403173',pokerPlusNickname:'EnotSimuran'}, 'ID403173'), 'EnotSimuran');

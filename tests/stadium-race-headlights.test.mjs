@@ -10,7 +10,7 @@ test('takeoff and landing preserve shader light counts while switching beams',()
  for(const enabled of [true,false,false,true]){
   headlights.update({x:2,y:enabled?0:2,z:10,a:.2},.1,enabled);
   assert.deepEqual(visibleLights(),initial);
-  assert.ok(initial.every(l=>l.intensity===(enabled?850:0)&&!l.castShadow));
+  assert.ok(initial.every(l=>l.intensity===(enabled?240:0)&&!l.castShadow));
  }
 });
 

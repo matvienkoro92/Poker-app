@@ -333,6 +333,9 @@
           runFragmentHooks("global-modals");
           return true;
         });
+      }).catch(function (error) {
+        delete loading[src];
+        throw error;
       });
     return loading[src];
   };

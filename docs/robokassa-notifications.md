@@ -141,3 +141,42 @@ player credit: 1,000 and 1,500 RUB → Robokassa, 2,000 RUB → Prodamus. This
 supersedes the earlier automatic balancing rule until the owner changes it.
 Prior issuance IDs still return their original link for safe retries. Charges
 remain 1,100 / 1,650 / 2,180 RUB respectively.
+
+
+## Equal-load link routing (2026-11-17)
+
+Owner override: supersedes the fixed mapping of November 13. New shared-link
+requests use the provider with the lowest confirmed gross receipts in the
+current Moscow operational day [06:00,06:00), among providers with a verified
+link for the exact requested credit. Equal totals rotate using daily issuance
+counts; unpaid link issuance never counts as a receipt. Website and existing
+Telegram commands share this routing and the existing ledger CAS. Repeated
+request IDs return their original provider and URL.
+
+Receipts count once even when assigned to a deposit. Manual active incomes
+without a matching receipt also count, using grossAmount when available. Voiding
+a deposit assignment does not erase the provider receipt. Prodamus nominal
+display conversion is not used to compare provider load.
+
+Currently verified credit amounts are 1,000 / 1,500 / 2,000 RUB. There is no
+verified 3,000 RUB link; do not substitute a link with a different amount.
+Mandarin was initially excluded pending authenticated invoice verification.
+The November 18 integration adds its single approved 1,100 RUB charge link to
+1,000 RUB credit requests when MANDARIN_API_KEY is configured. See
+[Mandarin payments](mandarin-payments.md).
+
+Published in `dpl_DigCB899RZDVtJQ1WsrA9XcFsQg1` (production alias
+`two-aces.ru`). Validation: 22 targeted routing, Telegram-command, payment-form
+and Robokassa tests passed; Vercel production build passed.
+Deployment side effect: the existing production news generator invoked the
+day-hero push scenario (112 accounts / 140 devices accepted, 3 accounts failed).
+Future unrelated releases should use a build path that excludes that sending
+step; the routing change itself sends no messages or payments.
+
+
+Owner update (2026-11-18): Mandarin new1/new2/new3 now support credits of
+1,000/1,500/2,000 RUB with a dedicated Production API key per link. All three
+providers display and save nominal player credit for their fixed charges in
+Deposits and Telegram. Gross receipt amounts stay immutable for reconciliation
+and load routing. Shift reports compare nominal totals and separately show
+provider gross receipts. See [Mandarin payments](mandarin-payments.md).

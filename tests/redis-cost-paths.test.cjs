@@ -56,11 +56,12 @@ test('nards cron backfills pending tournaments once and skips the settled archiv
   let activeScript;
   t.mock.method(boardGames, 'commands', async rows => {
     assert.equal(rows.length, 1);
+    if(rows[0][0]==='GET' && rows[0][1]===require('../lib/nards-tournament-recurring').CONFIG_KEY)return [null];
     assert.equal(rows[0][0], 'EVAL');
     activeScript = rows[0][1];
     return [[]];
   });
-  assert.deepEqual(await require('../lib/nards-tournament-runtime').runtime().sweep(), {advanced:0});
+  assert.deepEqual(await require('../lib/nards-tournament-runtime').runtime().sweep(), {advanced:0,recurringCreated:null});
   checkLua(`
 local initialized=false
 local scanned=0

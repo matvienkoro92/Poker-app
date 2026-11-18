@@ -12,15 +12,15 @@ test('hall request starts alongside CSS and does not wait for the race garage', 
     adminVisible: () => true, guestMode: () => false, loungeLive: null, detail: null,
     dialog: {open: true, classList:{add(){},remove(...names){calls.push(names.join(','));}}}, request: 0, generation: 0,
     warmRoomArt: () => calls.push('art'),
-    window: {pokerEnsureLazyDomains: () => new Promise(resolve => { stylesReady = resolve; })},
-    pokerSocialRequest: async route => { calls.push(route); return {hall: {featured: []}}; },
+    adminGarage:()=>false,window: {PokerGarage:{availableTransport:()=>"kart"},pokerEnsureLazyDomains: () => new Promise(resolve => { stylesReady = resolve; })},
+    pokerSocialRequest: async (route,body) => { calls.push(body.action); return {hall: {featured: []}}; },
     normalizeShelves: () => {}, render: () => calls.push('render'), updateEntry: () => {},
     error: message => { throw Error(message); }
   });
   vm.runInContext(code, ctx);
   const done = ctx.open('');
-  assert.deepEqual(calls, ['player-hall-dialog--immersive,player-hall-dialog--picker', 'art', 'player-hall']);
+  assert.deepEqual(calls, ['player-hall-dialog--immersive,player-hall-dialog--picker', 'art', 'get', 'start-room']);
   stylesReady();
   await done;
-  assert.deepEqual(calls, ['player-hall-dialog--immersive,player-hall-dialog--picker', 'art', 'player-hall', 'render']);
+  assert.deepEqual(calls, ['player-hall-dialog--immersive,player-hall-dialog--picker', 'art', 'get', 'start-room', 'render']);
 });

@@ -6,14 +6,10 @@ const fs = require("node:fs");
 
 test("FishKopcheny day uses one table and keeps its live labels readable", function () {
   const css = fs.readFileSync(require.resolve("../styles-home-tournament-scene.css"), "utf8");
-  const sunday = css.slice(css.lastIndexOf("/* Sunday: keep one continuous felt surface"));
-
-  assert.match(sunday, /home-tournament-bonuses--table::before\s*\{\s*display:none!important;/);
-  assert.match(sunday, /home-tournament-bonus--pokermanki-knockout::before/);
-  assert.match(sunday, /home-tournament-bonus__glove-label\s*\{[\s\S]*width:16\.5cqw!important/);
-  assert.match(sunday, /home-last-longer-dock__bar\s*\{\s*display:flex!important;top:74%!important;/);
-  assert.match(sunday, /aspect-ratio:900 \/ 1015!important/);
-  assert.match(sunday, /background-size:100% auto!important/);
-  assert.match(sunday, /home-tournament-bonuses__note-arc text[\s\S]*font:900 38px/);
-  assert.match(sunday, /stroke-width:3px!important/);
+  const character = '[data-tournament-character="fishkopcheny"]';
+  const rules = css.split("}").filter(rule => rule.includes(character));
+  assert.ok(rules.some(rule => rule.includes("::after") && rule.includes("home-tournament-fishkopcheny-head-mask.svg")));
+  assert.ok(rules.some(rule => rule.includes("> .home-tournament-bonuses--table {") && rule.includes("aspect-ratio:3/1!important")));
+  assert.ok(rules.some(rule => rule.includes(".home-last-longer-dock__bar") && rule.includes("display:flex!important")));
+  assert.ok(rules.some(rule => rule.includes(".home-tournament-bonuses__note-arc text") && rule.includes("font-size:28px")));
 });

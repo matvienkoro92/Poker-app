@@ -1,45 +1,90 @@
-// Metres. Both the coastal district and the northern islands use sea level zero.
-export const bounds={minX:-2990,maxX:650,minZ:-3140,maxZ:198};
-const xs=[-2840,-2590,-2390,-2150,-1900,-1660,-1430,-1230,-680,-470,-265,-64,72,280,495];
-const zs=[-3000,-2710,-2460,-2190,-1910,-1650,-1400,-1130,-880,-630,-410,-245];
-export const islands=[
- {x:-2060,z:-1650,w:1830,d:2960},
- {x:-90,z:-1650,w:1390,d:2960}
-];
-// Shoreline samples keep beaches, water collision and the map on the same coast.
-export const shores=islands.map((island,index)=>{
- const rows=[];
- for(let j=0;j<74;j++){
-  const t=j/73,z=island.z-island.d/2+(j+.5)*40;
-  const taper=Math.pow(Math.abs(t*2-1),9)*34;
-  const left=island.x-island.w/2+16+33*Math.sin(t*15+index)+17*Math.sin(t*33)+taper;
-  const right=island.x+island.w/2-14+29*Math.sin(t*13+1)+17*Math.cos(t*31)-taper;
-  rows.push({x:(left+right)/2,z,w:right-left,d:40});
+import {coastlines,plantings} from './atlas-coasts.mjs';
+import chapters from '../../app-last-buy-in-chapters.js';
+// Survey coordinates on the 640-unit Poker21 campaign illustration, in metres in game.
+export const mapPoint=(u,v)=>({x:98+(u-595.2)*5.6,z:147+(v-595.2)*5.6});
+export const bounds={minX:-3270,maxX:500,minZ:-3580,maxZ:250};
+function points(line){return line.trim().split(/\s+/).map(pair=>mapPoint(...pair.split(',').map(Number)));}
+export const shores=coastlines.map(points);
+const extent=new Map(shores.map(poly=>[poly,{left:Math.min(...poly.map(p=>p.x)),right:Math.max(...poly.map(p=>p.x)),north:Math.min(...poly.map(p=>p.z)),south:Math.max(...poly.map(p=>p.z))}]));
+function inside(p,polygon){
+ const e=extent.get(polygon);if(e&&(p.x<e.left||p.x>e.right||p.z<e.north||p.z>e.south))return false;
+ let hit=false;
+ for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
+  const a=polygon[i],b=polygon[j];
+  if((a.z>p.z)!==(b.z>p.z)&&p.x<(b.x-a.x)*(p.z-a.z)/(b.z-a.z)+a.x)hit=!hit;
  }
- return rows;
-});
-export const parks=[];
-export const landmarks=[
- {name:'АЭРОПОРТ',x:-2590,z:-2710,type:'airport'},
- {name:'СТАДИОН',x:-1660,z:-1910,type:'stadium'},
- {name:'ПОЛИЦИЯ',x:-470,z:-1130,type:'police'},
- {name:'ДЕЛОВОЙ ЦЕНТР',x:-2150,z:-880,type:'office'},
- {name:'ПЛЯЖНЫЙ ПРОСПЕКТ',x:280,z:-2190,type:'beach'}
-];
-export const nodes=[],roads=[],lots=[];
-const grid=new Map(),links=new Map();
-function node(x,z){const p={x,z};nodes.push(p);links.set(p,[]);grid.set(x+','+z,p);return p;}
-function connect(a,b,bridge=false){roads.push({a,b,bridge});links.get(a).push(b);links.get(b).push(a);}
-for(const z of zs)for(const x of xs)node(x,z);
-for(const [j,z] of zs.entries())for(const [i,x] of xs.entries()){
- const p=grid.get(x+','+z);
- if(i&& (i!==8||[1,6,10].includes(j)))connect(grid.get(xs[i-1]+','+z),p,i===8);
- if(j)connect(grid.get(x+','+zs[j-1]),p);
+ return hit;
 }
-export const gateways=[-64,72].map(x=>{const p=node(x,-100);connect(grid.get(x+',-245'),p,true);return p;});
-const contains=(p,x,z,r=0)=>Math.abs(x-p.x)<=p.w/2+r&&Math.abs(z-p.z)<=p.d/2+r;
-export const bridges=roads.filter(r=>r.bridge).map(({a,b})=>({x:(a.x+b.x)/2,z:(a.z+b.z)/2,w:Math.abs(a.x-b.x)||18,d:Math.abs(a.z-b.z)||18}));
-export function metroLand(x,z){return z<=-100&&(shores.some(rows=>{const row=rows[Math.floor((z+3130)/40)];return row&&contains(row,x,z);})||bridges.some(p=>contains(p,x,z)));}
+export const nodes=[],roads=[],circuits=[],parks=[],lots=[];
+const vertices=new Map(),links=new Map(),edges=new Map();
+function node(p){const key=p.x+','+p.z;if(vertices.has(key))return vertices.get(key);nodes.push(p);vertices.set(key,p);links.set(p,[]);return p;}
+function connect(a,b,bridge=false){
+ const key=[nodes.indexOf(a),nodes.indexOf(b)].sort((u,v)=>u-v).join('/');
+ if(edges.has(key))return;
+ const edge={a,b,bridge};edges.set(key,edge);roads.push(edge);links.get(a).push(b);links.get(b).push(a);
+}
+function street(line,bridge=false){
+ const path=points(line).map(node);
+ for(let i=1;i<path.length;i++)connect(path[i-1],path[i],bridge);
+ if(path[0]===path.at(-1)){
+  const legs=path.slice(1).map((b,i)=>({a:path[i],b,length:Math.hypot(b.x-path[i].x,b.z-path[i].z)}));
+  const xx=path.map(p=>p.x),zz=path.map(p=>p.z);
+  circuits.push({legs,length:legs.reduce((sum,e)=>sum+e.length,0),speed:9+circuits.length%5,offset:circuits.length*87,x:Math.min(...xx),z:Math.min(...zz),w:Math.max(...xx)-Math.min(...xx),d:Math.max(...zz)-Math.min(...zz)});
+ }
+}
+// Western mainland: stadium ring, stepped downtown avenues and the airport service loop.
+street('111,72 102,88 77,92 55,84 43,69 45,52 59,38 81,34 101,42 111,57 111,72');
+street('111,72 148,72 177,72 196,58 222,54 249,68');
+street('77,92 77,131 95,161 93,197 84,245 74,288 58,353 51,390 59,411 83,420 108,391 119,347 136,297 149,249 156,195 159,148 155,106 148,72');
+street('93,197 156,195 192,198 233,204 223,243 203,259 149,249 84,245 93,197');
+street('74,288 136,297 193,305 203,259');
+street('58,353 119,347 189,355 230,357 250,358');
+street('83,420 122,429 175,438 208,439 239,437 260,452 280,461');
+street('189,355 193,305');street('189,355 180,399 175,438');
+street('108,391 180,399 224,403 239,437');
+street('155,106 198,106 222,104 249,68');street('159,148 198,151 222,146 222,104');
+street('192,198 198,151 198,106 196,58');street('95,161 159,148');
+street('59,411 43,434 30,454 27,503 27,545 68,554 145,570 192,576 204,552 208,499 208,439 175,438 146,464 120,455 83,433 59,411');
+street('208,499 235,492 254,492 275,501 278,548');
+// Northern palace crossing, garden island drive and southern marina.
+street('249,68 274,65 308,60 333,62',true);street('333,62 342,48 360,41 382,48 390,65 377,78 351,80 333,62');
+street('390,65 410,67 445,76',true);
+street('233,204 268,205 309,208 337,201',true);
+street('337,201 350,186 355,148 364,132 378,132 389,149 394,189 399,221 410,265 408,285 395,299 372,304 354,293 350,266 347,234 337,201');
+street('399,221 431,225 468,229',true);
+street('250,358 302,360 326,358',true);
+street('326,358 350,355 374,365 402,356 416,360 403,381 378,401 352,398 332,382 326,358');
+street('416,360 459,359 510,358',true);
+// Eastern seafront follows the sand; the inner carriageway bends around the club and docks.
+street('445,76 455,58 482,46 514,47 533,60 541,85 541,142 542,183 550,222 550,262 549,307 552,357 551,408 552,461 555,503 556,531 532,544');
+street('445,76 464,96 482,124 480,154 469,182 468,209 468,229 482,250 505,280 510,312 510,358 517,384 509,422 500,449 492,473 475,499 488,512 515,520 532,544');
+street('464,96 511,96 541,85');street('480,154 512,146 541,142');
+street('468,209 495,189 520,185 542,183');street('482,250 503,263 530,263 550,262');
+street('510,312 549,307');street('510,358 552,357');street('509,422 551,408');street('492,473 521,465 552,461');
+// Club forecourt and loading apron are the playable entrances on the atlas.
+street('550,222 540,223 529,230');
+street('275,501 280,507 281.6,512');
+street('280,461 343,476 408,491 475,499',true);
+export const gateways=[-64,72].map((x,i)=>{const p=node({x,z:-100});const approach=node({x,z:-112});connect(node(mapPoint(i?556:532,i?531:544)),approach,true);connect(approach,p,true);return p;});
+const roadTiles=new Map();
+for(const edge of roads){
+ const {a,b}=edge;
+ for(let i=Math.floor((Math.min(a.x,b.x)-10)/128);i<=Math.floor((Math.max(a.x,b.x)+10)/128);i++)
+  for(let j=Math.floor((Math.min(a.z,b.z)-10)/128);j<=Math.floor((Math.max(a.z,b.z)+10)/128);j++){
+   const key=i+','+j;if(!roadTiles.has(key))roadTiles.set(key,[]);roadTiles.get(key).push(edge);
+  }
+}
+export function metroLand(x,z){
+ if(z>230||(z>-100&&x>=-98&&x<=246))return false;
+ const p={x,z};if(inside(p,lagoon))return false;return shores.some(poly=>inside(p,poly))||(roadTiles.get(cell(x,z))||[]).some(e=>distance(p,project(p,e))<=9.1);
+}
+export const lagoon=points('363,194 368,185 376,188 382,197 381,206 386,215 382,223 374,222 370,214 371,206 362,201');
+export const lunaSite={...mapPoint(58*6.4,56.5*6.4),name:'ЛУНОПАРК'};
+export const landmarks=[
+ ['АЭРОПОРТ',120,455,'airport'],['СТАДИОН',55,84,'stadium'],['ПОЛИЦИЯ',482,46,'police'],
+ ['ДЕЛОВОЙ ЦЕНТР',198,151,'office'],['ПЛЯЖНЫЙ ПРОСПЕКТ',550,262,'beach'],['ДВОРЕЦ',360,41,'palace'],
+ ['ЗАПАДНЫЙ TWO ACES',192,198,'club'],['ВОСТОЧНЫЙ TWO ACES',503,263,'club'],['ГРУЗОВОЙ ПОРТ',275,501,'freight'],['ОСТРОВ САДОВ',364,132,'garden'],['МАРИНА',378,401,'marina']
+].map(([name,u,v,type])=>({...mapPoint(u,v),name,type}));
 const buckets=new Map();
 function cell(x,z){return Math.floor(x/128)+','+Math.floor(z/128);}
 function lot(x,z,w,d,h,color,kind='block'){
@@ -47,26 +92,54 @@ function lot(x,z,w,d,h,color,kind='block'){
  for(let ix=Math.floor((p.minX-4)/128);ix<=Math.floor((p.maxX+4)/128);ix++)for(let iz=Math.floor((p.minZ-4)/128);iz<=Math.floor((p.maxZ+4)/128);iz++){const key=ix+','+iz;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(p);}
 }
 export const nearbyLots=(x,z)=>buckets.get(cell(x,z))||[];
-const pastels=[0xe6b79d,0xc4d1bd,0xe7d5ae,0xc39e97,0xa0b9bc];
-for(let j=1;j<zs.length;j++)for(let i=1;i<xs.length;i++){
- if(i===8)continue;
- const left=xs[i-1],top=zs[j-1],w=xs[i]-left,d=zs[j]-top;
- const spot=landmarks.find(p=>p.x===left&&p.z===top);
- if(spot){
-  const x=left+w/2,z=top+d/2;
-  if(spot.type==='stadium'){for(const side of [-1,1]){lot(x+side*w*.34,z,17,d*.68,23,0xc4b194,'stand');lot(x,z+side*d*.34,w*.61,15,17,0xd9b497,'stand');}}
-  else if(spot.type==='airport'){lot(x,z+d*.23,w*.74,31,13,0xb6c8c8,'terminal');lot(x+w*.32,z,14,14,36,0xa5bcc0,'tower');}
-  else lot(x,z,w*.53,d*.38,spot.type==='office'?112:spot.type==='beach'?19:14,spot.type==='police'?0x7895a4:0xe9ba9b,spot.type);
-  continue;
- }
- if((i*13+j*7)%11===0){parks.push({x:left+w/2,z:top+d/2,w:w-34,d:d-34});continue;}
- for(let k=0;k<6;k++){
-  const seed=(i*71+j*47+k*31)%113,x=left+w*(.19+(k%3)*.31),z=top+d*(k<3?.25:.75);
-  lot(x,z,25+seed%22,30+seed%34,(i<8?11:7)+seed%(i<8?55:25),pastels[seed%5]);
- }
+function building(u,v,w,d,h,c,type){const p=mapPoint(u,v);lot(p.x,p.z,w,d,h,c,type);}
+for(const [u,v,w,d] of [[61,61,12,86],[94,61,12,86],[78,48,148,12],[78,74,148,12]])building(u,v,w,d,17,0xd9ae85,'stand');
+building(99,503,215,55,14,0xb4c4c4,'terminal');building(131,491,16,16,36,0x859c9e,'tower');
+building(500,71,140,64,16,0x9bafb6,'police');building(216,135,33,42,118,0xc6ab78,'office');
+building(362,60,110,64,25,0xc98f69,'palace');
+building(190,223,130,118,18,0xc49b62,'club');building(515,225,140,110,21,0xc7a36f,'club');
+for(const [u,v] of [[239,516],[249,530],[232,550],[260,554]])building(u,v,36,70,10,0x76878a,'warehouse');
+for(const [u,v] of [[349,54],[375,54],[349,65],[375,65]])building(u,v,15,15,39,0xc29259,'tower');
+for(const [u,v,w,d] of [[369,165,72,204],[372,245,105,180],[85,174,28,54]]){parks.push({...mapPoint(u,v),w,d});}
+// The skyline, service buildings and piers are placed against their atlas footprints.
+building(178,165,30,35,15,0xcab98d,'newsroom');building(191,263,38,32,12,0xab927a,'archive');
+building(197,381,43,40,9,0xadc0b3,'workshop');
+building(287,512,39,62,11,0x879496,'warehouse');
+const colors=[0xe1b395,0xe2ceae,0xbfc9ad,0xcb9d90,0x9fb6bd];
+// Block footprints surveyed on the campaign art: centre u/v and width/depth in atlas units.
+const blocks=[
+ [134,62,17,10],[160,63,14,12],[184,49,11,16],[202,33,12,17],[225,40,14,11],
+ [97,105,11,19],[127,109,12,34],[146,94,10,19],[169,91,10,20],[185,98,9,28],[207,86,10,15],[238,88,11,10],
+ [128,153,17,12],[143,133,10,19],[170,135,11,18],[186,125,9,23],[229,167,11,18],
+ [108,185,12,11],[127,174,16,10],[139,186,14,9],[173,175,10,13],[186,179,10,10],
+ [106,214,11,19],[122,225,13,12],[138,211,12,14],[105,239,15,8],[166,233,8,13],[213,225,10,16],
+ [101,267,13,10],[119,278,14,11],[158,269,13,13],[177,273,13,17],[210,270,13,10],
+ [84,312,15,12],[99,330,14,10],[118,311,10,15],[152,324,13,17],[169,335,14,10],[199,327,11,22],[223,338,13,14],
+ [70,379,11,18],[88,386,12,12],[140,369,12,17],[158,378,14,15],[173,368,9,13],[204,374,10,17],[235,378,12,16],
+ [119,404,12,12],[146,414,16,11],[197,420,13,13],[222,420,11,12],
+ [467,58,10,9],[481,40,11,8],[518,48,12,8],[528,82,10,13],[497,113,15,15],[523,119,12,20],
+ [493,158,11,14],[526,162,11,18],[487,184,10,12],[537,194,8,13],[489,248,8,9],
+ [524,291,16,18],[537,317,10,14],[522,332,12,11],[530,374,19,16],[532,397,16,9],
+ [529,421,20,10],[530,440,19,12],[515,483,14,16],[539,479,11,12],[504,505,10,10],[548,520,9,10],
+ [351,152,6,9],[344,172,6,8],[341,186,6,7],[343,247,6,9],[353,281,6,8],[366,307,7,6],[392,306,8,6],[411,278,6,9],[407,245,6,10],[405,183,6,9],[400,154,6,8],
+ [332,351,8,6],[347,348,9,6],[362,349,8,6],[391,349,9,6],[409,350,8,6],[347,376,8,8],[366,382,7,9],[386,374,8,10],[367,412,9,6]
+];
+for(const [i,[u,v,width,depth]] of blocks.entries()){
+ const p=mapPoint(u,v),clearance=closest(p).gap-13;
+ const scale=Math.min(5.6,2*clearance/Math.hypot(width,depth));
+ if(scale<2)continue;
+ const w=width*scale,d=depth*scale;
+ if(distance(lunaSite,p)<38||nearbyLots(p.x,p.z).some(b=>Math.abs(b.x-p.x)<(w+b.w)/2+2&&Math.abs(b.z-p.z)<(d+b.d)/2+2))continue;
+ const downtown=u<250&&v<250;
+ lot(p.x,p.z,w,d,downtown?16+(i%5)*8:6+(i%4)*3,colors[i%colors.length]);
 }
+export const atlasTrees=plantings.flatMap(points).filter(p=>p.z<-112&&metroLand(p.x,p.z)&&closest(p).gap>16&&!nearbyLots(p.x,p.z).some(b=>p.x>b.minX-3&&p.x<b.maxX+3&&p.z>b.minZ-3&&p.z<b.maxZ+3));
+export const missionSites=chapters.activeOrder.map((id,index)=>{
+ const c=chapters[id],point=mapPoint(c.mapPoint[0]*6.4,c.mapPoint[1]*6.4);
+ return {...point,id,number:index+1,name:c.mapLocation,title:c.title,approach:closest(point).point};
+});
 function project(p,{a,b}){const dx=b.x-a.x,dz=b.z-a.z,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.z-a.z)*dz)/(dx*dx+dz*dz)));return {x:a.x+t*dx,z:a.z+t*dz};}
-const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+function distance(a,b){return Math.hypot(a.x-b.x,a.z-b.z);}
 function closest(p){let best=null;for(const edge of roads){const point=project(p,edge),gap=distance(point,p);if(!best||gap<best.gap)best={edge,point,gap};}return best;}
 export const metroNearest=p=>closest(p).point;
 export function metroRoute(from,to){
@@ -82,17 +155,11 @@ export function metroRoute(from,to){
  const path=[b.point];while(end){path.unshift(end);end=previous.get(end);}return [a.point,...path];
 }
 
-// Vehicles circulate on opposite sides of different blocks using right-hand lanes.
-export const circuits=[];
-for(let j=1;j<zs.length;j++)for(let i=1;i<xs.length;i++){
- if(i===8||(i+j)%2)continue;
- const x=xs[i-1]+3,z=zs[j-1]+3,w=xs[i]-xs[i-1]-6,d=zs[j]-zs[j-1]-6;
- circuits.push({x,z,w,d,length:2*(w+d),speed:8+(i*7+j)%8,offset:i*107+j*71});
-}
 export function cityDriver(c,t){
  let m=(c.offset+t*c.speed)%c.length;
- if(m<c.w)return {x:c.x+m,z:c.z,yaw:Math.PI/2};
- m-=c.w;if(m<c.d)return {x:c.x+c.w,z:c.z+m,yaw:0};
- m-=c.d;if(m<c.w)return {x:c.x+c.w-m,z:c.z+c.d,yaw:-Math.PI/2};
- return {x:c.x,z:c.z+c.d-(m-c.w),yaw:Math.PI};
+ for(const {a,b,length} of c.legs){
+  if(m<=length){const dx=(b.x-a.x)/length,dz=(b.z-a.z)/length;return {x:a.x+dx*m+dz*3,z:a.z+dz*m-dx*3,yaw:Math.atan2(dx,dz)};}
+  m-=length;
+ }
+ return {...c.legs[0].a,yaw:0};
 }

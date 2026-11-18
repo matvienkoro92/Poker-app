@@ -4,9 +4,9 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 function render(heroes, nick) {
   const nodes = {};
-  const context = {window: {addEventListener(){}, POKER_CLUB_NEWS_DATA:{dayHeroes:heroes}},
-    document:{addEventListener(){},getElementById(id){return nodes[id] ||= {}; }},
-    winterRatingSamePlayer:(a,b)=>a===b, Intl, Date:class extends Date {constructor(...args){super(...(args.length?args:['2026-09-10T12:00:00Z']));}},setInterval(){}};
+  const context = {location: {hostname:"club.example"}, window: {addEventListener(){}, POKER_CLUB_NEWS_DATA:{dayHeroes:heroes}},
+    document:{querySelectorAll(){return [];},addEventListener(){},getElementById(id){return id.startsWith("summary-") ? (nodes[id] ||= {}) : null; }},
+    winterRatingSamePlayer:(a,b)=>a===b, Intl, Date:class extends Date {constructor(...args){super(...(args.length?args:['2026-09-10T12:00:00Z']));}},setTimeout(){},setInterval(){}};
   context.window.winterRatingSamePlayer=context.winterRatingSamePlayer;
   let source=fs.readFileSync(require.resolve('../app-my-summary.js'),'utf8');
   source=source.replace('  window.initMySummary = init;', '  window.testStats = function (nick) { nickname=nick; renderStats({rows:[]}); };');

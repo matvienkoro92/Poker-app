@@ -2,7 +2,11 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const load=()=>Promise.all([import('../scripts/city-game/engine.mjs'),import('../scripts/city-game/world.mjs')]);
 function walker(E,s,x,z){for(let i=0;i<2400;i++){const dx=x-s.player.x,dz=z-s.player.z,d=Math.hypot(dx,dz);if(d<.15)return;E.step(s,{x:dx/d,z:dz/d,run:true});}throw Error('Walking route blocked at '+JSON.stringify(s.player)+' aiming '+x+','+z);}
 function driver(E,s,x,z,max=10){for(let i=0;i<7200;i++){const c=s.car,dx=x-c.x,dz=z-c.z,d=Math.hypot(dx,dz);if(d<2.6){for(let n=0;n<100&&Math.abs(c.speed)>.1;n++)E.step(s,{brake:true});return;}const desired=Math.atan2(dx,dz),angle=Math.atan2(Math.sin(desired-c.yaw),Math.cos(desired-c.yaw)),speed=Math.min(max,Math.max(3,d*.8),Math.abs(angle)>.6?5:max);E.step(s,{forward:c.speed<speed?1:0,turn:Math.max(-1,Math.min(1,-angle*2.5)),brake:c.speed>speed+1});if(s.failed)throw Error('Car destroyed at '+JSON.stringify(c));}throw Error('Driving route stuck '+JSON.stringify(s.car)+' aiming '+x+','+z);}
-test('full delivery works through movement, driving and interaction without changing mission state',async()=>{const [E,W]=await load(),s=E.create();assert.deepEqual(s.player,{...W.START,yaw:0});walker(E,s,87,159);assert.equal(E.interact(s),true);assert.equal(s.driving,true);assert.equal(s.phase,'club');for(const [x,z]of [[61,160],[40,160],[40,105],[72,105],[72,70],[72,0],[1,0],[-18,1]])driver(E,s,x,z);E.interact(s);walker(E,s,-24,-8);assert.equal(E.interact(s),true);assert.equal(s.briefed,true);assert.equal(s.phase,'port');walker(E,s,s.car.x+2.8,s.car.z);E.interact(s);for(const [x,z]of [[0,3],[0,-72],[72,-72],[72,-49]])driver(E,s,x,z);assert.equal(E.interact(s),true);assert.equal(s.driving,false);walker(E,s,85,-53);assert.equal(E.interact(s),true);assert.equal(s.carrying,true);assert.equal(s.heat,1);walker(E,s,s.car.x+2.8,s.car.z);assert.equal(E.interact(s),true);for(const [x,z]of [[72,0],[72,69],[0,69],[0,1],[-18,3]])driver(E,s,x,z,18);assert.equal(s.heat,0,'the patrol must be lost before delivery');E.interact(s);walker(E,s,-24,-8);assert.equal(E.interact(s),true);assert.equal(s.win,true);assert.equal(s.completed,true);assert.equal(s.phase,'complete');});
+test('full delivery works through movement, driving and interaction without changing mission state',async()=>{const [E,W]=await load(),s=E.create();assert.deepEqual(s.player,{...W.START,yaw:0});walker(E,s,87,159);assert.equal(E.interact(s),true);assert.equal(s.driving,true);assert.equal(s.phase,'club');function driveTo(target){for(const p of W.roadRoute(s.car,target))driver(E,s,p.x,p.z,18);driver(E,s,target.x,target.z,12);}
+function visit(target){driveTo(target);assert.equal(E.interact(s),true);walker(E,s,target.x,target.z);assert.equal(E.interact(s),true);}
+function board(){walker(E,s,s.car.x+2.8,s.car.z);assert.equal(E.interact(s),true);}
+visit(W.HOME);assert.equal(s.briefed,true);assert.equal(s.phase,'port');board();visit(W.PICKUP);assert.equal(s.carrying,true);assert.equal(s.heat,1);board();visit(W.HOME);assert.equal(s.heat,0);
+assert.equal(s.win,true);assert.equal(s.completed,true);assert.equal(s.phase,'complete');});
 test('walls, water and club walls are solid, doorway remains traversable',async()=>{const [,W]=await load();assert.equal(W.blocked(-39,-23),true);assert.equal(W.blocked(-24,-11),false);assert.equal(W.blocked(125,0),true);for(const b of W.BUILDINGS)assert.equal(W.blocked(b.x,b.z),true);});
 test('interaction checks physical proximity and safe vehicle exit speed',async()=>{const [E]=await load(),s=E.create();assert.equal(s.carrying,false);assert.equal(s.phase,'car');walker(E,s,87,159);E.interact(s);for(let i=0;i<45;i++)E.step(s,{forward:1});assert.equal(E.interact(s),false);assert.equal(s.driving,true);});
 test('checkpoint retains the case and completed badge while resetting damage and motion',async()=>{const [E]=await load(),s=E.create({carrying:true,completed:true});assert.equal(s.carrying,true);assert.equal(s.phase,'escape');assert.equal(s.health,100);assert.equal(s.completed,true);assert.equal(s.driving,false);assert.deepEqual(E.checkpoint(s),{carrying:true,completed:true,briefed:true});});
@@ -41,4 +45,21 @@ test('villa routes reach all metropolitan landmarks on continuous drivable land'
   for(const p of roadRoute(CAR_START,landmark)){check(previous,p);previous=p;}
   assert.equal(previous.x,landmark.x);assert.equal(previous.z,landmark.z);
  }
+});
+
+test('city mission markers use the campaign order, coordinates and reachable road entrances',async()=>{
+ const chapters=require('../app-last-buy-in-chapters');
+ const {missionSites,mapPoint,lunaSite}=await import('../scripts/city-game/metropolis.mjs');
+ const {VILLA,CAR_START,blocked,roadRoute}=await import('../scripts/city-game/world.mjs');
+ assert.deepEqual(missionSites.map(s=>s.id),chapters.activeOrder);
+ for(const s of missionSites){
+  const [u,v]=chapters[s.id].mapPoint;
+  assert.deepEqual({x:s.x,z:s.z},mapPoint(u*6.4,v*6.4));
+  const route=roadRoute(CAR_START,s.approach);
+  assert.ok(Math.hypot(route.at(-1).x-s.approach.x,route.at(-1).z-s.approach.z)<.01);
+  assert.equal(blocked(s.approach.x,s.approach.z,1.6),false);
+ }
+ const villa=mapPoint(93*6.4,93*6.4);
+ assert.ok(Math.hypot(VILLA.x-villa.x,VILLA.z-villa.z)<.001);
+ assert.deepEqual({x:lunaSite.x,z:lunaSite.z},mapPoint(58*6.4,56.5*6.4));
 });

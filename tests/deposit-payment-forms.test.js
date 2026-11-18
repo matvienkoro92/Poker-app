@@ -1,11 +1,11 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const {paymentForms}=require('../lib/deposit-payment-forms');
-test('Prodamus fixed charges count at their nominal value while other providers retain gross',()=>{
+test('fixed payment charges count at player-credit nominal for every provider',()=>{
  const now=Date.now(),confirmed=[218000,110000,165000].map((amount,i)=>({id:String(i),providerId:'prodamus',status:'confirmed',amount,confirmedAt:now}));
  const forms=paymentForms(now,confirmed.concat({providerId:'robokassa',status:'confirmed',amount:165000,confirmedAt:now}));
  assert.equal(forms.providers.find(p=>p.id==='prodamus').total,450000);
- assert.equal(forms.providers.find(p=>p.id==='robokassa').total,165000);
+ assert.equal(forms.providers.find(p=>p.id==='robokassa').total,150000);
 });
 test('payment-form day changes at 06:00 Moscow, independent of host timezone',()=>{
  const before=paymentForms(Date.parse('2026-10-18T05:59:59.999+03:00'));

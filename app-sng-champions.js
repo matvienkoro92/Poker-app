@@ -274,7 +274,6 @@
     fetchState()
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "Ошибка загрузки");
-        updateFourthBattlePanel(data);
         state = data;
         activeTournamentId = data.tournamentId || activeTournamentId;
         rememberStateRevision(data);
@@ -2084,21 +2083,6 @@
     });
   }
 
-  function updateFourthBattlePanel(data) {
-    var target = (data && data.tournaments || []).find(function (item) {
-      return /^\s*4(?:[-–]?\s*(?:й|ый|ой))?\s*СНГ/i.test(item.title || "");
-    });
-    if (!target) return;
-    document.querySelectorAll("[data-sng-four-players]").forEach(function (el) {
-      el.textContent = String(target.approved || 0) + "/" + String(target.capacity || 32);
-    });
-    document.querySelectorAll("[data-sng-four-buyin]").forEach(function (el) { el.textContent = formatHomeMoney(target.buyIn); });
-    document.querySelectorAll("[data-sng-four-cta]").forEach(function (el) {
-      var canJoin = target.status === "open" && Number(target.approved || 0) < Number(target.capacity || 32);
-      el.textContent = target.myEntryStatus === "approved" ? "Вы записаны" : canJoin ? "Записаться" : target.status === "draft" ? "Скоро" : "Смотреть";
-    });
-  }
-
   var homeTournamentId = "";
   function updateHomePlaque() {
     if (!state) return;
@@ -2820,17 +2804,6 @@
         }
       }).observe(document.body, { childList: true, subtree: true });
     }
-    function refreshFourthBattlePanel() {
-      fetch(baseUrl() + API_PATH + apiAuthQuery("?") + "&_t=" + Date.now(), { cache: "no-store" })
-        .then(function (res) { return res.json(); })
-        .then(function (data) { if (data && data.ok) updateFourthBattlePanel(data); })
-        .catch(function () {});
-    }
-    refreshFourthBattlePanel();
-    window.addEventListener("online", refreshFourthBattlePanel);
-    document.addEventListener("visibilitychange", function () {
-      if (document.visibilityState === "visible") refreshFourthBattlePanel();
-    });
     var homeRefreshRetry = null;
     function refreshHomeBanner(attempt, usePreload) {
       window.clearTimeout(homeRefreshRetry);
@@ -2849,10 +2822,10 @@
     }
     window.addEventListener("online", function () { refreshHomeBanner(0); });
     window.addEventListener("pageshow", function (event) {
-      if (event.persisted) refreshHomeBanner(0);
+      if (event.persisted) refreshHomeBanner(0, true);
     });
     document.addEventListener("visibilitychange", function () {
-      if (document.visibilityState === "visible") refreshHomeBanner(0);
+      if (document.visibilityState === "visible") refreshHomeBanner(0, true);
     });
     if (window.__pokerHomeWidgetOpening !== "sngChampions") refreshHomeBanner(0, true);
   }

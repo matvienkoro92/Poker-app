@@ -157,6 +157,7 @@ fs.writeFileSync(path.join(root, "lib", "friend-tournament-results.json"), JSON.
 console.log("Generated club-news-data.js with", rows.length, "recent player results");
 
 async function notifyLatestDayHero() {
+  if (process.env.DAY_HERO_PUSH_SKIP === "1") return;
   if (String(process.env.VERCEL_ENV || "").trim() !== "production" && process.env.DAY_HERO_PUSH_ALLOW_LOCAL !== "1") return;
   const latestHero = latest && dayHeroes[latest];
   if (!latestHero) return;

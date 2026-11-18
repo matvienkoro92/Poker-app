@@ -1,7 +1,7 @@
 /* Story chapters and local medals for the owner prototype. */
 const chapters=window.LastBuyInChapters;
 // Keep saved mission identities while Missclick is temporarily off the route.
-const activeChapters=[0,1,2,3,5,6,7,8,9,10,12,13,14,11];
+const activeChapters=chapters.activeOrder;
 const chapterNumber=i=>activeChapters.indexOf(i)+1;
 // The owner-only profile entry enables chapter testing without awarding medals.
 let adminChapters=new URLSearchParams(location.search).get('adminChapters')==='1';

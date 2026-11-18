@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),vm=require(
 const {lua,lauxlib,lualib,to_luastring,to_jsstring}=require('fengari');
 test('escrow journal atomically indexes the host room before any wallet operation',async()=>{
  let options,row;
- const context={module:{exports:{}},require:name=>name==='node:crypto'?require(name):name==='./redis'?{pipeline:async rows=>{row=rows[0];return [{result:1}];}}:name==='./board-games-room'?()=>({}):name==='./billiards-wagers'?o=>(options=o,{}):name==='./game-connection-protection'?{presence:()=>({})}:null,process,Date,JSON,Math,Number,Error};
+ const context={module:{exports:{}},require:name=>name==='node:crypto'?require(name):name==='./redis'?{pipeline:async rows=>{row=rows[0];return [{result:1}];}}:name==='./board-games-room'?()=>({}):name==='./billiards-wagers'?o=>(options=o,{}):name==='./game-connection-protection'?{presence:()=>({})}:require('node:module').createRequire(require.resolve('../lib/board-games-service'))(name),process,Date,JSON,Math,Number,Error};
  vm.runInNewContext(fs.readFileSync('lib/board-games-service.js','utf8'),context);
  await options.store.put({id:'ABCDEFGHJK',owner:'host',status:'funding_host',expires:Date.now()+7200000},'lock-token');
  const [,script,count,...args]=row,keys=args.slice(0,count),values=args.slice(count);assert.equal(count,5);

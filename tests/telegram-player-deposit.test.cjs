@@ -296,6 +296,23 @@ test('payment link supports a new amount and plain Отмена without duplicat
  assert.equal(await f.handle(f.message('2000',4)),false);
 });
 
+test('numeric IDs sent as replies to payment links pass through to the manager dialog',async()=>{
+ for(const legacy of [false,true]){
+  const f=fixture(),waitingKey='poker_app:player-deposit:v1:waiting:777';
+  await f.handle(f.message('деп 1000'));
+  if(legacy){
+   const {promptMessageId,expiresAt}=JSON.parse(f.store.get(waitingKey));
+   f.store.set(waitingKey,JSON.stringify({promptMessageId,expiresAt}));
+  }
+  const reply=f.message('123456',102);
+  reply.message.reply_to_message={message_id:101,from:{is_bot:true},...(legacy?{text:f.sent[0].body.text}:{})};
+  assert.equal(await f.handle(reply),false);
+  assert.equal(f.sent.length,1);
+  assert.equal(JSON.parse(f.store.get('ledger')).paymentLinkIssues.length,1);
+  assert.equal(JSON.parse(f.store.get(waitingKey)).promptMessageId,101);
+ }
+});
+
 test('payment link below 3000 highlights the commission-free threshold',async()=>{
  for(const amount of [1000,1500,2000]){
   const f=fixture();await f.handle(f.message('деп '+amount));const body=f.sent[0].body;

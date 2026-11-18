@@ -1,4 +1,4 @@
-const test=require('node:test'),assert=require('node:assert/strict'),E=require('../app-last-buy-in-campaign-engine.js');
+const test=require('node:test'),assert=require('node:assert/strict'),E=require('./helpers/archived-portal.cjs');
 function play(s){const {controller}=require('./helpers/last-buy-in-campaign-player.cjs');let frames=0;for(;frames<6000&&!s.won&&!s.lost;frames++)E.step(s,controller(s));return {frames};}
 test('all three relays can be completed from normal spawn with ordinary inputs',()=>{const s=E.create(10),r=play(s);assert.equal(s.won,true);assert.equal(s.puzzles,3);assert.ok(s.hits<=2);assert.ok(r.frames<3000);console.log('Portal walkthrough:',r.frames,'frames /',(r.frames/60).toFixed(1),'s,',s.hits,'hits');});
 test('every relay fits on one screen and hazards increase gradually',()=>{const s=E.create(10);assert.equal(s.portalGuards.length,0);for(const p of s.platforms)assert.ok(p.x>=0&&p.x+p.w<=390);assert.ok(s.cube.x<s.portals[0].x&&s.pad.x>s.portals[1].x);assert.equal(s.panel.hp,0);});

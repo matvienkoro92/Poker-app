@@ -162,3 +162,13 @@ test('exchange permits its board and blocks separate amount prompts',async t=>{
  assert.equal((await send({...prompt,chat_id:123})).ok,false);
  assert.equal((await send({...prompt,reply_parameters:undefined})).ok,false);
 });
+
+test('Mandarin payment scope permits only text in the approved withdrawals group',async t=>{
+ const oldFetch=global.fetch,oldMandarin=process.env.MANDARIN_WITHDRAWALS_CHAT_ID,oldProdamus=process.env.PRODAMUS_WITHDRAWALS_CHAT_ID;
+ t.after(()=>{global.fetch=oldFetch;for(const [key,value]of [['MANDARIN_WITHDRAWALS_CHAT_ID',oldMandarin],['PRODAMUS_WITHDRAWALS_CHAT_ID',oldProdamus]]){if(value===undefined)delete process.env[key];else process.env[key]=value;}});
+ process.env.PRODAMUS_WITHDRAWALS_CHAT_ID='-100123';delete process.env.MANDARIN_WITHDRAWALS_CHAT_ID;
+ let sends=0;global.fetch=async()=>{sends++;return {ok:true};};
+ const send=(id,method='sendMessage')=>policy.guardedFetch('https://api.telegram.org/bottest/'+method,{body:JSON.stringify({chat_id:id})},'mandarin-payment');
+ assert.equal((await send('-100123')).ok,true);assert.equal((await send('-999')).ok,false);assert.equal((await send('-100123','sendPhoto')).ok,false);
+ process.env.MANDARIN_WITHDRAWALS_CHAT_ID='-222';assert.equal((await send('-100123')).ok,false);assert.equal((await send('-222')).ok,true);assert.equal(sends,2);
+});

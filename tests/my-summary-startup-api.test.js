@@ -6,7 +6,7 @@ const fs = require('node:fs');
 test('summary request works before the API base helper loads', async () => {
   const urls = [];
   const context = {
-    window: { addEventListener() {} },
+    location: {hostname:"club.example"}, window: { addEventListener() {} },
     document: { addEventListener() {}, getElementById() { return null; }, querySelectorAll() { return []; } },
     fetch(url) { urls.push(url); return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }); },
     pokerApiAuthJsonBody: (body) => body,
@@ -29,7 +29,7 @@ test('guest startup does not request private hand history or unread reviews', as
   const timers = [];
   const urls = [];
   const context = {
-    window: { addEventListener() {} },
+    location: {hostname:"club.example"}, window: { addEventListener() {} },
     document: { hidden: false, addEventListener() {}, getElementById() { return null; }, querySelectorAll() { return []; } },
     fetch(url) { urls.push(url); return Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }); },
     pokerApiHasCredential: () => false,

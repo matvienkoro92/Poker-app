@@ -13,13 +13,14 @@ test('five outfits unlock every five levels from forty through sixty',()=>{
   const saved=Garage.chooseScoped(look,{stats:{level:o.level}},{paint:'ruby'},'character');
   assert.ok(G.outfitSelected(saved,o.id));assert.equal(saved.paint,'ruby');
   for(const [kind,id]of Object.entries(o.pieces)){
+   if(id==='none'){assert.equal(look[kind],'none');continue;}
    assert.ok(!ids.has(id),'Reused item '+id);ids.add(id);
    const item=G.items.find(i=>i.kind===kind&&i.id===id);assert.equal(item.target,o.level);
    assert.ok(fs.statSync(path.join(__dirname,'../assets/player-hall/wardrobe/summer',id+'.webp')).size>1000);
    const mixed={...saved,[kind]:'none'};assert.equal(G.outfitSelected(mixed,o.id),false);
   }
  }
- assert.equal(ids.size,45);
+ assert.equal(ids.size,G.themedOutfits.flatMap(o=>Object.values(o.pieces)).filter(id=>id!=='none').length);
 });
 test('individual outfit pieces mix independently and vehicle saves retain gloves',()=>{
  const look=G.outfitLoadout(G.defaults,'enduro');look.shoes=G.themedOutfits.find(o=>o.id==='space').pieces.shoes;

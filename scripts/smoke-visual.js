@@ -100,6 +100,8 @@ async function showView(page, view) {
     if (typeof setView !== "function") throw new Error("setView is not available");
     setView(viewName);
   }, view);
+  await page.waitForFunction(name => document.body.dataset.view === name &&
+    !document.body.classList.contains("poker-view-section-loading"), view);
   await page.waitForTimeout(view === "chat" ? 1400 : 700);
 }
 
@@ -120,16 +122,25 @@ async function inspectView(page, view) {
       .map((node) => {
         const r = node.getBoundingClientRect();
         const p = node.parentElement && node.parentElement.getBoundingClientRect();
+        // Cards in a horizontal carousel can extend beyond the viewport.
+        let left = r.left, right = r.right;
+        for (let parent = node.parentElement; parent && parent !== body; parent = parent.parentElement) {
+          if (["auto", "scroll", "clip", "hidden"].includes(getComputedStyle(parent).overflowX)) {
+            const clip = parent.getBoundingClientRect();
+            left = Math.max(left, clip.left);
+            right = Math.min(right, clip.right);
+          }
+        }
         return {
           tag: node.tagName,
           text: String(node.textContent || "").trim().slice(0, 80),
-          left: Math.round(r.left),
-          right: Math.round(r.right),
+          left: Math.round(left),
+          right: Math.round(right),
           parentLeft: p ? Math.round(p.left) : 0,
           parentRight: p ? Math.round(p.right) : 0,
         };
       })
-      .filter((item) => item.text && (item.left < -2 || item.right > window.innerWidth + 2));
+      .filter((item) => item.text && item.right > item.left && (item.left < -2 || item.right > window.innerWidth + 2));
     return {
       bodyView: body.getAttribute("data-view"),
       active: !!active,
@@ -137,6 +148,7 @@ async function inspectView(page, view) {
       navVisible: !!nav && getComputedStyle(nav).visibility !== "hidden" && nav.getBoundingClientRect().height > 0,
       scrollWidth: Math.ceil(doc.scrollWidth),
       clientWidth: Math.ceil(doc.clientWidth),
+      guestLoginVisible: !!document.getElementById("profileExitBtn")?.getBoundingClientRect().width,
       bodyText: String(body.innerText || "").trim().length,
       overflows: overflows.slice(0, 10),
     };
@@ -188,7 +200,7 @@ async function main() {
       if (!data.activeBox || data.activeBox.width < 280 || data.activeBox.height < 120) throw new Error(`Active view ${view} is visually too small`);
       if (!data.navVisible) throw new Error(`Bottom nav is hidden on ${view}`);
       if (data.scrollWidth > data.clientWidth + 4) throw new Error(`Horizontal overflow on ${view}: ${data.scrollWidth} > ${data.clientWidth}`);
-      if (data.bodyText < 120) throw new Error(`View ${view} looks blank`);
+      if (data.bodyText < 120 && !(view === "profile" && data.guestLoginVisible)) throw new Error(`View ${view} looks blank`);
       if (shotBytes < 12000) throw new Error(`Screenshot for ${view} looks blank`);
       if (data.overflows.length) throw new Error(`Text overflow on ${view}: ${JSON.stringify(data.overflows[0])}`);
     }

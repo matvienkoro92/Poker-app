@@ -10,8 +10,8 @@ test('queue entry alone never permits deleting a message',async()=>{
   const f=fixture({receipt});assert.equal((await f.send()).ok,false);assert.equal(f.sent.length,0);
  }
 });
-test('only a registered bot board or a confirmed amount can be deleted',async()=>{
- const b=fixture({receipt:JSON.stringify(board())});assert.equal((await b.send()).ok,true);
+test('a board is retained and only a confirmed amount can be deleted',async()=>{
+ const b=fixture({receipt:JSON.stringify(board())});assert.equal((await b.send()).ok,false);
  const amount={type:'amount',chat:'-123',messageId:7,createdAt:Date.now(),userId:42,amount:300};
  const a=fixture({submitted:JSON.stringify(amount)});assert.equal((await a.send()).ok,true);
  for(const patch of [{amount:1001},{userId:0},{type:'other'},{chat:'-999'}]){
@@ -22,5 +22,5 @@ test('future timers and missing queue entries fail closed',async()=>{
  for(const due of [null,Date.now()+60000]){const f=fixture({receipt:JSON.stringify(board()),due});assert.equal((await f.send()).ok,false);assert.equal(f.sent.length,0);}
 });
 test('deletion stops above twenty attempts per minute',async()=>{
- const f=fixture({receipt:JSON.stringify(board()),count:21});assert.equal((await f.send()).status,429);assert.equal(f.sent.length,0);
+ const f=fixture({submitted:JSON.stringify({...board(),type:'amount',userId:42,amount:300}),count:21});assert.equal((await f.send()).status,429);assert.equal(f.sent.length,0);
 });

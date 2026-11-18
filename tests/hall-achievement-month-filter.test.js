@@ -8,7 +8,7 @@ test('month filter sits above trophies and applies to every award including late
  data.sngChampion=c.hallFishAggregateSngChampionRows([{completedAt:'2026-09-01T12:00:00Z',winners:[{nick:'Sng',place:1}]},{completedAt:'2026-10-01T12:00:00Z',winners:[{nick:'Sng',place:1}]}],[]);
  c.hallFishActiveDayHeroMonth='10.2026';
  for(const spec of c.hallFishAchievementSpecs(data)){
-  const filtered=c.hallFishAchievementRowsForMonth(spec,'10.2026');for(const row of filtered){if(spec.key!=='topWin')assert.equal(row.value,row.detailRows.length);assert.ok(row.detailRows.every(d=>d._monthKey==='10.2026'));}
+  const filtered=c.hallFishAchievementRowsForMonth(spec,'10.2026');for(const row of filtered){if(spec.key==='monthChampion')assert.equal(row.value,200000);else if(spec.key!=='topWin')assert.equal(row.value,row.detailRows.length);assert.ok(row.detailRows.every(d=>d._monthKey==='10.2026'));}
   c.hallFishActiveAchievementTab=spec.key;const html=c.hallFishRenderAchievementRows(data);assert.ok(html.indexOf('class="hall-fish-day-hero-months ')<html.indexOf('class="hall-fish-achievement-tabs-shell"'));assert.match(html,/Месяц для всех ачивок/);assert.match(html,/10\.2026/);assert.equal(c.hallFishActiveDayHeroMonth,'10.2026');
  }
  const specs=c.hallFishAchievementSpecs(data);assert.equal(specs.length,8);for(const removed of ['clubChoice','sngChampion','viceChampion','billiardsKing']){assert.ok(!specs.some(s=>s.key===removed));}

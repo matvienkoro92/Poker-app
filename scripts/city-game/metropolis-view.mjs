@@ -1,5 +1,5 @@
 import * as T from '../../vendor/three/three.module.min.js';
-import {shores,parks,roads,lots,landmarks} from './metropolis.mjs';
+import {mapPoint,atlasTrees,shores,lagoon,parks,roads,lots,landmarks} from './metropolis.mjs';
 
 // Static instances share one draw per visible 200 m cell and primitive.
 export function buildMetropolis(scene){
@@ -9,7 +9,61 @@ export function buildMetropolis(scene){
   if(!bins.has(key))bins.set(key,{geometry:round?crown:box,parts:[]});
   bins.get(key).parts.push([x,y,z,w,h,d,color,angle]);
  }
- for(const rows of shores)for(const p of rows){add(p.x,-.55,p.z,p.w,1,p.d,0xa9ab89);add(p.x+p.w/2-3,-.045,p.z,6,.06,p.d,0xe2cca1);}
+ // Preserve the illustration's sand, planting and paved areas at their world coordinates.
+ const landMaterial=new T.MeshStandardMaterial({color:0xa4aa83,roughness:1});
+ const atlas=new Image();
+ landMaterial.addEventListener('dispose',()=>{atlas.onload=null;landMaterial.map?.dispose();});
+ atlas.onload=()=>{
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=640;
+  const ctx=canvas.getContext('2d');ctx.drawImage(atlas,0,0,640,640);
+  const pixels=ctx.getImageData(0,0,640,640);
+  for(let i=0;i<pixels.data.length;i+=4){
+   const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
+   const plants=Math.min(1,Math.max(0,(g-b-22)/50))*Math.min(1,Math.max(0,(g-r+17)/27));
+   const sand=Math.min(1,Math.max(0,(r-b-20)/65))*(1-plants);
+   const light=.79+.23*(r+g+b)/765;
+   pixels.data[i]=(174-77*plants+48*sand)*light;
+   pixels.data[i+1]=(171-45*plants+33*sand)*light;
+   pixels.data[i+2]=(155-74*plants+5*sand)*light;
+  }
+  ctx.putImageData(pixels,0,0);landMaterial.map=new T.CanvasTexture(canvas);
+  landMaterial.map.colorSpace=T.SRGBColorSpace;landMaterial.color.setHex(0xffffff);landMaterial.needsUpdate=true;
+ };
+ atlas.src='assets/last-buy-in/optimized/poker21-city-map-locations-v5.webp';
+ function groundPolygon(points,color,height,terrain=false){
+  const shape=new T.Shape(points.map(p=>new T.Vector2(p.x,-p.z)));
+  const geometry=new T.ShapeGeometry(shape);geometry.rotateX(-Math.PI/2);
+  if(terrain){
+   const pos=geometry.attributes.position,uv=geometry.attributes.uv,corner=mapPoint(0,0),span=640*5.6;
+   for(let i=0;i<pos.count;i++)uv.setXY(i,(pos.getX(i)-corner.x)/span,1-(pos.getZ(i)-corner.z)/span);
+  }
+  const mesh=new T.Mesh(geometry,terrain?landMaterial:new T.MeshStandardMaterial({color,roughness:1}));mesh.position.y=height;mesh.receiveShadow=true;scene.add(mesh);
+ }
+ for(const coast of shores)groundPolygon(coast,0xa4aa83,-.05,true);
+ groundPolygon(lagoon,0x3c8997,.1);
+ const coast=[];
+ for(let v=44;v<=539;v+=5){
+  const z=mapPoint(0,v).z,polygon=shores[1];let edge=-Infinity;
+  for(let i=0;i<polygon.length;i++){const a=polygon[i],b=polygon[(i+1)%polygon.length];
+   if((a.z>z)!==(b.z>z))edge=Math.max(edge,a.x+(b.x-a.x)*(z-a.z)/(b.z-a.z));
+  }
+  if(Number.isFinite(edge))coast.push({x:edge,z});
+ }
+ const inland=coast.map(p=>({x:p.x-55,z:p.z})).reverse();
+ groundPolygon([...coast,...inland],0xe0cb9c,-.02);
+ for(let i=1;i<coast.length;i++){
+  const a=coast[i-1],b=coast[i],length=Math.hypot(b.x-a.x,b.z-a.z);
+  for(let m=16;m<length;m+=36){
+   const x=a.x+(b.x-a.x)*m/length-32,z=a.z+(b.z-a.z)*m/length;
+   add(x,3.2,z,.55,6.4,.55,0x84684c);
+   for(let k=0;k<5;k++){const angle=k*Math.PI*.4;add(x+Math.sin(angle)*1.55,6.4,z+Math.cos(angle)*1.55,1.45,.42,4.6,0x507b53,angle,true);}
+  }
+ }
+ for(const [i,p] of atlasTrees.entries()){
+  const height=4+(i%5)*.7;
+  add(p.x,height*.35,p.z,.42,height*.7,.42,0x795d48);
+  add(p.x,height*.78,p.z,height*.49,height*.4,height*.46,i%3?0x526f41:0x647e49,i*.82,true);
+ }
  for(const p of parks){
   add(p.x,.02,p.z,p.w,.12,p.d,0x829867);add(p.x,.09,p.z,3,.04,p.d,0xdcc9a1);
   for(let i=0;i<24;i++){const x=p.x+((i*37%97)/97-.5)*p.w,z=p.z+((i*53%101)/101-.5)*p.d;if(Math.abs(x-p.x)<5)continue;
@@ -26,6 +80,8 @@ export function buildMetropolis(scene){
  }
  for(const p of lots){
   const {x,z,w,d,h,color}=p;add(x,h/2,z,w,h,d,color);add(x,h+.4,z,w+1,.8,d+1,0xd7cdb8);
+  if(p.kind==='club'){add(x,h+2,z,w*.7,4,d*.69,0x496854);add(x,h+5,z,w*.42,3,d*.43,0xb29a61);}
+  if(p.kind==='warehouse'){for(let i=-1;i<=1;i++)add(x+i*9,3,z+d/2+.12,7,6,.3,0x475457);continue;}
   if(p.kind==='stand'){
    const longX=w>d,long=longX?w:d;
    for(let t=-long/2+5;t<long/2;t+=12)for(const side of [-1,1]){
@@ -43,18 +99,31 @@ export function buildMetropolis(scene){
   }
   if(h>20)add(x+w*.18,h+1.5,z,6,3,5,0x848e87);
  }
- // The east coast promenade runs beside the last avenue, clear of its intersections.
- for(const p of shores[1]){const edge=p.x+p.w/2;add((509+edge)/2,-.01,p.z,edge-509,.12,p.d,0xe9d3a3);}add(513,.08,-1650,8,.16,2880,0xcfbd9f);
- for(let z=-3040;z<-230;z+=36){
-  add(517,3.2,z,.55,6.4,.55,0x84684c);
-  for(let i=0;i<5;i++){const angle=i*Math.PI*.4;add(517+Math.sin(angle)*1.55,6.4,z+Math.cos(angle)*1.55,1.45,.42,4.6,0x507b53,angle,true);}
+ // Finger piers on the Gulf side of the eastern island; the airport faces the other shore.
+ for(let i=0;i<5;i++){const p=mapPoint(489,449+i*4);
+  add(p.x-29,.26,p.z,59,.52,2.2,0x9b8768);
+  for(let k=0;k<4;k++){const x=p.x-8-k*13;add(x,.5,p.z+4,3,.9,6.5,0xe9e4cf,0,true);}
  }
- for(const p of landmarks){
-  if(p.type==='airport'){
-   for(const dx of [45,104]){const x=p.x+dx,z=p.z+102;add(x,1.6,z,2,2,16,0xe1e5df,0,true);add(x,1.5,z,14,.4,3,0xd9ded8);add(x,2.7,z-6,.45,3.4,2.4,0x537285);}
-   add(p.x+80,.07,p.z+70,138,.12,19,0x596068);for(let i=0;i<8;i++)add(p.x+20+i*16,.15,p.z+70,7,.03,.4,0xffffff);}
-  if(p.type==='stadium'){add(p.x+115,.12,p.z+130,125,.2,121,0x59865c);for(const dx of [28,194])for(const dz of [29,219]){add(p.x+dx,18,p.z+dz,.65,36,.65,0x848e89);add(p.x+dx,36,p.z+dz,6,2.4,1,0xffe4b3);}}
+ const beacon=mapPoint(565,575);
+ for(let tier=0;tier<6;tier++)add(beacon.x,2+tier*4,beacon.z,6-tier*.5,4,6-tier*.5,tier%2?0xf1e7d0:0xb55d4d);
+ add(beacon.x,25,beacon.z,4,2.2,4,0xf3cf7e);
+ const runway=mapPoint(109,546);
+ add(runway.x,.06,runway.z,740,.12,23,0x626767,-.14);
+ for(let n=-8;n<=8;n++)add(runway.x+n*40,.14,runway.z+n*5.64,15,.02,.65,0xebe4d1,-.14);
+ for(const u of [76,99,121]){const p=mapPoint(u,483);add(p.x,1.8,p.z,3.2,3.6,27,0xe8e6de,0,true);add(p.x,2,p.z,24,.5,4,0xcecec3);}
+ const arena=mapPoint(78,61);
+ for(let i=0;i<40;i++){
+  const angle=i*Math.PI/20,sa=Math.sin(angle),ca=Math.cos(angle);
+  if(i===10||i===30)continue;
+  const rotation=Math.atan2(-73*ca,-109*sa);
+  for(let step=0;step<6;step++){
+   const x=arena.x+(88+step*3.7)*ca,z=arena.z+(52+step*3.8)*sa;
+   add(x,1.7+step*2.0,z,Math.hypot(109*sa,73*ca)*.162,2.4,4.6,step%2?0xd6aa71:0x99574a,rotation);
+  }
+  add(arena.x+117*ca,17,arena.z+82*sa,Math.hypot(117*sa,82*ca)*.165,1.2,14,0xc7c5ad,rotation);
  }
+ const pitch=mapPoint(78,61);add(pitch.x,.09,pitch.z,142,.16,97,0x5b895a);
+ for(const dx of [-83,83])for(const dz of [-59,59]){add(pitch.x+dx,16,pitch.z+dz,.65,32,.65,0x889591);add(pitch.x+dx,32,pitch.z+dz,5,2,1,0xffe5ad);}
  const dummy=new T.Object3D(),tint=new T.Color();
  for(const {geometry,parts} of bins.values()){
   const mesh=new T.InstancedMesh(geometry,material,parts.length);

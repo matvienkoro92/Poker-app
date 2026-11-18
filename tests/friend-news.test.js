@@ -7,7 +7,7 @@ const { buildSharedEvents } = require("../lib/friend-news");
 const now = Date.parse("2026-09-10T12:00:00Z");
 const self = { userId: "ID400800", pokerPlusNickname: "ПокерМанки" };
 const friend = { userId: "ID403173", pokerPlusNickname: "Waaar" };
-const rows = require("../lib/friend-tournament-results.json");
+const rows = require("./helpers/september-friend-results.cjs");
 
 test("real September 9 result: PokerMonkey and Waaar share Big Boss prizes", () => {
   const events = buildSharedEvents(self, [friend], rows, now);
@@ -58,8 +58,8 @@ function browserHarness() {
     pending: function () { return friendReadPending; },
     setTracking: function (value) { friendTrackingSince = value; },
     setMode: function (mode) { newsModalMode = mode; },
-    setupLoad: function (roster) {
-      loadFriendNewsEnvelope = function () { return Promise.resolve({ friends: roster }); };
+    setupLoad: function (roster, scopedReadStatus) {
+      loadFriendNewsEnvelope = function () { return Promise.resolve({ friends: roster, scopedReadStatus }); };
       cachedFetchJson = function () { return Promise.resolve({}); };
       tournamentSnapshotsReady = function (friends) { window.test.loadedFriends = friends; return Promise.resolve({}); };
       apiBase = function () { return "https://example.test"; };
@@ -265,4 +265,40 @@ test("club news retains next-day Last Longer payout under yesterday's tournament
   assert.equal(news[index + 1]._eventKind, "self-bet-result");
   assert.equal(news[index + 1].lastLongerPayout, 3500);
   assert.equal(news[index + 1].at, news[index].at);
+});
+
+test("scoped receipt lookup preserves a concurrent local read and ignores a stale account response", async () => {
+  for (const switchAccount of [false, true]) {
+    const h = browserHarness();
+    const since = "2026-09-09T12:00:00Z";
+    const id = "friend:" + friend.userId + ":" + since;
+    h.api.setState(self.userId, []);
+    h.api.setupLoad([{ ...friend, friendSince: since }], true);
+    let finish;
+    h.context.fetch = async (_, options) => {
+      const body = JSON.parse(options?.body || "{}");
+      if (body.action === "read-status") {
+        assert.ok(body.ids.includes(id));
+        return new Promise(resolve => {
+          finish = () => resolve({ok:true, json:async () => ({ok:true, accountId:self.userId,
+            membership:body.ids.map(() => switchAccount ? "1" : "0").join("")})});
+        });
+      }
+      return {ok:true, json:async () => ({ok:true,posts:[],levelRows:[]})};
+    };
+    const updating = h.api.load();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(typeof finish, "function");
+    if (switchAccount) h.api.setState("B", []);
+    else h.api.pending()[id] = true;
+    finish();
+    await updating;
+    if (switchAccount) {
+      assert.equal(h.window.pokerGetFriendNewsSummary().accountId, "B");
+      assert.equal(h.storage.has("poker_friend_news_read_v1:B"), false);
+    } else {
+      assert.equal(h.api.pending()[id], true);
+      assert.equal(h.window.pokerGetFriendNewsSummary().unread, 0);
+    }
+  }
 });

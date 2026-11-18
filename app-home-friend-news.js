@@ -261,8 +261,11 @@
 
   function cachedFetchJson(url, cacheKey, ttlMs, requestOptions) {
     var now = Date.now();
+    // Both achievement endpoints return the same public history to every account.
+    var publicHistory = cacheKey === "sng-achievements-v2" || cacheKey === "choice-achievements-v1";
+    var storageKey = REMOTE_CACHE_PREFIX + (publicHistory ? url : cacheKey);
     try {
-      var stored = JSON.parse(sessionStorage.getItem(REMOTE_CACHE_PREFIX + cacheKey) || "null");
+      var stored = JSON.parse((publicHistory ? localStorage : sessionStorage).getItem(storageKey) || "null");
       if (stored && stored.at && now - Number(stored.at) < ttlMs && stored.data) {
         return Promise.resolve(stored.data);
       }
@@ -274,7 +277,7 @@
     }).then(function (data) {
       if (!data || data.ok === false) throw new Error("news_data_unavailable");
       try {
-        sessionStorage.setItem(REMOTE_CACHE_PREFIX + cacheKey, JSON.stringify({ at: Date.now(), data: data }));
+        (publicHistory ? localStorage : sessionStorage).setItem(storageKey, JSON.stringify({ at: Date.now(), data: data }));
       } catch (error) {}
       return data;
     });
@@ -329,7 +332,7 @@
     if (envelopePromise) return envelopePromise;
     if (envelopeValue && Date.now() - envelopeAt < 30000) return Promise.resolve(envelopeValue);
     var generation = friendAuthGeneration;
-    var request = friendNewsRequest({ action: "feed" }).then(function (data) {
+    var request = friendNewsRequest({ action: "feed", scopedReadStatus: true }).then(function (data) {
       if (generation !== friendAuthGeneration) throw new Error("friend_news_stale");
       if (friendNewsAccountId !== data.accountId) {
         friendReadIds = {};
@@ -360,7 +363,7 @@
   }
 
   window.pokerGetFriendNewsSummary = function () {
-    return { accountId: friendNewsAccountId, ready: friendTrackingSince !== null, unread: friendNewsAccountId ? events.filter(function (row) {
+    return { accountId: friendNewsAccountId, ready: friendNewsLoaded && friendTrackingSince !== null, unread: friendNewsAccountId ? events.filter(function (row) {
       return isUnreadFriendEvent(row);
     }).length : 0 };
   };
@@ -2919,9 +2922,8 @@
 
   function render() {
     updateFriendNewsBadges();
-    var root = el("homeFriendNews");
-    if (!root) return;
-    renderModalList(activeModalEvents());
+    var modal = el("homeFriendNewsModal");
+    if (modal && !modal.hidden) renderModalList(activeModalEvents());
   }
 
   var adminNewsTelegramCache = {};
@@ -4359,7 +4361,6 @@
     }
     var base = apiBase();
     if (!base) return;
-    var signature = "";
     if (friendNewsLoadPromise) return friendNewsLoadPromise;
     if (Date.now() - lastLoadAt < 30000) return Promise.resolve();
     var requestSequence = ++loadSequence;
@@ -4378,11 +4379,11 @@
             { raffles: [] }, { levelRows: [] }, { posts: [] }, selfBetRows];
         });
       }
-      var publicLevelsPromise = cachedFetchJson(base + "/api/player-crm?publicLevels=1&avatarFormat=url", "public-levels-urls-v1", 5 * 60 * 1000, { cache: "default" })
+      var publicLevelsPromise = window.pokerLoadPublicLevelRows(base, 5 * 60 * 1000)
         .catch(function () { return { levelRows: [] }; });
       return Promise.all([
         Promise.resolve(friendsPayload),
-        cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily:" + signature + ":" + suffix, 60 * 1000, { cache: "default" })
+        cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily-winners-50:" + suffix, 60 * 1000, { cache: "default" })
           .catch(function () { return { winners: [] }; }),
         cachedFetchJson(base + "/api/sng-champions?mode=achievements", "sng-achievements-v2", 5 * 60 * 1000, { cache: "default" })
           .catch(function () { return { rows: [] }; }),
@@ -4476,11 +4477,32 @@
               });
           });
         }).slice(0, MAX_FRIEND_EVENTS);
-      events = placeSelfBetNewsAfterWinner(nextEvents);
-      friendNewsLoading = false;
-      friendNewsLoaded = true;
-      writeRenderedEventsCache(events);
-      render();
+      var rows = placeSelfBetNewsAfterWinner(nextEvents);
+      var account = friendNewsAccountId;
+      var candidates = results[0].scopedReadStatus ? rows.filter(isUnreadFriendEvent)
+        .map(function (row) { return row.id; })
+        .filter(function (id) { return typeof id === "string" && id.length <= 1000; }) : [];
+      var status = candidates.length ? friendNewsRequest({ action: "read-status", ids: candidates }) : Promise.resolve(null);
+      return status.then(function (response) {
+        if (requestSequence !== loadSequence || account !== friendNewsAccountId) return;
+        if (response) {
+          var bits = response.membership;
+          if (response.accountId !== account || typeof bits !== "string" || bits.length !== candidates.length || /[^01]/.test(bits)) {
+            throw new Error("friend_news_invalid_status");
+          }
+          candidates.forEach(function (id, i) {
+            if (bits[i] === "1") friendReadIds[id] = true;
+          });
+          saveFriendReadCache();
+        }
+        events = rows;
+        friendNewsLoading = false;
+        friendNewsLoaded = true;
+        writeRenderedEventsCache(events);
+        render();
+        var modal = el("homeFriendNewsModal");
+        if (modal && !modal.hidden && newsModalMode === "friends") loadActiveModalFeedback(events);
+      });
     }).catch(function () {
       if (requestSequence !== loadSequence) return;
       friendNewsLoading = false;
@@ -4702,12 +4724,7 @@
     }
     clubWallLoading = true;
     if (newsModalMode === "club" && clubNewsTab === "wall") renderModalList(clubWallEvents);
-    var request = cachedFetchJson(
-      base + "/api/player-crm?publicLevels=1&avatarFormat=url",
-      "public-levels-urls-v1",
-      force ? 0 : 5 * 60 * 1000,
-      { cache: force ? "no-store" : "default" }
-    ).then(function (data) {
+    var request = window.pokerLoadPublicLevelRows(base, force ? 0 : 5 * 60 * 1000).then(function (data) {
       var players = (data && Array.isArray(data.levelRows) ? data.levelRows : []).map(function (row) {
         return Object.assign({}, row, {
           userId: row && (row.profileId || row.userId || row.accountId || row.dtId) || "",
@@ -4813,7 +4830,7 @@
     var tournamentDay = clubTournamentDayKey();
     var dailyRangeQuery = tournamentDay ? "&from=" + encodeURIComponent(tournamentDay) + "&to=" + encodeURIComponent(tournamentDay) : "";
     var request = publishClubNewsProgressively([
-      cachedFetchJson(base + "/api/player-crm?publicLevels=1&avatarFormat=url", "public-levels-urls-v1", 5 * 60 * 1000, { cache: "default" })
+      window.pokerLoadPublicLevelRows(base, 5 * 60 * 1000)
         .catch(function () { return { levelRows: [], failed: true }; }),
       cachedFetchJson(
         base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=100" + dailyRangeQuery,
@@ -4913,8 +4930,12 @@
     // Cached/generated rows are the progressive first paint. The live refresh
     // can replace and extend them without blanking the ticker or the modal.
     clubNewsLoaded = false;
+    function refreshVisibleClubNews() {
+      var modal = el("homeFriendNewsModal");
+      if (el("homeClubNewsTrack") || (modal && !modal.hidden && newsModalMode === "club")) loadClubNews();
+    }
     mountWhenProfileReady();
-    loadClubNews();
+    refreshVisibleClubNews();
     load();
     window.addEventListener("poker-profile-friends-ready", function (event) {
       var readyFriends = event && event.detail && Array.isArray(event.detail.friends)
@@ -4945,17 +4966,17 @@
       try { sessionStorage.removeItem(RENDERED_EVENTS_CACHE_KEY); } catch (error) {}
       render();
       load();
-      loadClubNews();
+      refreshVisibleClubNews();
     }
     window.addEventListener("poker-admin-access", function () { renderModalList(activeModalEvents()); });
     window.addEventListener("poker-auth-changed", resetFriendNewsForAuth);
     window.addEventListener("poker-telegram-auth", resetFriendNewsForAuth);
-    window.addEventListener("focus", function () { load(); loadClubNews(); });
+    window.addEventListener("focus", function () { load(); refreshVisibleClubNews(); });
     setInterval(function () {
       if (typeof document !== "undefined" && document.hidden) return;
       // Refresh badges even when Profile has not been opened.
       load();
-      loadClubNews();
+      refreshVisibleClubNews();
     }, 15 * 60 * 1000);
   }
 
@@ -5001,7 +5022,6 @@
     var base = apiBase();
     var suffix = authSuffix();
     var joiner = suffix ? "&" : "?";
-    var playerCacheKey = matchKey(nick);
     var pseudoFriend = {
       userId: id || ("player:" + matchKey(nick)),
       accountId: String(player.accountId || id || "").trim(),
@@ -5015,7 +5035,7 @@
     var emptyWinners = Promise.resolve({ winners: [] });
     var snapshotsPromise = tournamentSnapshotsReady([pseudoFriend]);
     var dailyPromise = base
-      ? cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "player-daily:" + playerCacheKey + ":" + suffix, 60 * 1000, { cache: "default" })
+      ? cachedFetchJson(base + "/api/promo/daily-poker/winners" + suffix + joiner + "limit=50", "daily-winners-50:" + suffix, 60 * 1000, { cache: "default" })
         .catch(function () { return { winners: [] }; })
       : emptyWinners;
     var sngPromise = base

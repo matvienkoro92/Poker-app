@@ -106,7 +106,7 @@ test('delete policy denies arbitrary group and private message deletion without 
   const result=await f.policy.guardedFetch('https://api.telegram.org/botfixture/deleteMessage',{body:JSON.stringify(body)},'support-delete');assert.equal(result.status,403);
  }
 });
-test('new room link buttons route internally and disappear once that room is linked',async()=>{
+test('new room link buttons route internally and offer editing once that room is linked',async()=>{
  for(const [action,cmd,label] of [['support:supr','sid','Suprema'],['support:pp','ppid','PPPoker']]){
   const f=fixture();await f.setup();await f.handle(f.pm());
   const start=f.calls.length,click=f.callback(action);click.callback_query.message.message_id=f.client.headerMessageId;
@@ -117,7 +117,7 @@ test('new room link buttons route internally and disappear once that room is lin
  }
  const linked=fixture({supremaIds:['12345'],pppokerIds:['67890']});await linked.setup();await linked.handle(linked.pm());
  const keyboard=linked.calls.find(c=>c.body.text?.includes('Рейк:')).body.reply_markup.inline_keyboard.flat();
- assert.ok(!keyboard.some(b=>['support:supr','support:pp'].includes(b.callback_data)));
+ for(const action of ['support:supr','support:pp'])assert.match(keyboard.find(b=>b.callback_data===action).text,/Изменить/);
  assert.ok(keyboard.some(b=>b.callback_data==='support:xpoker'));
 });
 test('lead gets one topic, messages/media copy to that topic and duplicate updates do not resend',async()=>{
@@ -252,24 +252,26 @@ test('bot questions mirror into the client topic once, including first contact t
 
 test('payment link notices show provider and both amounts without duplicating the player message',async()=>{
  const f=fixture();await f.setup();const user={id:LEAD,first_name:'Lead'};
- for(const [providerId,amount,chargeAmount,id] of [['robokassa',100000,110000,42],['prodamus',200000,218000,43]]){
+ for(const [providerId,amount,chargeAmount,id] of [['robokassa',100000,110000,42],['prodamus',200000,218000,43],['mandarin',150000,165000,44]]){
   const options={paymentLink:{providerId,amount,chargeAmount}};
   await f.mirrorBotMessage(LEAD,id,user,options);await f.mirrorBotMessage(LEAD,id,user,options);
  }
  const notices=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text.includes('Ожидаем перевод'));
- assert.equal(notices.length,2);assert.match(notices[0].body.text,/Робокасса.*1[\s\u00a0]000 ₽/);assert.match(notices[0].body.text,/1[\s\u00a0]100 ₽/);
+ assert.equal(notices.length,3);assert.match(notices[0].body.text,/Робокасса.*1[\s\u00a0]000 ₽/);assert.match(notices[0].body.text,/1[\s\u00a0]100 ₽/);
  assert.ok(notices.every(notice=>!notice.body.reply_markup));
  assert.match(notices[0].body.text,/\n\nОжидаем перевод\.$/);
  const bold=notices[0].body.entities.at(-1);assert.equal(notices[0].body.text.slice(bold.offset,bold.offset+bold.length),'Ожидаем перевод.');
  assert.equal(f.client.appliedIconId,'5350452584119279096');
  assert.doesNotMatch(f.client.appliedTitle,/🟡|😐/);
  assert.match(notices[1].body.text,/Prodamus.*2[\s\u00a0]000 ₽/);assert.match(notices[1].body.text,/2[\s\u00a0]180 ₽/);
+ assert.match(notices[2].body.text,/Мандарин.*1[\s\u00a0]500 ₽/);assert.match(notices[2].body.text,/1[\s\u00a0]650 ₽/);
  assert.equal(f.calls.filter(c=>c.method==='copyMessage').length,0);assert.equal(f.client.lastAnsweredInboundId,undefined);
 });
 test('payment waiting ends on new player message, manager answer, confirmation or cancellation',async()=>{
  const f=fixture();await f.setup();const user={id:LEAD,first_name:'Lead'},options={paymentLink:{providerId:'robokassa',amount:100000,chargeAmount:110000}};
  await f.mirrorBotMessage(LEAD,42,user,options);
- await f.handle(f.pm('Оплатил, мой ID',43));assert.equal(f.client.appliedIconId,'5379748062124056162');assert.equal(f.client.awaitingPayment,undefined);
+ await f.handle(f.pm('123456',43));assert.equal(f.client.appliedIconId,'5379748062124056162');assert.equal(f.client.awaitingPayment,undefined);
+ assert.ok(f.calls.some(c=>c.method==='sendMessage'&&c.body.message_thread_id===f.client.threadId&&c.body.text.endsWith('\n\n123456')));
  await f.handle(f.groupMessage());assert.equal(f.client.appliedIconId,'5237699328843200968');
  await f.mirrorBotMessage(LEAD,44,user,options);
  const paid=f.callback('support:payment-paid');paid.callback_query.message.message_id=f.client.awaitingPayment.noticeMessageId;
@@ -435,7 +437,7 @@ test('card has no return button and refreshes only after twelve hours of activit
  const f=fixture();await f.setup();await f.handle(f.pm());
  const headerId=f.client.headerMessageId;
  const header=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(header.body.reply_markup.inline_keyboard.length,5);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
+ assert.equal(header.body.reply_markup.inline_keyboard.length,6);assert.equal(header.body.reply_markup.inline_keyboard[0][0].text,'✉️ Открыть профиль');assert.equal(header.body.reply_markup.inline_keyboard[0][0].url,'tg://user?id='+LEAD);
  const key='poker_app:telegram:support:v1:client:'+GROUP+':'+LEAD;
  f.store.set(key,JSON.stringify({...f.client,cardUpdatedAt:Date.now()-11*60*60*1000}));
  await f.handle(f.pm('До срока',60));
@@ -452,7 +454,7 @@ test('profile privacy restriction does not prevent creation of the player card',
  const f=fixture();await f.setup();f.fail('sendMessage',400,'Bad Request: BUTTON_USER_PRIVACY_RESTRICTED',true);
  await f.handle(f.pm());assert.equal(f.client.headerSent,true);
  const attempts=f.calls.filter(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
- assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,5);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,4);
+ assert.equal(attempts.length,2);assert.equal(attempts[0].body.reply_markup.inline_keyboard.length,6);assert.equal(attempts[1].body.reply_markup.inline_keyboard.length,5);
 });
 test('manager notes append to the saved header once, preserve authors and do not refresh stats or contact lead',async()=>{
  const f=fixture();await f.setup();await f.handle(f.pm());
@@ -599,12 +601,12 @@ test('xpoker button rejects a forged player card',async()=>{
  await f.handle(f.callback('support:xpoker'));assert.equal(f.client.xpokerLink,undefined);
 });
 
-test('linked X-Poker hides the link button; unlinked player retains it',async()=>{
+test('X-Poker button offers to edit a linked ID or link an account',async()=>{
  for(const ids of [[],['2335996']]){
   const f=fixture({xpokerIds:ids});await f.setup();await f.handle(f.pm());
   const card=f.calls.find(c=>c.method==='sendMessage'&&c.body.text?.includes('Рейк:'));
   const buttons=card.body.reply_markup.inline_keyboard.flat();
-  assert.equal(buttons.some(b=>b.callback_data==='support:xpoker'),ids.length===0);
+  assert.match(buttons.find(b=>b.callback_data==='support:xpoker').text,ids.length?/Изменить/:/Привязать/);
   assert.ok(buttons.some(b=>b.callback_data==='support:resolve'));
  }
 });

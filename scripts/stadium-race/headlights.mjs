@@ -4,8 +4,9 @@ import * as T from '../../vendor/three/three.module.min.js';
 export function createHeadlights(scene){
  const lens=new T.SphereGeometry(1,10,6);
  const lampGlass=new T.MeshBasicMaterial({color:'#ecf6ff',toneMapped:false});
+ const beamIntensity=240;
  const lamps=[-1,1].map(side=>{
-  const light=new T.SpotLight('#ecf4ff',850,32,.40,.78,2);
+  const light=new T.SpotLight('#ecf4ff',beamIntensity,38,.49,.96,2);
   light.castShadow=false;scene.add(light,light.target);
   return {light,side};
  });
@@ -41,7 +42,7 @@ export function createHeadlights(scene){
   update(p,heading,enabled,pitch=0){
    const a=p.a-heading,sin=Math.sin(a),cos=Math.cos(a);
    for(const {light,side}of lamps){
-    light.intensity=enabled?850:0;
+    light.intensity=enabled?beamIntensity:0;
     light.position.set(p.x+sin*2.25+cos*side*.67,p.y+.65,p.z+cos*2.25-sin*side*.67);
     light.target.position.set(p.x+sin*13+cos*side*1.2,p.y-.24-Math.sin(pitch)*11,p.z+cos*13-sin*side*1.2);
    }

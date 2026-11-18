@@ -146,7 +146,7 @@
     var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 12000);
     var opts = {cache:"no-store", signal:controller.signal};
     if (body) { opts.method = "POST"; opts.headers = {"Content-Type":"application/json"}; opts.body = JSON.stringify(pokerApiAuthJsonBody(body)); }
-    else path += pokerApiAuthQuery("?") + (path === "raffles" ? "&scope=active" : "");
+    else path += pokerApiAuthQuery("?") + (path === "raffles" ? "&scope=active" : path === "user/bonus-balance" ? "&balanceOnly=1" : "");
     var apiBase = typeof getApiBase === "function" ? getApiBase() : "";
     return fetch(apiBase + "/api/" + path, opts).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function (d) { if (d.ok === false) throw new Error(d.error || "API"); return d; }).finally(function () { clearTimeout(timeout); });
   }

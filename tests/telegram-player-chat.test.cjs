@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const chat=require('../lib/telegram-player-chat'),{orderedCommands}=require('../scripts/set-telegram-private-deposit-command.cjs');
 test('menu starts in the requested order and preserves remaining commands',()=>{
  const existing=[{command:'stats',description:'Моя статистика'},{command:'dep',description:'old'},{command:'tables',description:'Столы сейчас'},{command:'schedule',description:'old'}];
- const result=orderedCommands(existing);assert.deepEqual(result.slice(0,7).map(c=>c.command),['dep','chat','create_game','withdrawals','schedule','spin','bonus_balance']);assert.deepEqual(result.slice(7),[existing[0],existing[2]]);
+ const result=orderedCommands(existing);assert.deepEqual(result.slice(0,10).map(c=>c.command),['dep','rating','chat','download','rakeback','create_game','withdrawals','schedule','spin','bonus_balance']);assert.deepEqual(result.slice(10),[existing[0],existing[2]]);
 });
 test('chat commands accept the sender private chat only',()=>{
  for(const text of ['/чат','/chat','/chat@Poker_dvatuza_bot']){

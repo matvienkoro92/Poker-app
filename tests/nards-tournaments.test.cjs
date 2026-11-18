@@ -253,7 +253,7 @@ test('both players must skip the same round break before the room starts early',
   assert.equal(f.roomMap.get(final.roomId).tournament.active, true);
 });
 
-test('chat gets registration, half-full, start, live final and winner notices once', async () => {
+test('chat gets registration, half-full, start and winner notices once', async () => {
   const sent = [];
   const f = fixture({ notify: async payload => sent.push(payload) });
   const t = await f.create({ capacity: 2, roundTargets: [2], prizeKind: 'tickets', prizeAmounts: [1000, 500] });
@@ -271,16 +271,14 @@ test('chat gets registration, half-full, start, live final and winner notices on
   await startFirstRound(f, t);
   await f.call('m1', 'get', t.id);
   const room = drawn.rounds[0].matches[0].roomId;
-  assert.equal(sent.length, 4);
+  assert.equal(sent.length, 3);
   assert.match(sent[2].text, /Старт[\s\S]*1\. Игрок 1\n2\. Игрок 2/);
-  assert.match(sent[3].text, /Начался финал/);
-  assert.ok(sent[3].reply_markup.inline_keyboard[0][0].url.endsWith('board_watch_' + room));
   await f.finish(room, 0, 2);
   const result = await f.call('m1', 'get', t.id);
   await f.service.sweep();
-  assert.equal(sent.length, 5);
-  assert.ok(sent[4].text.includes('Победитель: ' + result.entries.find(entry => entry.id === result.winnerId).name));
-  assert.match(sent[4].text, /билет на покер номиналом 1\s000 ₽/);
+  assert.equal(sent.length, 4);
+  assert.ok(sent[3].text.includes('Победитель: ' + result.entries.find(entry => entry.id === result.winnerId).name));
+  assert.match(sent[3].text, /билет на покер номиналом 1\s000 ₽/);
 });
 
 test('start reminds only registered players; ready pairs start early and others start at the deadline', async () => {

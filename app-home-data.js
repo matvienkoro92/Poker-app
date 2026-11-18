@@ -5,6 +5,31 @@
     sessionStorage.removeItem("poker_home_friend_news_remote_v1:public-levels");
     sessionStorage.removeItem("poker_hall_fish_level_rows_v2");
   } catch (error) {}
+  var directoryRequests = new Map();
+  window.pokerLoadPublicLevelRows = function (base, maxAge) {
+    var url = String(base || "").replace(/\/$/, "") + "/api/player-crm?publicLevels=1&avatarFormat=url";
+    var key = "poker_public_level_rows_v1:" + url;
+    if (directoryRequests.has(url)) return directoryRequests.get(url);
+    try {
+      if (maxAge > 0) {
+        var saved = JSON.parse(localStorage.getItem(key));
+        var age = saved && Date.now() - saved.at;
+        if (saved && age >= 0 && age < maxAge && Array.isArray(saved.data.levelRows)) return Promise.resolve(saved.data);
+      }
+    } catch (_) {}
+    var options = { cache: maxAge > 0 ? "default" : "no-store" };
+    var response = typeof pokerFetchWithTimeout === "function" ? pokerFetchWithTimeout(url, options, 9000) : fetch(url, options);
+    var request = response.then(function (res) {
+      if (!res.ok) throw new Error("public_levels_http_" + res.status);
+      return res.json();
+    }).then(function (data) {
+      if (!data || !data.ok || !Array.isArray(data.levelRows)) throw new Error("public_levels_invalid");
+      try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), data: data })); } catch (_) {}
+      return data;
+    }).finally(function () { directoryRequests.delete(url); });
+    directoryRequests.set(url, request);
+    return request;
+  };
   var pending = null, value = null, updatedAt = 0, generation = 0;
   window.pokerInvalidateTournamentBetHome = function () {
     generation += 1;

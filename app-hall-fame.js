@@ -702,9 +702,7 @@ function hallFishFetchRows() {
   if (hallFishRatingRowsPromise) return hallFishRatingRowsPromise;
   var base = hallFishGetApiBase();
   if (!base) return Promise.reject(new Error("no-api-base"));
-  var q = "?publicLevels=1&avatarFormat=url";
-  hallFishRatingRowsPromise = hallFishFetch(base + "/api/player-crm" + q, { cache: "default" })
-    .then(function (r) { return r.json(); })
+  hallFishRatingRowsPromise = window.pokerLoadPublicLevelRows(base, 60000)
     .then(function (data) {
       if (!data || !data.ok) throw new Error((data && data.error) || "bad-response");
       hallFishRatingRowsCache = hallFishRowsFromCrmData(data);

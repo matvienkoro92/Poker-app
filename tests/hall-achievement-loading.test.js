@@ -51,10 +51,12 @@ test('tournament tops load only displayed categories and late games respect the 
 test('public player list uses a stable URL and HTTP caching', async () => {
   let request;
   const c = { hallFishAchievementRowsCache:null, hallFishRatingRowsPromise: null, hallFishGetApiBase: () => 'https://example.test',
-    hallFishFetch: (url, init) => { request = { url, init }; return Promise.resolve({ json: () => ({ ok: true }) }); },
+    hallFishFetch: (url, init) => { request = { url, init }; return Promise.resolve({ ok: true, json: () => ({ ok: true, levelRows: [] }) }); },
     hallFishRowsFromCrmData: () => [], hallFishWriteRowsSessionCache() {} };
   vm.createContext(c);
   vm.runInContext(source.slice(source.indexOf('function hallFishFetchRows()'), source.indexOf('function hallFishEnsureModal()')), c);
+  c.window = {}; c.fetch = c.hallFishFetch;
+  vm.runInContext(fs.readFileSync(require.resolve("../app-home-data.js"), "utf8"), c);
   await c.hallFishFetchRows();
   assert.equal(request.url, 'https://example.test/api/player-crm?publicLevels=1&avatarFormat=url');
   assert.equal(request.init.cache, 'default');
@@ -66,6 +68,29 @@ test('background player refresh cannot orphan pending game achievements and leav
  vm.runInContext(source.slice(source.indexOf('function hallFishRefreshVisibleRows('),source.indexOf('function hallFishFetchRows(')),c);
  c.hallFishGetApiBase=()=> 'https://example.test';c.hallFishFetch=()=>Promise.resolve({json:()=>Promise.resolve({ok:true})});c.hallFishRowsFromCrmData=()=>[{nick:'Fresh player'}];c.hallFishWriteRowsSessionCache=()=>{};c.hallFishRatingRowsPromise=null;
  vm.runInContext(source.slice(source.indexOf('function hallFishFetchRows('),source.indexOf('function hallFishEnsureModal(')),c);
+ c.window={pokerLoadPublicLevelRows:()=>Promise.resolve({ok:true,levelRows:[]})};
  const data=await c.hallFishLoadAchievementRows();await c.hallFishFetchRows();assert.equal(c.hallFishAchievementRowsCache,data);c.hallFishRefreshVisibleRows([{nick:'Fresh player'}]);assert.equal(c.hallFishAchievementRowsCache,data);assert.equal(data.king[0].nick,'Fresh player');
  nards.resolve({nardsKing:[{nick:'Nards winner'}]});billiards.resolve({goldenBall:[]});await new Promise(r=>setImmediate(r));assert.equal(data.pendingExtras,false);assert.equal(paints.at(-1).pending,false);assert.equal(paints.at(-1).nards[0].nick,'Nards winner');
+});
+
+test('directory readers share requests, reuse a fresh public response on reopen and retry errors', async () => {
+  const storage = new Map();
+  let calls = 0, fail = false;
+  function boot() {
+    const c = {window: {}, localStorage: {getItem: k => storage.get(k), setItem: (k,v) => storage.set(k,v)},
+      fetch: async () => { calls++; return {ok: !fail, json: async () => ({ok:true, levelRows:[]})}; }};
+    vm.runInNewContext(fs.readFileSync(require.resolve('../app-home-data.js'), 'utf8'), c);
+    return c.window.pokerLoadPublicLevelRows;
+  }
+  const load = boot();
+  await Promise.all([load('/club', 60000), load('/club/', 300000)]);
+  assert.equal(calls, 1);
+  await boot()('/club', 60000);
+  assert.equal(calls, 1);
+  fail = true;
+  await assert.rejects(load('/other', 60000));
+  fail = false;
+  await load('/other', 60000);
+  await load('/club', 0);
+  assert.equal(calls, 4);
 });

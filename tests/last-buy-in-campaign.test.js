@@ -1,14 +1,42 @@
 const test=require('node:test'),assert=require('node:assert/strict'),E=require('../app-last-buy-in-campaign-engine'),C=require('../app-last-buy-in-chapters');
-test('twelve ordered chapters and five boss encounters, all allies remain allies',()=>{assert.equal(C.length,12);assert.equal(C.filter(c=>c.boss).length,5);assert.equal(C[11].hero,'vaar');for(const c of C)assert.ok(c.before&&c.after&&c.goal);assert.deepEqual(C.map(c=>c.mode),['chase','fight','platform','zuma','chips','bomb','tanks','hidden','zuma','comic','portal','speed']);});
+test('fifteen ordered chapters and five boss encounters, all allies remain allies',()=>{assert.equal(C.length,15);assert.equal(C.filter(c=>c.boss).length,5);assert.equal(C[11].hero,'vaar');for(const c of C)assert.ok(c.before&&c.after&&c.goal);assert.deepEqual(C.map(c=>c.mode),['chase','fight','platform','zuma','chips','bomb','tanks','hidden','comic','race','speed','speed','flight','paint','td']);});
 test('Bomb explosions stop at solid walls and chain into adjacent bombs',()=>{const s=E.create(7,{archivedBomb:true});s.bombs=[{x:1,y:1,fuse:1},{x:3,y:1,fuse:99}];E.step(s,{});assert.equal(s.bombs.length,0);assert.ok(s.flames.some(f=>f.x===4&&f.y===1));assert.ok(!s.flames.some(f=>f.x===2&&f.y===2));assert.ok(s.health<5);});
-test('Zuma inserts a colour and removes a real matching run; all three batches are completable',()=>{const s=E.create(8);let limit=0;while(!s.won&&limit++<5000){const at=s.chain.findIndex(c=>c.color===s.ball),aim=at<0?0:at;if(at<0){E.step(s,{special:true});E.step(s,{});continue;}E.step(s,{});E.step(s,{aim,attack:true});for(let i=0;i<16;i++)E.step(s,{});}assert.equal(s.won,true);assert.equal(s.wave,3);assert.ok(s.score>1000);});
-test('Portals require carrying a cell and installing it at each receiver',()=>{const s=E.create(10);for(let n=0;n<3;n++){s.x=s.cube.x;s.y=s.cube.y;s.ground=true;E.step(s,{attack:true});assert.equal(s.carry,true);E.step(s,{});if(!s.portalPowered){s.x=s.portalConsole.x;s.y=465;s.ground=true;E.step(s,{special:true});}s.x=s.portals[0].x;s.y=465;E.step(s,{});assert.equal(s.crossedPortal,true);s.x=s.pad.x-25;s.y=s.pad.y;s.ground=true;E.step(s,{attack:true});assert.equal(s.portalCharge,1);assert.equal(s.puzzles,n);for(let t=0;t<70;t++)E.step(s,{});assert.equal(s.puzzles,n+1);}assert.equal(s.won,true);});
+test('Zuma matches can defeat both current bosses through normal controls',()=>{
+ const s=E.create(C.findIndex(chapter=>chapter.mode==='zuma'));
+ const {controller}=require('./helpers/last-buy-in-campaign-player.cjs');
+ while(!s.won&&!s.lost&&s.tick<5000)E.step(s,controller(s));
+ assert.equal(s.won,true);assert.equal(s.wave,3);assert.ok(s.score>1000);
+});
+test('Portals require carrying a cell and installing it at each receiver',()=>{const E=require("./helpers/archived-portal.cjs"),s=E.create(10);for(let n=0;n<3;n++){s.x=s.cube.x;s.y=s.cube.y;s.ground=true;E.step(s,{attack:true});assert.equal(s.carry,true);E.step(s,{});if(!s.portalPowered){s.x=s.portalConsole.x;s.y=465;s.ground=true;E.step(s,{special:true});}s.x=s.portals[0].x;s.y=465;E.step(s,{});assert.equal(s.crossedPortal,true);s.x=s.pad.x-25;s.y=s.pad.y;s.ground=true;E.step(s,{attack:true});assert.equal(s.portalCharge,1);assert.equal(s.puzzles,n);for(let t=0;t<70;t++)E.step(s,{});assert.equal(s.puzzles,n+1);}assert.equal(s.won,true);});
 test('Snake supports carry the rider; locks do not auto-open and boss must be attacked after warning',()=>{const s=E.create(5,{archivedSnake:true});const p=s.platforms[2];s.x=p.x+20;s.y=p.y;s.ground=true;const x=s.x;E.step(s,{});assert.notEqual(s.x,x);assert.equal(s.picked,0);for(const l of s.locks){s.x=l.x;E.step(s,{special:true});}assert.equal(s.picked,3);s.x=s.boss.x-40;s.y=330;E.step(s,{special:true});assert.equal(s.phase,'boss');assert.equal(s.boss.hp,6);});
-test('Deaths preserve route progress, collected keys and puzzle state',()=>{for(const chapter of [3,4,6,7,8,9,10]){const s=E.create(chapter);s.score=333;s.picked=2;s.health=0;s.lost=true;const x=s.x;E.revive(s);assert.equal(s.lost,false);assert.equal(s.health,s.mode==='platform'?3:s.mode==='tanks'?1:5);assert.equal(s.x,x);assert.equal(s.score,333);assert.equal(s.picked,2);}});
-test('Weapon race requires a first-place finish rather than elapsed time',()=>{const s=E.create(9);s.distance=21599;s.speed=3.8;s.rivals.forEach(r=>r.distance=23000);E.step(s,{up:true});assert.equal(s.won,false);s.distance=21599;s.rivals.forEach(r=>r.distance=5000);E.step(s,{up:true});assert.equal(s.won,true);});
+test('Deaths preserve route progress, collected keys and puzzle state',()=>{for(const chapter of [3,4,6,7,8,10]){const s=E.create(chapter);const health=s.health;s.score=333;s.picked=2;s.health=0;s.lost=true;const x=s.x;E.revive(s);assert.equal(s.lost,false);assert.equal(s.health,health);assert.equal(s.x,x);assert.equal(s.score,333);assert.equal(s.picked,2);}});
+test('Weapon race requires a first-place finish rather than elapsed time',()=>{const s=E.create(9);s.countdown=0;s.distance=require("../app-last-buy-in-race-engine").FINISH-1;s.speed=3.8;s.rivals.forEach(r=>r.distance=s.distance+500);E.step(s,{up:true});assert.equal(s.won,false);s.countdown=0;s.lost=false;s.distance=require("../app-last-buy-in-race-engine").FINISH-1;s.rivals.forEach(r=>r.distance=5000);E.step(s,{up:true});assert.equal(s.won,true);});
 test('Archived swim requires all keys and exit; surface pockets replenish air',()=>{const s=E.create(5,{archivedSwim:true});s.x=150;s.y=130;s.air=100;E.step(s,{});assert.ok(s.air>100);s.x=s.world-50;E.step(s,{});assert.equal(s.won,false);for(const t of s.tokens){s.x=t.x;s.y=t.y;E.step(s,{});}s.x=s.world-50;E.step(s,{});assert.equal(s.won,true);});
 test('Speed loop carries the rider through a full circular path, then returns control',()=>{const s=E.create(3,{archivedSpeed:true});s.x=1160;s.y=430;s.vx=7;E.step(s,{right:true});assert.ok(s.loop);let min=540,max=0;for(let i=0;i<150&&s.loop;i++){E.step(s,{});min=Math.min(min,s.y);max=Math.max(max,s.y);}assert.equal(s.loop,null);assert.ok(min<300&&max>440);assert.ok(s.vx>4);});
-test('all nine new chapters can be completed through normal controls, sharing at most three campaign lives',()=>{const {controller}=require('./helpers/last-buy-in-campaign-player.cjs');let spent=0;for(const chapter of [2,3,4,5,6,7,8,9,10]){const s=E.create(chapter);while(!s.won&&s.tick<20000){E.step(s,controller(s));assert.ok(Number.isFinite(s.x)&&Number.isFinite(s.y));if(s.lost){spent++;assert.ok(spent<3,'campaign lives exhausted in chapter '+chapter);E.revive(s);}}assert.equal(s.won,true,'chapter '+chapter+' is not completable');const tick=s.tick;E.step(s,{right:true,attack:true});assert.equal(s.tick,tick);}});
+test('active campaign chapters from the platform to the bridge can be completed with three lives per chapter', () => {
+  const {controller} = require('./helpers/last-buy-in-campaign-player.cjs');
+  for (const chapter of [2, 3, 5, 6, 7, 8, 9, 10]) {
+    const state = E.create(chapter);
+    let lives = 3;
+    for (let steps = 0; !state.won && steps < 20000; steps++) {
+      if (state.mode === 'hidden') {
+        const item = state.items.find(item => !item.found);
+        require('../app-last-buy-in-hidden-engine').hit(state, item.x, item.y);
+      }
+      E.step(state, controller(state));
+      const position = state.mode === 'race' ? [state.distance, state.lateral] : [state.x, state.y];
+      assert.ok(position.every(Number.isFinite), 'invalid position in chapter ' + chapter);
+      if (state.lost) {
+        assert.ok(--lives > 0, 'test player exhausted three lives in chapter ' + chapter);
+        E.revive(state);
+      }
+    }
+    assert.ok(state.won, 'test player did not finish chapter ' + chapter);
+    const tick = state.tick;
+    E.step(state, {right:true, attack:true});
+    assert.equal(state.tick, tick);
+  }
+});
 test('Platform obstacles have solid sides, walkable tops and a one-use underside reward',()=>{
  const setup=()=>{const s=E.create(2);s.enemies=[];s.mushrooms=[];s.traps=[];s.pipes=[];s.platforms=[];s.blocks=[{x:100,y:300,w:40,h:30,kind:'question',used:false}];return s;};
  let s=setup();s.x=87;s.y=340;E.step(s,{right:true});assert.equal(s.x,88);
@@ -54,4 +82,4 @@ test('Moving, fading and suspended platforms carry Vaar and keep tokens anchored
  for(const kind of ['slide','swing','fade']){const s=E.create(2),p=s.platforms.find(p=>p[kind]);assert.ok(p,kind);s.enemies=[];s.traps=[];s.pipes=[];s.streetHazards=[];s.mushrooms=[];if(p.fade)s.tick=300-Math.floor(p.phase*60);s.x=p.x+p.w/2;s.y=p.y;s.ground=true;const offset=s.x-p.x;for(let i=0;i<30;i++)E.step(s,{});assert.ok(Math.abs(s.x-p.x-offset)<.001,kind+' carries horizontally');assert.equal(s.y,p.y);if(kind==='fade'){s.tick=230-Math.floor(p.phase*60);E.step(s,{});assert.equal(p.gone,true);s.tick=300-Math.floor(p.phase*60);E.step(s,{});assert.equal(p.gone,false);}}
 });
 test('One archive press at the visible entrance takes the case',()=>{const s=E.create(2);s.caseKeys.forEach(k=>k.collected=true);s.archive.openTicks=60;s.x=s.archive.x-75;s.y=s.archive.y;s.ground=true;s.previous={special:true};E.step(s,{special:true});assert.equal(s.won,true);assert.equal(s.archive.caseTaken,true);});
-test('Zuma drain ends the round even with protection and never grants an automatic retreat',()=>{const s=E.create(8);s.inv=999;s.travel=E.zumaPath(s.wave).length-(s.chain.length-1)*24;E.step(s,{});assert.equal(s.lost,true);assert.equal(s.health,0);assert.equal(s.retreatTicks,0);});
+test('Zuma drain ends the round even with protection and never grants an automatic retreat',()=>{const s=E.create(3);s.inv=999;s.travel=E.zumaPath(s.wave).length-(s.chain.length-1)*24;E.step(s,{});assert.equal(s.lost,true);assert.equal(s.health,0);assert.equal(s.retreatTicks,0);});

@@ -133,7 +133,9 @@
       "app-tournament-share.js",
       "app-tournament-bet.js",
       "app-hall-fame.js",
-      "app-club-honors.js"
+      "app-club-honors.js",
+      "app-tournament-history-data.js",
+      "app-tournament-history.js"
     ],
     "profile": [
       "app-profile-hero.js",
@@ -151,7 +153,16 @@
       "app-hall-card-pick.js",
       "app-hall-table.js",
       "app-garage-radio.js",
-      "app-player-hall.js"
+      "app-player-hall.js",
+      "app-hall-trophies.js",
+      "app-lounge-live.js",
+      "app-player-hall-equipment.js",
+      "app-player-lounge.js",
+      "app-villa-darts-menu.js",
+      "app-villa-darts-online.js",
+      "app-villa-darts.js",
+      "app-villa-entry.js",
+      "app.js"
     ],
     "push": [
       "app-push.js",
@@ -162,7 +173,10 @@
       "broadcasts",
       "reports",
       "tracking",
-      "auth-debug"
+      "auth-debug",
+      "app-admin-deposits-parser.js",
+      "app-admin-deposits.js",
+      "app-admin-game-stats.js"
     ],
     "adminModules": {
       "visitors": [
@@ -220,7 +234,12 @@
       "app-club-reviews.js",
       "hero-catalog.js",
       "app-hero-builder.js",
-      "app-profile-appearance.js"
+      "app-profile-appearance.js",
+      "app-friend-affinity.js",
+      "app-home-daily-poker.js",
+      "app-home-jackpot-guide.js",
+      "app-play-flow.js",
+      "app-table-alert-settings.js"
     ],
     "media": [
       "app-streams.js",
@@ -282,7 +301,68 @@
       "app-cooler-flight.js"
     ],
     "billiards": [
-      "app-billiards.js"
+      "app-billiards.js",
+      "app-billiards-access.js",
+      "app-billiards-cues.js",
+      "app-billiards-equipment-sync.js",
+      "app-billiards-overlay.js",
+      "app-billiards-replay-worker.js",
+      "app-billiards-tables.js"
+    ],
+    "garage": [
+      "app-bicycle-catalog.js",
+      "app-bicycle-workshop.js",
+      "app-city-access.js",
+      "app-city-game.js",
+      "app-city-launch.js",
+      "app-garage-3d.js",
+      "app-garage-catalog.js",
+      "app-garage-showcase.js",
+      "app-garage-workshop.js",
+      "app-scooter-catalog.js"
+    ],
+    "boardGames": [
+      "app-board-games-worker.js",
+      "app-board-games.js",
+      "app-game-participation.js",
+      "app-game-touch-guard.js",
+      "app-game-viewport.js",
+      "app-living-board-preview.js",
+      "app-nards-tournaments.js"
+    ],
+    "lastBuyIn": [
+      "app-last-buy-in-campaign-engine.js",
+      "app-last-buy-in-campaign-game.js",
+      "app-last-buy-in-chapters.js",
+      "app-last-buy-in-comic-engine.js",
+      "app-last-buy-in-comic-game.js",
+      "app-last-buy-in-engine.js",
+      "app-last-buy-in-game.js",
+      "app-last-buy-in-gucci-engine.js",
+      "app-last-buy-in-gucci-game.js",
+      "app-last-buy-in-hidden-engine.js",
+      "app-last-buy-in-hidden-game.js",
+      "app-last-buy-in-lunapark.js",
+      "app-last-buy-in-park-art.js",
+      "app-last-buy-in-park-engine.js",
+      "app-last-buy-in-park-game.js",
+      "app-last-buy-in-poker-engine.js",
+      "app-last-buy-in-race-3d.js",
+      "app-last-buy-in-race-engine.js",
+      "app-last-buy-in-story.js",
+      "app-last-buy-in-tanks-engine.js",
+      "app-last-buy-in-td-data.js",
+      "app-last-buy-in-td-engine.js",
+      "app-last-buy-in-td-game.js",
+      "app-last-buy-in-victory-scenes.js"
+    ],
+    "tracking": [
+      "app-link-stats.js"
+    ],
+    "monkeyRace": [
+      "app-monkey-race-campaign.js",
+      "app-monkey-race-engine.js",
+      "app-monkey-race.js"
     ]
   }
 }

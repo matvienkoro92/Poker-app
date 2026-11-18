@@ -8,6 +8,7 @@ test('pending subscription input is handled before manager mirroring and trackin
   '../telegram-player-deposit':{handle:async()=>{calls.push('deposit');releaseTimer();return false;}},
   '../club-table-subscriptions':{handle:async update=>{calls.push('subscription:'+update.message.text);return true;}},
   '../telegram-support':{observeTimerActivity:async()=>timerPending,handle:async()=>{calls.push('support');return {handled:true};}},
+  '../telegram-exchange':{action:()=>false},
   '../tracking-link-milestones':{observeUpdate:async()=>calls.push('tracking')},
   '../telegram-club-commands':{command:()=>null}
  };

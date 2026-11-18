@@ -1,5 +1,44 @@
 # Robokassa notification ingress
 
+## Mandarin invoice callback
+
+URL: https://consult-payment-notify.vercel.app/api/mandarin-webhook
+
+The owner-approved links are `https://secure-app.mandarin.io/link/134987/new1`,
+`/new2` and `/new3`: charges 1,100 / 1,650 / 2,180 RUB for player credits
+1,000 / 1,500 / 2,000 RUB. Earlier Mandarin links must not be offered. See
+`lib/mandarin-payment-links.js` and `docs/mandarin-payments.md` in the parent repo.
+
+The relay forwards only the invoice ID to the main app, which independently
+checks invoice status through Mandarin with its link-scoped production API key.
+It preserves backend status codes and fails with 503 on transport errors.
+GET is rejected with 405. There are no secrets in the relay project.
+
+The address was initially published as an inactive placeholder on 2026-11-17;
+the invoice handler replaces that placeholder on 2026-11-18. Real payment delivery
+must be verified after deployment without inserting synthetic ledger payments.
+
+## ConexusPay / ButlerPay reserved callback
+
+URL: https://consult-payment-notify.vercel.app/api/conexuspay-webhook
+
+The address is reserved for onboarding. GET/HEAD report
+`awaiting_configuration`; POST returns 503 and never acknowledges or stores a
+payment. This is not an active integration. Before activation, implement raw-body
+RSA verification (`X-Payload-Signature`), expected `partnerCode` binding, strict
+`isTest` separation, durable atomic version checks and payment deduplication.
+Credentials and partner configuration are still required. No Telegram sending
+scenario is added by reserving this endpoint.
+
+Published 2026-11-17 as `dpl_4P9C3AcHXEY3WyRk8RMK6QsZ2ZEc` on the
+existing `consult-payment-notify` project. Public checks confirmed GET 200 with
+`acceptingPayments: false` and POST 503. Existing Prodamus GET and unsigned
+Robokassa POST still return 405 and 400 respectively.
+
+Provider reference: https://butlerpay.app/ru/docs/partner-api/webhooks
+
+## Existing payment relays
+
 Public Result URL: https://consult-payment-notify.vercel.app/api/robokassa-webhook
 
 Vercel project: `consult-payment-notify` (`prj_5B44OnBkpspGqEpLFKuc4KnfFUhx`),

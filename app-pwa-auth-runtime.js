@@ -108,12 +108,6 @@
     if (hintEl) hintEl.style.display = "block";
   }
 
-  function getVkAppIdForPwa() {
-    var el = document.getElementById("app");
-    var id = el && el.getAttribute("data-vk-app-id");
-    id = id != null ? String(id).trim() : "";
-    return /^\d+$/.test(id) ? id : "";
-  }
 
   function deliverVkOAuthCode(code, redirectUri) {
     var base = getTelegramAuthApiBase();
@@ -222,14 +216,6 @@
   }
 
   /** Опционально в #app: data-telegram-bot-id="123456789" — иначе id подтягивается с GET /api/telegram-bot-info */
-  function getTelegramBotIdFromAppAttr() {
-    var el = document.getElementById("app");
-    var raw = el && el.getAttribute("data-telegram-bot-id");
-    raw = raw != null ? String(raw).trim() : "";
-    if (!/^\d+$/.test(raw)) return 0;
-    var n = parseInt(raw, 10);
-    return n > 0 ? n : 0;
-  }
 
   function whenTelegramWidgetJsReady(cb) {
     if (typeof cb !== "function") return;
@@ -288,7 +274,7 @@
       });
       mount.appendChild(btn);
     }
-    var botIdAttr = getTelegramBotIdFromAppAttr();
+    var botIdAttr = pwaAuthModeRuntime.getTelegramBotIdFromAppAttr();
     if (botIdAttr > 0) {
       whenTelegramWidgetJsReady(function () {
         addBtn(botIdAttr);
@@ -334,7 +320,7 @@
 
   function mountVkLoginForPwa(mount) {
     if (!mount || isPwaAuthLocalHost()) return;
-    var appId = getVkAppIdForPwa();
+    var appId = pwaAuthModeRuntime.getVkAppIdForPwa();
     if (!appId) return;
     if (mount.querySelector(".auth-banner__vk-login-btn")) return;
     var btn = document.createElement("button");

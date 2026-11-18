@@ -20,7 +20,7 @@ function paymentFixture(){
   const poker={hasPokerPlusOperatorConfig:()=>true,getGroupMemberData:async()=>({groupId:'test-club',nickname:'Player'}),changeGroupMemberChips:async input=>{calls.push(input);return input;}};
   const apiAuth={setCors(){},parseBody:req=>req.body,authRequired:()=>({ok:true,memberId:'admin'})};
   const mod={exports:{}};
-  vm.runInNewContext(source,{module:mod,process:{env:{POKERPLUS_CHIPS_MAX_ABS:'1000',POKERPLUS_GROUP_ID:'test-club'}},console,require:name=>name==='../redis'?redis:name==='../pokerplus'?poker:name==='../api-auth'?apiAuth:name==='../pokerplus-transfer-limit'?require('../lib/pokerplus-transfer-limit'):require(name)});
+  vm.runInNewContext(source,{module:mod,process:{env:{POKERPLUS_CHIPS_MAX_ABS:'1000',POKERPLUS_GROUP_ID:'test-club'}},console,require:name=>name==='../cash-operation-guard'?{check:async()=>{}}:name==='../redis'?redis:name==='../pokerplus'?poker:name==='../api-auth'?apiAuth:name==='../pokerplus-transfer-limit'?require('../lib/pokerplus-transfer-limit'):require('node:module').createRequire(require.resolve('../lib/api-handlers/pokerplus-chips'))(name)});
   return{handler:mod.exports,calls};
 }
 test('video-table payout completes once and repeated checkmark replays without a second transfer',async()=>{

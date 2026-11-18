@@ -35,7 +35,7 @@ test('wishlist and gift drafts do not grant items and stay private',()=>{
 test('gift recipient is checked against server friendships before saving',async()=>{
  const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),filename=path.resolve('lib/profile-hero.js');let stored=null,friend=false;
  const redis=async commands=>commands.map(c=>{if(c[0]==='SISMEMBER')return friend?1:0;if(c[0]==='GET')return stored;if(c[0]==='HGET')return null;if(c[0]==='SMEMBERS')return [];if(c[0]==='EVAL'){stored=c[5];return 1;}throw Error(c[0]);});
- const ctx={module:{exports:{}},require:id=>id==='./club-social'?{redis}:require(require.resolve(id,{paths:[path.dirname(filename)]})),Date,console};vm.runInNewContext(fs.readFileSync(filename,'utf8'),ctx);const api=ctx.module.exports;
+ const ctx={module:{exports:{}},require:id=>id==='./admin-player-level'?{hasAccountMaxLevel:async()=>false}:id==='./hero-pilot-accounts.json'?{ID400800:'man'}:id==='./club-social'?{redis}:require(require.resolve(id,{paths:[path.dirname(filename)]})),Date,console};vm.runInNewContext(fs.readFileSync(filename,'utf8'),ctx);const api=ctx.module.exports;
  const body={action:'gift-draft',recipient:'ID403173',message:'Привет',version:0,requestId:'gift-test-request-0001'};
  await assert.rejects(api.updateHero('ID400800',body),/списке друзей/);assert.equal(stored,null);friend=true;const result=await api.updateHero('ID400800',body);assert.equal(result.shop.giftDraft.recipient,'ID403173');assert.equal(result.inventory.length,5);
 });

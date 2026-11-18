@@ -139,9 +139,10 @@ const baseFiles = [
   'deposit-quick-input.js',
   'app-garage-3d.js',
 ];
+const inactiveStylesheets = new Set(require("../css-manifest.json").inactiveStylesheets);
 const cssPartFiles = fs
   .readdirSync(root)
-  .filter((name) => /^styles-.+\.css$/.test(name))
+  .filter((name) => /^styles-.+\.css$/.test(name) && !inactiveStylesheets.has(name))
   .sort();
 const localModuleFiles = fs
   .readdirSync(root)
@@ -283,7 +284,14 @@ function copyReferencedAssets() {
     if (fs.existsSync(path.join(__dirname, '..', 'assets', thumb))) refs.add(thumb);
   }
   // Carved boards and checker URLs are built from validated catalogue IDs.
-  addWardrobeAssets('board-games/nards');
+  const nards = require('../lib/nards-equipment');
+  const { NARDS_RAILS } = require('../lib/nards-rails');
+  const assetPrefix = './assets/board-games/nards/';
+  for (const item of [...nards.NARDS_BOARDS, ...nards.NARDS_INTERIORS, ...nards.LUXURY_CHECKERS, ...nards.DESIGN_CHECKERS, ...nards.NARDS_DICE, ...NARDS_RAILS]) {
+    for (const value of Object.values(item)) {
+      if (typeof value === 'string' && value.startsWith(assetPrefix)) refs.add(value.slice('./assets/'.length));
+    }
+  }
   addWardrobeAssets('board-games/previews');
   addWardrobeAssets('board-games/chess/sculpted-v2');
   const chessEquipment = require('../lib/chess-equipment');

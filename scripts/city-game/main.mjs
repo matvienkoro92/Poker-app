@@ -1,4 +1,4 @@
-import {shores,parks,lots,roads,landmarks,bounds} from './metropolis.mjs';
+import {mapPoint,shores,lagoon,parks,lots,roads,landmarks,lunaSite,metroNearest,missionSites} from './metropolis.mjs';
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {create,step,interact,rescue,subject,prompt,objective,checkpoint,notice} from './engine.mjs';
 import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,PORT,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,PENINSULA,roadRoute} from './world.mjs';
@@ -9,12 +9,12 @@ let garage=null,radioActive=false,renderLoop=null;
 function syncCityRadio(active){if(radioActive===active)return;radioActive=active;window.pokerSyncGarageRadio?.(active);}
 const $=id=>document.getElementById(id),SAVE='poker21-city:v1';
 let saved={};try{saved=JSON.parse(localStorage.getItem(SAVE)||'{}')||{};}catch(_){}
-let state=create(saved),view=null,started=false,paused=true,disposed=false,last=0,acc=0,savePhase=state.phase,showedResult=false,quality='standard',soundEnabled=saved.sound===true,elapsedFrame=0;
+let state=create(saved),view=null,started=false,paused=true,disposed=false,last=0,acc=0,savePhase=state.phase,showedResult=false,quality='standard',soundEnabled=saved.sound===true,lastMapTime=-Infinity;
 const keys=new Set(),stick={x:0,y:0,id:null},held={gas:false,brake:false},listeners=[];let cameraDrag=null,lastCameraDrag=-10,lastHealth=100;
 function on(target,event,fn,opts){target.addEventListener(event,fn,opts);listeners.push(()=>target.removeEventListener(event,fn,opts));}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify({...checkpoint(state),sound:soundEnabled,best:saved.best||null}));}catch(_){}}
 function clearInput(){keys.clear();held.gas=held.brake=false;stick.x=stick.y=0;stick.id=null;cameraDrag=null;$('cityStick').querySelector('i').style.transform='translate(-50%,-50%)';}
-function freeze(){paused=true;syncCityRadio(false);clearInput();audio.silence();last=0;acc=0;}
+function freeze(){previousCar=null;paused=true;syncCityRadio(false);clearInput();audio.silence();last=0;acc=0;}
 function resume(){if(!started||state.failed||document.hidden)return;paused=false;last=0;acc=0;renderLoop?.request();}
 function pause(){if(awardInspector.isOpen||!started||$('cityPauseDialog').open||$('cityResult').open||$('cityMapDialog').open)return;freeze();$('cityPauseDialog').showModal();}
 function reset(){state=create({completed:state.completed});savePhase=state.phase;showedResult=false;save();$('cityResult').close();$('cityPauseDialog').close();document.body.classList.remove('city-failed');view.orbit.yaw=0;view.orbit.pitch=.24;resume();updateUI();}
@@ -60,9 +60,9 @@ on(window,'pagehide',()=>{save();dispose();});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 function input(){const f=(keys.has('KeyW')||keys.has('ArrowUp')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-stick.y,r=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0)+stick.x;const forward=Math.max(-1,Math.min(1,f+(state.driving&&held.gas?1:0))),turn=Math.max(-1,Math.min(1,r));state.steer=turn;const yaw=view.orbit.yaw;return {forward,turn,brake:held.brake||keys.has('Space'),x:Math.sin(yaw)*forward-Math.cos(yaw)*turn,z:Math.cos(yaw)*forward+Math.sin(yaw)*turn,run:held.gas||keys.has('ShiftLeft')||keys.has('ShiftRight')};}
 let lastUI='';
-function navigationObjective(){return destination?{title:destination.name,detail:'Маршрут на карте · можно сменить пункт назначения',target:destination}:objective(state);}
+function navigationObjective(){return destination?{title:destination.title||destination.name,detail:destination.approach?'Подъезд · '+destination.name:'Маршрут на карте · можно сменить пункт назначения',target:destination.approach||destination}:objective(state);}
 function updateUI(){const o=navigationObjective(),p=subject(state),d=o.target?Math.round(Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,key=[o.title,o.detail,d,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
- $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ОСТРОВ TWO ACES / ЛУНОПАРК':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ВОСТОЧНЫЙ ПОРТ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=o.target?'◆ '+d+' м до цели':'';$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
+ $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ПРИЧАЛ / ОСТРОВ ВИЛЛЫ':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ПРИЧАЛ ВИЛЛЫ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=o.target?'◆ '+d+' м до цели':'';$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
  const radio=$('cityRadio');radio.classList.toggle('is-hidden',state.noticeTime<=0);radio.querySelector('p').textContent=state.notice;radio.style.bottom=state.driving?'350px':'';
  const info=document.querySelector('.city-drive-info');info.hidden=!state.driving;$('citySpeed').textContent=Math.round(Math.abs(state.car.speed)*3.6);$('cityCondition').style.width=state.health+'%';$('cityCondition').style.background=state.health<35?'#ed9a74':'#d3d9ad';$('cityConditionText').textContent='КУЗОВ '+Math.round(state.health)+'%';
  const actionText=awardInspector.near()?'Рассмотреть награду · E':prompt(state),actionButton=$('cityAction');actionButton.classList.toggle('is-ready',!!actionText);actionButton.disabled=!actionText||Math.abs(state.driving?state.car.speed:0)>2;actionButton.querySelector('span').textContent=actionText?(actionText.includes('награду')?'Осмотреть':actionText.includes('Магнитофон')?'Музыка':actionText.includes('Выйти')?'Выйти':actionText.includes('руль')?'В машину':actionText.includes('Ромой')?'Рома':actionText.includes('виллу')?'Домой':actionText.includes('Вернуть')?'Передать':actionText.includes('кейс')?'Кейс':'Действие'):'Действие';actionButton.setAttribute('aria-label',actionText||'Действие недоступно');$('cityGas').querySelector('span').textContent=state.driving?'Газ':'Бежать';$('cityBrake').hidden=!state.driving;
@@ -71,25 +71,61 @@ function updateUI(){const o=navigationObjective(),p=subject(state),d=o.target?Ma
 }
 let destination=null;
 const destinationSelect=$('cityDestination');
-for(const spot of [...landmarks,{...GATE,name:'ВИЛЛА'},{...HOME,name:'TWO ACES'},{...PICKUP,name:'ПОРТ'},{x:157,z:70,name:'ЛУНОПАРК'}]){
- const opt=document.createElement('option');opt.textContent=spot.name;opt.value=JSON.stringify(spot);destinationSelect.append(opt);
+function destinations(label,spots){
+ const group=document.createElement('optgroup');group.label=label;
+ for(const spot of spots){const opt=document.createElement('option');opt.textContent=spot.number?spot.number+'. '+spot.name:spot.name;opt.value=JSON.stringify(spot);group.append(opt);}
+ destinationSelect.append(group);
 }
+destinations('Миссии Poker21',missionSites);
+destinations('Город',[...landmarks,{...GATE,name:'ВИЛЛА'},{...HOME,name:'TWO ACES'},{...PICKUP,name:'ПОРТ'},{...lunaSite,approach:metroNearest(lunaSite)}]);
 on(destinationSelect,'change',()=>{destination=destinationSelect.value?JSON.parse(destinationSelect.value):null;drawMap($('cityFullMap'),true);});
-function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canvas.width,focus=subject(state),span=full?3920:370,k=size/span,cx=full?(bounds.minX+bounds.maxX)/2:focus.x,cz=full?(bounds.minZ+bounds.maxZ)/2:focus.z,X=x=>size/2+(x-cx)*k,Z=z=>size/2+(z-cz)*k;ctx.fillStyle='#153c43';ctx.fillRect(0,0,size,size);ctx.fillStyle='#6b8275';for(const rows of shores)for(const island of rows)ctx.fillRect(X(island.x-island.w/2),Z(island.z-island.d/2),island.w*k,island.d*k);
+const cityAtlas=new Image();
+cityAtlas.onload=()=>{if($('cityMapDialog').open)drawMap($('cityFullMap'),true);};
+cityAtlas.src='assets/last-buy-in/optimized/poker21-city-map-locations-v5.webp';
+function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canvas.width,focus=subject(state),span=full?3760:370,k=size/span,cx=full?mapPoint(320,320).x:focus.x,cz=full?mapPoint(320,320).z:focus.z,X=x=>size/2+(x-cx)*k,Z=z=>size/2+(z-cz)*k;ctx.fillStyle='#153c43';ctx.fillRect(0,0,size,size);ctx.fillStyle='#6b8275';const illustrated=full&&cityAtlas.complete&&cityAtlas.naturalWidth>0;
+ if(illustrated){const corner=mapPoint(0,0);ctx.drawImage(cityAtlas,X(corner.x),Z(corner.z),640*5.6*k,640*5.6*k);}
+ else for(const poly of shores){ctx.beginPath();poly.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();}
+ if(!illustrated){
+ ctx.fillStyle='#286171';ctx.beginPath();lagoon.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();
  ctx.fillStyle='#88935f';for(const park of parks)ctx.fillRect(X(park.x-park.w/2),Z(park.z-park.d/2),park.w*k,park.d*k);
  ctx.fillStyle='#9eaa9d';for(const lot of lots){if(!full&&(Math.abs(lot.x-cx)>220||Math.abs(lot.z-cz)>220))continue;ctx.fillRect(X(lot.minX),Z(lot.minZ),lot.w*k,lot.d*k);}
- ctx.fillStyle='#6b8275';ctx.strokeStyle='#ccc5aa';ctx.lineWidth=Math.max(1,15*k);ctx.beginPath();
+ }ctx.fillStyle='#6b8275';ctx.strokeStyle=illustrated?'rgba(245,225,175,.42)':'#ccc5aa';ctx.lineWidth=Math.max(1,15*k);ctx.beginPath();
  for(const {a,b} of roads){if(!full&&(Math.max(a.x,b.x)<cx-span/2||Math.min(a.x,b.x)>cx+span/2||Math.max(a.z,b.z)<cz-span/2||Math.min(a.z,b.z)>cz+span/2))continue;ctx.moveTo(X(a.x),Z(a.z));ctx.lineTo(X(b.x),Z(b.z));}ctx.stroke();
- ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(X(PENINSULA.x),Z(PENINSULA.z),PENINSULA.rx*k,PENINSULA.rz*k,0,0,Math.PI*2);ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.fillStyle='#c6b690';ctx.fillRect(X(110),Z(63),52*k,14*k);ctx.fillStyle='#b4aa8c';ctx.fillRect(X(152),Z(30),10*k,75*k);ctx.fillRect(X(40),Z(155),47*k,10*k);ctx.fillRect(X(34.5),Z(105),11*k,55*k);ctx.fillRect(X(34.5),Z(99.5),43*k,11*k);ctx.fillRect(X(66.5),Z(70),11*k,35*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(200),Z(34),9*k,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#819085';for(const x of ROAD_X)ctx.fillRect(X(x-7),Z(-110),14*k,201*k);for(const z of ROAD_Z)ctx.fillRect(X(-100),Z(z-7),197*k,14*k);ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[PORT,'#4d686c'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}
- const o=destination?{target:destination}:objective(state),p=subject(state);if(o.target){const route=roadRoute(p,o.target);ctx.strokeStyle='#ffda8d';ctx.lineWidth=full?3:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
+ if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(X(PENINSULA.x),Z(PENINSULA.z),PENINSULA.rx*k,PENINSULA.rz*k,0,0,Math.PI*2);ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.fillStyle='#c6b690';ctx.fillRect(X(110),Z(63),52*k,14*k);ctx.fillStyle='#b4aa8c';ctx.fillRect(X(152),Z(30),10*k,75*k);ctx.fillRect(X(40),Z(155),47*k,10*k);ctx.fillRect(X(34.5),Z(105),11*k,55*k);ctx.fillRect(X(34.5),Z(99.5),43*k,11*k);ctx.fillRect(X(66.5),Z(70),11*k,35*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(200),Z(34),9*k,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#819085';for(const x of ROAD_X)ctx.fillRect(X(x-7),Z(-110),14*k,201*k);for(const z of ROAD_Z)ctx.fillRect(X(-100),Z(z-7),197*k,14*k);ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[PORT,'#4d686c'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}}
+ const o=navigationObjective(),p=subject(state);if(o.target){const route=roadRoute(p,o.target);ctx.strokeStyle=full?'#102e39':'#ffda8d';ctx.lineWidth=full?6:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();if(full){ctx.lineWidth=3;ctx.strokeStyle='#ffda8d';ctx.stroke();}ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
  ctx.fillStyle='#364955';for(const vehicle of [...state.traffic,...state.metroTraffic]){ctx.save();ctx.translate(X(vehicle.x),Z(vehicle.z));ctx.rotate(-vehicle.yaw);ctx.fillRect(-Math.max(1,1.1*k),-2.3*k,Math.max(2,2.2*k),4.6*k);ctx.restore();}
  ctx.fillStyle='#a8e8d5';ctx.beginPath();ctx.arc(X(state.car.x),Z(state.car.z),full?5:3.5,0,Math.PI*2);ctx.fill();if(state.heat){ctx.fillStyle='#f79778';ctx.font='bold '+(full?20:13)+'px Arial';ctx.fillText('★',X(state.police.x)-5,Z(state.police.z)+5);}
  ctx.save();ctx.translate(X(p.x),Z(p.z));ctx.rotate(-p.yaw);ctx.fillStyle='#fff2cd';ctx.strokeStyle='#214348';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,full?9:6);ctx.lineTo(full?-6:-5,full?-6:-4);ctx.lineTo(full?6:5,full?-6:-4);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
- ctx.font='bold '+(full?15:10)+'px Arial';ctx.fillStyle='#eff0d7';ctx.textAlign='center';ctx.fillText('N ↑',size-20,17);if(full){for(const [t,x,z]of [...landmarks.map(p=>[p.name,p.x,p.z-42]),['ВИЛЛА И СТАРЫЙ ПОРТ',0,175],['ЛУНОПАРК',310,65]]){ctx.font='bold 13px Arial';ctx.strokeStyle='#17383c';ctx.lineWidth=3;ctx.strokeText(t,X(x),Z(z));ctx.fillStyle='#efe1bd';ctx.fillText(t,X(x),Z(z));}}}
-function tick(t){if(disposed||!view||document.hidden)return;const dt=last?Math.min(.05,(t-last)/1000):1/60;last=t;if(!paused){acc+=dt;while(acc>=1/60){step(state,input(),1/60);acc-=1/60;if(state.failed||state.win)break;}if(state.driving&&!cameraDrag&&state.time-lastCameraDrag>2){const diff=Math.atan2(Math.sin(state.car.yaw-view.orbit.yaw),Math.cos(state.car.yaw-view.orbit.yaw));view.orbit.yaw+=diff*(1-Math.exp(-dt*2));}}
- view.render(state,dt,navigationObjective(),!started);updateUI();if(elapsedFrame++%4===0)drawMap($('cityMinimap'));audio.update();syncCityRadio(!document.hidden&&(!!radioDialog?.open||(!paused&&!state.driving&&Math.hypot(state.player.x-GARAGE_RADIO.x,state.player.z-GARAGE_RADIO.z)<10)));if(lastHealth>state.health){document.body.classList.add('city-result-effect');setTimeout(()=>document.body.classList.remove('city-result-effect'),250);}lastHealth=state.health;}
+ ctx.font='bold '+(full?15:10)+'px Arial';ctx.fillStyle='#eff0d7';ctx.textAlign='center';ctx.fillText('N ↑',size-20,17);if(full){
+  ctx.textBaseline='middle';ctx.font='bold 13px Arial';
+  for(const site of missionSites){
+   const x=X(site.x),z=Z(site.z);ctx.fillStyle=destination?.number===site.number?'#ae5525':'#243b37';
+   ctx.strokeStyle='#f5d291';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,z,9,0,Math.PI*2);ctx.fill();ctx.stroke();
+   ctx.fillStyle='white';ctx.fillText(site.number,x,z);
+  }
+  for(const [p,glyph] of [[VILLA,'⌂'],[lunaSite,'★']]){
+   ctx.fillStyle='#164743';ctx.strokeStyle='#f5d291';ctx.beginPath();ctx.arc(X(p.x),Z(p.z),9,0,Math.PI*2);ctx.fill();ctx.stroke();
+   ctx.fillStyle='#fff2af';ctx.fillText(glyph,X(p.x),Z(p.z));
+  }
+  ctx.textBaseline='alphabetic';
+ }}
+
+const fixedStep=1/60;
+let previousCar=null;
+function renderDrivingState(){
+ if(paused||!state.driving||!previousCar||previousCar.owner!==state.car)return state;
+ const fraction=Math.min(1,acc/fixedStep),c=state.car;
+ if(Math.hypot(c.x-previousCar.x,c.z-previousCar.z)>2)return state;
+ return {...state,time:state.time-fixedStep+fraction*fixedStep,car:{...c,
+  x:previousCar.x+(c.x-previousCar.x)*fraction,z:previousCar.z+(c.z-previousCar.z)*fraction,
+  yaw:previousCar.yaw+Math.atan2(Math.sin(c.yaw-previousCar.yaw),Math.cos(c.yaw-previousCar.yaw))*fraction}};
+}
+function tick(t){if(disposed||!view||document.hidden)return;const dt=last?Math.min(.15,(t-last)/1000):1/60;last=t;if(!paused){acc+=dt;while(acc>=fixedStep){
+ previousCar=state.driving?{owner:state.car,x:state.car.x,z:state.car.z,yaw:state.car.yaw}:null;
+ step(state,input(),fixedStep);acc-=fixedStep;if(state.failed||state.win)break;}if(state.driving&&!cameraDrag&&state.time-lastCameraDrag>2){const diff=Math.atan2(Math.sin(state.car.yaw-view.orbit.yaw),Math.cos(state.car.yaw-view.orbit.yaw));view.orbit.yaw+=diff*(1-Math.exp(-dt*2));}}
+ view.render(renderDrivingState(),dt,navigationObjective(),!started);updateUI();if(t-lastMapTime>=125){drawMap($('cityMinimap'));lastMapTime=t;}audio.update();syncCityRadio(!document.hidden&&(!!radioDialog?.open||(!paused&&!state.driving&&Math.hypot(state.player.x-GARAGE_RADIO.x,state.player.z-GARAGE_RADIO.z)<10)));if(lastHealth>state.health){document.body.classList.add('city-result-effect');setTimeout(()=>document.body.classList.remove('city-result-effect'),250);}lastHealth=state.health;}
 function dispose(){if(disposed)return;disposed=true;syncCityRadio(false);awardInspector.dispose();radioDialog?.remove();renderLoop?.dispose();listeners.forEach(f=>f());view?.dispose();audio.context?.close().catch(()=>{});}
-renderLoop=createRenderScheduler({render:tick,active:()=>!paused});
+renderLoop=createRenderScheduler({render:tick,fps:Infinity,active:()=>!paused});
 for(const event of ['pointermove','pointerup','keydown','click'])on(document,event,()=>renderLoop.request());on(window,'resize',()=>renderLoop.request());
 window.PokerCity={inspect(){return {player:{...state.player},car:{...state.car},phase:state.phase,carrying:state.carrying,driving:state.driving,paused,health:state.health,heat:state.heat,escape:state.escape,elapsed:state.elapsed,completed:state.completed,objective:objective(state),prompt:prompt(state),metrics:view?.metrics,villa:view?.villa,garage:garage?{source:garage.source,owner:garage.owner,look:{...garage.look}}:null};}};
 (async()=>{try{garage=await loadCityGarage();view=await createCityScene($('cityCanvas'),text=>$('cityLoading').textContent=text,garage);if(disposed){view.dispose();return;}$('cityLoading').textContent=(garage.look.transport==='bmw-e60'?'Ваш BMW M5 E60':garage.look.transport==='mustang-gt500'?'Ваш Shelby GT500':garage.owner?'Ваш сохранённый МанкиCar Two ACES':'Клубный МанкиCar · гостевой заезд')+' · WASD или джойстик';$('cityStart').textContent=saved.carrying?'Продолжить доставку':'Начать с виллы →';$('cityStart').disabled=false;renderLoop.request();}catch(error){console.error('City failed to load',error);$('cityLoading').textContent=error.userMessage||'Не удалось загрузить 3D-сцену. Проверь соединение и поддержку WebGL в браузере.';$('cityStart').textContent='Повторить загрузку';$('cityStart').disabled=false;$('cityStart').onclick=()=>location.reload();}})();

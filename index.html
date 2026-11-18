@@ -444,7 +444,7 @@
         }, { once: true });
       }
     </script>
-    <link rel="stylesheet" href="./styles-hall-main-players.css?v=20261102-level-names-left">
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="home-month hall profile chat" data-poker-lazy-position="source" href="./styles-hall-main-players.css?v=20261102-level-names-left">
     <link rel="stylesheet" href="./styles.css?v=20261117-inactive-views" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-info-modals" data-poker-lazy-position="source" href="./styles-home-info-modals.css?v=1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="editor-planner" data-poker-lazy-position="source" href="./styles-home-planner-modal.css?v=1" />
@@ -466,13 +466,13 @@
     <link type="application/poker-lazy-style" data-poker-lazy-domain="hall" href="./styles-hall.css?v=4.002" />
     <link rel="stylesheet" href="./styles-tournament.css?v=4.002" />
     <link rel="stylesheet" href="./styles-home-overrides.css?v=20261111-daily-character-fit" />
-    <link rel="stylesheet" href="./styles-header-admin.css?v=20261114-eager-menu" />
+    <link rel="stylesheet" href="./styles-header-admin.css?v=20261118-transparent-header" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="admin-deposits" data-poker-lazy-position="source" href="./styles-admin-deposits.css?v=20261104-usdt-rate" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="home-news-modal" data-poker-lazy-position="source" href="./styles-home-news-modal.css?v=20261117-club-background-fix" />
     <link rel="stylesheet" href="./styles-home-jackpot-guide.css?v=5" />
     <link rel="stylesheet" href="./styles-home-lounge-labels.css?v=20260919-no-bottom-glow-1" />
     <link rel="preload" as="image" href="./assets/home-tournament-pokermanki-magic-head-mask.svg" />
-    <link rel="stylesheet" href="./styles-home-tournament-scene.css?v=20261026-idle-gpu-1" />
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="tournament-scene" data-poker-lazy-position="source" href="./styles-home-tournament-scene.css?v=20261026-idle-gpu-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-hall.css?v=20261111-shared-nards-v2" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-hall-achievements.css?v=20261011-1" />
     <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-player-lounge.css?v=20261111-wall-stereo" />
@@ -597,7 +597,7 @@
     />
     <link rel="stylesheet" href="./styles-home-sng-reference.css?v=9" />
 <script src="app-game-touch-guard.js?v=2"></script>
-    <link rel="stylesheet" href="./styles-garage-showcase.css?v=20261013-portrait-no-flash-1">
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="garage home-month" data-poker-lazy-position="source" href="./styles-garage-showcase.css?v=20261013-portrait-no-flash-1">
 <link type="application/poker-lazy-style" data-poker-lazy-domain="profile chat" href="./styles-chess-memes.css?v=20261029-1" /></head>
   <body data-view="home">
     <div id="appBootOverlay" class="app-boot-overlay" role="status" aria-live="polite" aria-busy="true">
@@ -987,7 +987,7 @@
             </span>
             <span class="home-daily-deal-hero__arrow" aria-hidden="true">›</span>
           </span>
-          <picture><img
+          <picture><source media="(max-width: 600px)" srcset="./assets/daily-poker-character-no-stacks-v2-720.webp 2x, ./assets/daily-poker-character-no-stacks-v2.webp 3x"><img
             class="home-daily-deal-hero__image"
                 src="./assets/daily-poker-character-no-stacks-v2.webp"
             alt=""
@@ -1044,7 +1044,7 @@
           </button>
         </section>
         <button type="button" class="home-last-longer-strip" data-last-longer-strip hidden>
-          <img src="./assets/last-longer-chip-transparent-v1.png" alt="" aria-hidden="true" width="44" height="44" decoding="async">
+          <img data-src="./assets/last-longer-chip-transparent-v1-132.webp" alt="" aria-hidden="true" width="44" height="44" decoding="async">
           <span class="home-last-longer-strip__copy"><strong>Ласт-лонгер к турниру вечера</strong><span><b data-last-longer-strip-bank></b><span aria-hidden="true"> · </span><span data-last-longer-strip-players></span></span><span data-last-longer-strip-stake></span></span>
           <span class="home-last-longer-strip__arrow" aria-hidden="true">→</span>
         </button>
@@ -1758,7 +1758,7 @@
     <script defer src="./app-home-media.js?v=4.002"></script>
     <script defer src="./app-admin-menu-password.js?v=20261017-deposits-1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-deposits" src="./app-admin-deposits-parser.js?v=20261017-1"></script>
-    <script defer src="./deposit-quick-input.js"></script>
+    <script defer src="./deposit-quick-input.js?v=1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="admin-deposits" src="./app-admin-deposits.js?v=20261117-roma-ppc"></script>
     <script defer src="./app-lazy-loader.js?v=20261002-coolershan-v2"></script>
     <script defer src="./app-home-planner-access.js?v=4.002"></script>
@@ -1797,7 +1797,7 @@
     <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-garage-catalog.js?v=20261110-club-honors-v1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-garage-showcase.js?v=20261108-imported-upgrades"></script>
     <link rel="stylesheet" href="./styles-home-cups.css?v=20261111-transparent-cups">
-    <link rel="stylesheet" href="./styles-club-honors.css?v=20261111-ring-shelf-v3">
+    <link type="application/poker-lazy-style" data-poker-lazy-domain="home-month club-honors hall profile chat home-news-modal" data-poker-lazy-position="source" href="./styles-club-honors.css?v=20261111-ring-shelf-v3">
     <script defer src="./app-club-honors.js?v=light-v4-20261111-ring-face-v4"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-garage-workshop.js?v=20261110-club-honors-v1"></script>
     <script type="application/poker-lazy" data-poker-lazy-domain="garage" src="./app-bicycle-workshop.js?v=20261105-vehicle-clear4"></script>
@@ -2016,19 +2016,25 @@
     if (!root) return;
     function load() {
       if (typeof window.pokerEnsureScriptDomains !== 'function') return;
-      Promise.resolve(window.pokerEnsureScriptDomains(['hall'])).catch(function () {});
+      Promise.all([window.pokerEnsureStyleDomains(['home-month']), window.pokerEnsureScriptDomains(['hall'])]).catch(function () {});
     }
     // This card is below the fold. Its live ranking needs the season archives;
     // do not download them while the user is reading unrelated home content.
     if (typeof IntersectionObserver === 'undefined') { load(); return; }
+    var visibleTimer;
     var observer = new IntersectionObserver(function (entries) {
-      if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
-      observer.disconnect();
-      load();
+      clearTimeout(visibleTimer);
+      if (!entries[entries.length - 1].isIntersecting) return;
+      visibleTimer = setTimeout(function () {
+        var rect = root.getBoundingClientRect();
+        if (!rect.height || rect.top >= innerHeight || rect.bottom <= 0) return;
+        observer.disconnect();
+        load();
+      }, 250);
     });
     observer.observe(root);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initHomeMonthlyLeader, { once: true });
+  if (document.readyState !== 'complete') window.addEventListener('load', initHomeMonthlyLeader, { once: true });
   else initHomeMonthlyLeader();
 })();
 </script>

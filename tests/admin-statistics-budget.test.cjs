@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const statsSource=fs.readFileSync(require.resolve('../app-admin-game-stats.js'),'utf8');
 function harness(){
- const nodes=new Map();const element=()=>({isConnected:true,className:'',setAttribute(){},append(){},replaceChildren(){},addEventListener(){},closest(){return null;},querySelector(key){if(!nodes.has(key))nodes.set(key,{value:'7',textContent:'',replaceChildren(){},append(){}});return nodes.get(key);}});
+ const nodes=new Map();const element=()=>({isConnected:true,className:'',setAttribute(){},append(){},replaceChildren(){},addEventListener(){},closest(){return null;},querySelectorAll(){return [];},querySelector(key){if(!nodes.has(key))nodes.set(key,{value:'7',textContent:'',replaceChildren(){},append(){}});return nodes.get(key);}});
  let section;const document={createElement(){const node=element();if(!section)section=node;return node;},body:{append(){}}};const context={document,window:{},Date,Map,Set};vm.runInNewContext(statsSource,context);return{context,nodes,get section(){return section;}};
 }
 test('leaving embedded game statistics stops pagination after the pending response',async()=>{

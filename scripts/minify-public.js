@@ -5,7 +5,7 @@ const path = require("path");
 const { transform, build } = require("esbuild");
 const vm = require("node:vm");
 const { bundleChat } = require("./bundle-chat");
-const { bundleStartup } = require("./bundle-startup");
+const { bundleStartup, bundleHome } = require("./bundle-startup");
 const output = path.join(__dirname, "..", "public");
 async function main() {
   let before = 0, after = 0;
@@ -28,7 +28,7 @@ async function main() {
     });
     if (result.warnings.length) throw new Error(name + ": " + result.warnings.map(w => w.text).join("; "));
     if (name.endsWith(".js")) {
-      const checked = name === "app-game-participation.js" ? (await transform(result.code, {loader:"js",format:"cjs"})).code : result.code;
+      const checked = /^\s*(?:export\s|import\s+[\w*{])/m.test(source) ? (await transform(result.code, {loader:"js",format:"cjs"})).code : result.code;
       new vm.Script(checked, { filename: name });
     }
     const inputBytes = Buffer.byteLength(source);
@@ -81,6 +81,7 @@ async function main() {
   fs.writeFileSync(htmlPath, fs.readFileSync(htmlPath, "utf8").replace('<link rel="stylesheet" href="./styles.css', preloads + '<link rel="stylesheet" href="./styles.css'));
   console.log("Chat bundles:", JSON.stringify(bundleChat(output)));
   console.log("Startup bundle:", JSON.stringify(bundleStartup(output)));
+  bundleHome(output);
   // Compress executable inline blocks, preserving HTML text and whitespace.
   let compactHtml = fs.readFileSync(htmlPath, "utf8");
   const blocks = [...compactHtml.matchAll(/<(script|style)(\s[^>]*)?>([\s\S]*?)<\/\1>/g)];

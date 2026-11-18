@@ -110,6 +110,39 @@ export function createDistrictDetailFactory(block,sharedCylinder){
    const shell=detail(parent,seats,seatMaterials[index%3],x,y,z,.27,.36,.24);shell.rotation.x=Math.PI/2;shell.userData.batchMaterialKey='stadium-seat';
    block(parent,'#3c4548',x,y-.2,z,.055,.35,.055);
   },
+  concourse(parent,index,side){
+   const pavilion=Math.floor(index/2)%2===0;
+   const z=(index%3-1)*2;
+   const piece=(color,x,y,dz,w,h,d)=>block(parent,color,side*x,y,z+dz,w,h,d);
+   if(pavilion){
+    // Open terrace with a pitched canopy, warm service windows and outdoor tables.
+    piece('#71675e',16,1.5,0,5,3,8);
+    const windows=detail(parent,plane,shopMaterials[index%4],side*13.48,1.45,z,7.8,2.8,1);
+    windows.rotation.y=-side*Math.PI/2;
+    const roof=piece('#547272',14,3.35,0,9,.23,9.6);roof.rotation.z=side*.08;
+    for(const dz of [-4,4])piece('#48565a',10,1.54,dz,.13,3.08,.13);
+    for(const dz of [-2,2]){
+     piece('#9d7854',11.7,.84,dz,1.6,.12,1.4);
+     piece('#485358',11.7,.41,dz,.25,.8,.25);
+     for(const delta of [-.9,.9])piece('#aa8860',11.7,.45,dz+delta,1.55,.18,.4);
+    }
+   }else{
+    // Recessed entry gates framed by masonry piers and a stepped art-deco marquee.
+    for(const dz of [-4,0,4]){
+     piece('#b4a18a',15,1.85,dz,.95,3.7,.72);
+     piece('#e2c499',15,3.63,dz,1.18,.24,.96);
+    }
+    for(const dz of [-2,2]){
+     piece('#374a52',15,1.05,dz,.11,.12,3.3);
+     for(let bar=-1.4;bar<=1.4;bar+=.55)piece('#586666',15,.98,dz+bar,.08,1.94,.08);
+    }
+    for(let n=0;n<3;n++)piece(n===1?'#d6ae73':'#566a70',15,3.83+n*.2,0,2.5-n*.36,.22,10-n*1.2);
+    for(const dz of [-6,6]){
+     piece('#887b69',11,.33,dz,2.3,.66,2.5);
+     this.tree(parent,index+dz,side*11,z+dz);
+    }
+   }
+  },
   stadium(parent,index,side){
    // Roof trusses and access stairs give grandstands a believable structure.
    for(const z of [-4,4])for(const direction of [-1,1]){const brace=block(parent,'#758487',side*16,3.9,z+direction*.7,.08,1.5,.09);brace.rotation.x=direction*.6;}

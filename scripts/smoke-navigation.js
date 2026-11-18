@@ -251,6 +251,8 @@ async function main() {
       await new Promise((resolve) => setTimeout(resolve, isCore ? 1600 : isSent ? 120 : 1400));
       await route.continue();
     });
+    await page.route("**/api/admin-menu-access", route =>
+      route.fulfill({json: {ok: true, token: "local-navigation-fixture", expiresIn: 3600}}));
     await page.route(/\/api\/admin-report-shifts(?:\?|$)/, async (route) => {
       const url = route.request().url();
       const method = route.request().method();
@@ -332,7 +334,12 @@ async function main() {
         });
         return;
       }
-      const scope = new URL(url).searchParams.get("scope") || "all";
+      const params = new URL(url).searchParams;
+      if (params.get("access") === "1") {
+        await route.fulfill({ headers: corsHeaders, contentType: "application/json", body: JSON.stringify({ ok: true, allowed: true }) });
+        return;
+      }
+      const scope = params.get("scope") || "all";
       if (new URL(url).searchParams.get("rakebackDraft") === "1") {
         await route.fulfill({
           status: 200,
@@ -713,6 +720,11 @@ async function main() {
         if (await page.evaluate(() => window.__smokeRouteLoadState) !== "ready") throw new Error("View assets failed: " + target);
       }
       if (target === "player-crm") {
+        const password = page.locator("#adminMenuPasswordInput");
+        if (await password.isVisible()) {
+          await password.fill("1234");
+          await page.locator("#adminMenuPasswordSubmit").click();
+        }
         await page.waitForFunction(() => {
           const root = document.getElementById("playerCrmView");
           return !!(window.__pokerPlayerCrmStandaloneOpen && root && root.classList.contains("player-crm-standalone"));

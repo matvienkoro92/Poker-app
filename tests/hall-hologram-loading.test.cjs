@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');
-function setup(){let observer,carPaints=0,characterPaints=0;const window={PokerGarage:{canAccessHall:()=>true,characterFields:[]},addEventListener(){},pokerSocialRequest:async()=>({showcase:{garage:{loadout:{}}}}),pokerGaragePreviewCache:{read:async()=>({width:100,height:200})},pokerPaintSavedGarageVehicle:async()=>{carPaints++;}};
+function setup(){let observer,carPaints=0,characterPaints=0;const window={PokerGarage:{adminTransport:()=>false,canAccessHall:()=>true,characterFields:[]},addEventListener(){},pokerSocialRequest:async()=>({showcase:{garage:{loadout:{}}}}),pokerGaragePreviewCache:{read:async()=>({width:100,height:200})},pokerPaintSavedGarageVehicle:async()=>{carPaints++;}};
  const c={window,document:{addEventListener(){}},IntersectionObserver:class{constructor(fn){observer=fn}observe(){}unobserve(){}},console};vm.createContext(c);vm.runInContext(fs.readFileSync('app-garage-showcase.js','utf8'),c);
  return {window,hydrate:async(car)=>{const node={dataset:{hallShowcase:'ID123456'},isConnected:true,querySelector:s=>s==='.hall-garage-car'?(car?canvas:null):canvas},canvas={isConnected:true,closest:()=>node,getContext:()=>({drawImage(){characterPaints++;}})};window.pokerHydrateGarageHall({querySelectorAll:()=>[node]});observer([{isIntersecting:true,target:node}]);for(let i=0;i<12;i++)await Promise.resolve();},counts:()=>({carPaints,characterPaints})};
 }

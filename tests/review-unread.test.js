@@ -27,14 +27,14 @@ test('summary excludes own topics and counts external discussions',async()=>{
  assert.equal(await unread([{authorId:'other'}],1,'others','other'),false);
 });
 
-test('review count mirrors to navigation even before summary mounts and clears at zero',()=>{
+test('review count stays on the summary card and does not appear on the villa shortcut',()=>{
  const source=fs.readFileSync(require.resolve('../app-my-summary'),'utf8');
  const code=source.slice(source.indexOf('  function renderReviewUnread(count)'),source.indexOf('  var reviewUnreadRequest'));
  const badge=id=>({id,hidden:true,textContent:'',setAttribute(k,v){this[k]=v},classList:{toggle(k,v){this[k]=v}}});
  const nav=badge('bottomNavReviewUnread'),card=badge('');let badges=[nav];
  const context={window:{},document:{querySelectorAll:()=>badges}};
  vm.runInNewContext(code,context);
- context.renderReviewUnread(6);assert.equal(nav.textContent,'6');assert.equal(nav.hidden,false);
+ context.renderReviewUnread(6);assert.equal(nav.textContent,'6');assert.equal(nav.hidden,true);
  badges=[nav,card];context.renderReviewUnread(5);assert.equal(nav.textContent,card.textContent);
  context.renderReviewUnread(120);assert.equal(nav.textContent,'99+');assert.equal(card.textContent,'99+');
  context.window.__pokerTelegramAuth={adminAccess:true};

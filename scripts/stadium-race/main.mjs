@@ -93,9 +93,19 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   function groundShadow(mesh,d,lateral,tier=0){const p=sample(d,lateral,tier),a=sample(d-10,lateral,tier),b=sample(d+10,lateral,tier);mesh.position.set(p.x,p.y+.045,p.z);mesh.rotation.set(-Math.PI/2-Math.atan2(b.y-a.y,1.2),p.a,0,'YXZ');}
   const strips=Array.from({length:100},()=>{const g=group();const roadPlaceholder=new T.Group();g.add(roadPlaceholder);for(const side of [-1,1]){block(g,'#e65c59',side*7,-.03,0,.45,.14,2.55);block(g,'#f2e2bc',side*6.7,.015,0,.1,.03,2.55);block(g,'#77796a',side*11,-.3,0,7,.3,2.55);}return g;});
   const asphaltCanvas=document.createElement('canvas');asphaltCanvas.width=asphaltCanvas.height=256;
-  const ac=asphaltCanvas.getContext('2d');ac.fillStyle='#272a2d';ac.fillRect(0,0,256,256);let seed=21;
-  for(let n=0;n<15000;n++){seed=(seed*1664525+1013904223)>>>0;const x=seed>>>24;seed=(seed*1664525+1013904223)>>>0;const y=seed>>>24;ac.fillStyle=n%2?'#ffffff09':'#00000012';ac.fillRect(x,y,1,1);}
+  const ac=asphaltCanvas.getContext('2d');ac.fillStyle='#383a3c';ac.fillRect(0,0,256,256);let seed=21;
+  for(let n=0;n<15000;n++){seed=(seed*1664525+1013904223)>>>0;const x=seed>>>24;seed=(seed*1664525+1013904223)>>>0;const y=seed>>>24;ac.fillStyle=n%2?'#e1d7bd24':'#070a1036';ac.fillRect(x,y,1,1);}
   for(let lane=0;lane<3;lane++){const wear=ac.createLinearGradient(lane*85,0,lane*85+85,0);wear.addColorStop(0,'#00000000');wear.addColorStop(.3,'#00000012');wear.addColorStop(.65,'#0000000b');wear.addColorStop(1,'#00000000');ac.fillStyle=wear;ac.fillRect(lane*85,0,85,256);}
+  // Parallel rubber tracks fade into the aggregate and meet across the tile seam.
+  for(const offset of [54,150]){
+   for(let y=0;y<256;y++){
+    const phase=y*Math.PI/128;
+    const x=offset+3*Math.sin(phase);
+    const wear=ac.createLinearGradient(x-7,0,x+7,0);
+    wear.addColorStop(0,'transparent');wear.addColorStop(.5,'rgba(10,12,15,'+(.24+.11*Math.cos(phase))+')');wear.addColorStop(1,'transparent');
+    ac.fillStyle=wear;ac.fillRect(x-7,y,14,1);
+   }
+  }
   const asphalt=new T.CanvasTexture(asphaltCanvas);asphalt.colorSpace=T.SRGBColorSpace;asphalt.wrapS=asphalt.wrapT=T.RepeatWrapping;asphalt.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
   const roadGeo=new T.BufferGeometry(),roadPositions=new Float32Array(101*6),roadUV=new Float32Array(101*4),roadIndices=[];
   for(let i=0;i<101;i++){roadUV.set([0,i*.6,3,i*.6],i*4);if(i<100){const n=i*2;roadIndices.push(n,n+2,n+1,n+1,n+2,n+3);}}
@@ -115,10 +125,16 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   const scenery=Array.from({length:32},(_,i)=>{const g=group(),side=i%2?-1:1;const stadium=new T.Group(),city=new T.Group(),bridge=new T.Group(),plaza=new T.Group();g.add(stadium,city,bridge,plaza);
    block(stadium,'#577b62',side*26,-.5,0,37,.5,24.2);block(stadium,'#aab4a5',side*15,-.2,0,14,.3,24.2);
    block(stadium,'#cfaf65',side*19,5.2,0,.08,2,.08);const flag=block(stadium,i%2?'#c45d48':'#1f6978',side*19+.5,5.8,0,1,.6,.04);flag.rotation.y=.3;
+   const grandstand=(Math.floor(i/2)+(side<0?1:0))%3===0;
+   if(grandstand){
    for(let row=0;row<4;row++){block(stadium,row%2?'#656a6b':'#96958a',side*(11+row*1.5),row*.75+.4,0,2,.6,9);for(let seat=0;seat<7;seat++)districtDetails.stadiumSeat(stadium,seat+i,side*(11+row*1.5),row*.75+.95,-4+seat*1.25);}
-   for(const z of [-3,3])districtDetails.tree(stadium,i,side*24,z,foliage);
    block(stadium,'#142f42',side*16,4.6,0,6,.25,10);block(stadium,'#d0a65c',side*13,4.5,0,.18,.4,10);
    for(const z of [-4,4])block(stadium,'#344e59',side*18,2.3,z,.18,4.6,.18);
+    districtDetails.stadium(stadium,i,side);
+   }else{
+    districtDetails.concourse(stadium,i,side);
+   }
+   for(const z of [-3,3])districtDetails.tree(stadium,i,side*24,z,foliage);
    for(const z of [-4,0,4]){block(stadium,'#a0b6bb',side*8.1,.7,z,.12,1.4,.12);}
    block(stadium,'#a0b6bb',side*8.1,1.2,0,.12,.12,10);block(stadium,'#284d60',side*8.1,.45,0,.15,.7,10);
    block(stadium,'#d4e8e4',side*14,5.2,0,.2,7,.2);block(stadium,'#fff3c4',side*14,8.5,0,3,.5,.4);
@@ -130,7 +146,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
    block(city,'#7b8789',side*7.65,1.2,0,.08,.09,9);
    block(city,'#d0c5a6',side*9,-.05,0,3,.18,24.2);
    block(city,'#283c49',side*8.3,2.6,0,.12,5.2,.12);block(city,'#f6dc9b',side*8.3,5.2,0,.7,.18,.7);
-   streetFurniture(city,i,side);districtDetails.city(city,i,side);districtDetails.stadium(stadium,i,side);
+   streetFurniture(city,i,side);districtDetails.city(city,i,side);
    for(const z of [-3,0,3]){block(city,'#e2d5b9',side*11.8,2.5,z,.25,.25,2.2);const awning=block(city,i%2?'#a95648':'#397a78',side*11.3,2.7,z,1.2,.15,2.2);awning.rotation.z=side*.12;}
    if(i%4===0){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#133b47';ctx.fillRect(0,0,512,128);ctx.strokeStyle='#d3ab5f';ctx.lineWidth=7;ctx.strokeRect(6,6,500,116);ctx.fillStyle='#f4e1ad';ctx.font='bold 49px Arial';ctx.textAlign='center';ctx.fillText(i%8?'POKER21':'TWO ACES',256,81);const tx=new T.CanvasTexture(c);tx.colorSpace=T.SRGBColorSpace;
     for(const parent of [stadium,city]){const sign=new T.Mesh(new T.PlaneGeometry(6,1.5),new T.MeshBasicMaterial({map:tx,side:T.DoubleSide}));sign.position.set(side*8.03,parent===city?3.8:.8,0);sign.rotation.y=-side*Math.PI/2;parent.add(sign);}

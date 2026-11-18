@@ -32,28 +32,30 @@ async function main() {
       page.on('pageerror',e=>errors.push(e.message));
       await page.clock.setFixedTime(new Date('2026-09-12T00:22:00+07:00'));
       await page.addInitScript(()=>sessionStorage.setItem('poker_pwa_guest_session','1'));
+  const eventId = "smoke-friend-win";
+  const friend = {userId:"tg_smoke", contactName:"Тестовый игрок"};
+  const event = {id:eventId,type:"win",actorId:friend.userId,actorNick:friend.contactName,
+    text:"Победа в турнире",newsTitle:friend.contactName,newsLines:["Победа в турнире"],at:"2026-09-11T16:00:00Z"};
+  await ctx.route('**/api/**',r=>r.fulfill({json:{ok:true,posts:[],rows:[]}}));
+  await ctx.route('**/api/friend-news',r=>r.fulfill({json:{ok:true,accountId:"ID123456",friends:[friend],sharedEvents:[event],readIds:[]}}));
   const feedbacks=new Map(), sent=[];
   await ctx.route('**/api/profile-event-feedback',async route=>{
     const body=route.request().postDataJSON();sent.push(body);
-    const get=id=>{if(!feedbacks.has(id))feedbacks.set(id,{reactions:{},myReaction:'',commentCount:1,comments:[{id:'c1',author:'Киса',text:'Красавчик',at:'2026-09-10T12:00:00Z',reactions:{},myReaction:''}]});return feedbacks.get(id);};
-    if(body.action==='view')return route.fulfill({json:{ok:true,feedback:Object.fromEntries(body.eventIds.map(id=>[id,get(id)]))}});
+    const get=id=>{if(!feedbacks.has(id))feedbacks.set(id,{reactions:{'🔥':1},myReaction:'',commentCount:1,comments:[{id:'c1',author:'Киса',text:'Красавчик',at:'2026-09-10T12:00:00Z',reactions:{},myReaction:''}]});return feedbacks.get(id);};
+    if(body.action==='view'||body.action==='list')return route.fulfill({json:{ok:true,feedback:Object.fromEntries(body.eventIds.map(id=>[id,get(id)]))}});
     const f=get(body.eventId),target=body.action==='comment-reaction'?f.comments[0]:f;
     if(body.action==='reaction'||body.action==='comment-reaction'){target.reactions={[body.emoji]:target.myReaction===body.emoji?0:1};target.myReaction=target.myReaction===body.emoji?'':body.emoji;}
     return route.fulfill({json:{ok:true,feedback:f}});
   });
   await page.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'networkidle'});
-  await page.evaluate(()=>window.pokerOpenClubNewsModal());
+  await page.evaluate(()=>{window.pokerApiAuthQuery=()=>'?pwaSession=smoke';window.pokerOpenFriendNews();});
   await page.waitForSelector('#homeFriendNewsModal:not([hidden])');
-  await page.waitForTimeout(1500);
 
-  const card=page.locator('#homeFriendNewsList [data-home-news-event-id]').first();
-  await card.locator('[data-home-news-add-reaction]:not([data-comment-id])').click();
+
+  const card=page.locator('[data-home-news-event-id="'+eventId+'"]').filter({has:page.locator('[data-home-news-comments]')});
+  await card.locator('[data-home-news-reaction]').click({position:{x:3,y:3}});
   const picker=page.locator('.profile-reaction-picker--news');
-  await picker.waitFor({state:'visible'});
-  assert.equal(await picker.evaluate(n=>getComputedStyle(n).position),'fixed');
-  await picker.locator('[data-picker-reaction]').first().click();
-  await page.waitForTimeout(150);
-  assert.ok(sent.some(r=>r.action==='reaction'&&r.scope==='club'));
+  assert.ok(sent.some(r=>r.action==='reaction'&&r.scope==='friends'));
   await card.locator('[data-home-news-reaction-users]').first().click();
   const users=page.locator('.profile-reaction-users--news');
   await users.waitFor({state:'visible'});
@@ -69,10 +71,10 @@ async function main() {
   await card.locator('.home-news-emoji-picker:not([hidden])').waitFor({state:'visible'});
   await card.locator('[data-home-comment-emoji]').first().click();
   assert.ok((await card.locator('input').inputValue()).length>0);
-  const bounds=await card.evaluate(n=>{const a=n.querySelector('.home-friend-news-modal__day-hero').getBoundingClientRect(), b=n.querySelector('form').getBoundingClientRect();return {heroBottom:a.bottom,formTop:b.top};});
-  assert.ok(bounds.heroBottom<=bounds.formTop,'Hero badge must stay above comment form');
+  const bounds=await card.evaluate(n=>{const a=n.querySelector('.home-friend-news-modal__player-title').getBoundingClientRect(), b=n.querySelector('form').getBoundingClientRect();return {heroBottom:a.bottom,formTop:b.top};});
+  assert.ok(bounds.heroBottom<=bounds.formTop,'Player title must stay above the comment form');
   assert.deepEqual(errors,[]);
-  await page.screenshot({path:path.join(output, 'reactions-'+width+'.png')});console.log('Passed real news clicks: event reaction, comment reaction, emoji insertion and badge placement',bounds);
+  await page.screenshot({path:path.join(output, 'reactions-'+width+'.png')});console.log('Passed real news clicks: event reaction, comment reaction, emoji insertion and title placement',bounds);
 
       await ctx.close();
     }

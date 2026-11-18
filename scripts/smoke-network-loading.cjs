@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..', process.env.SMOKE_ROOT || '.');
 (async () => {
   const browser = await chromium.launch();
   try {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+    const page = await browser.newPage({ viewport: { width: 390, height: 650 }, serviceWorkers: 'block' });
     const files = [], api = [], errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.route('**/*', async route => {
@@ -45,6 +45,13 @@ const root = path.resolve(__dirname, '..', process.env.SMOKE_ROOT || '.');
     assert.deepEqual(deferred(), [], 'Closed garage and deposits must not download at startup');
     assert.equal(files.filter(file => file === '/club-news-data.js').length, 1, 'Reuse the embedded news snapshot');
     assert.equal(api.filter(call => call.path === '/api/profile-wall' && call.body.action === 'club-feed').length, 0);
+    const fullSng = () => api.filter(call => {
+      const params = new URLSearchParams(call.query);
+      return call.path === '/api/sng-champions' && !params.has('summary') && !params.has('mode');
+    });
+    assert.equal(fullSng().length, 0, 'Closed SNG panel must not read the tournament archive');
+    assert.deepEqual(files.filter(file => /styles-(garage-showcase|club-honors|home-tournament-scene|hall-main-players)\.css|last-longer-chip-transparent/.test(file)), []);
+    assert.ok(!api.some(call => call.path === '/api/player-crm' && call.query.includes('publicLevels')));
     await page.evaluate(() => window.pokerOpenClubNewsModal());
     await page.waitForSelector('#homeFriendNewsModal:not([hidden]) [data-home-news-reaction-users]');
     assert.ok(files.includes('/app-garage-catalog.js'), 'News opens with the shared character renderer');
@@ -119,12 +126,21 @@ const root = path.resolve(__dirname, '..', process.env.SMOKE_ROOT || '.');
     });
     await page.clock.fastForward(46000);
     assert.equal(voteCalls(), beforeHidden, 'A hidden app must not poll the home badge');
+    const fullBeforeResume = fullSng().length;
     const resumeVote = page.waitForRequest(request => request.url().includes('/api/club-choice-vote?summary=1'));
     await page.evaluate(() => {
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
       document.dispatchEvent(new Event('visibilitychange'));
     });
     await resumeVote;
+    assert.equal(fullSng().length, fullBeforeResume);
+    await page.evaluate(() => setView('download'));
+    await page.waitForFunction(() => [...document.styleSheets].some(sheet => sheet.href?.includes('styles-home-tournament-scene.css')));
+    await page.evaluate(() => setView('home'));
+    await page.locator('#homePlayerMonth').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => [...document.styleSheets].some(sheet => sheet.href?.includes('styles-hall-main-players.css')));
+    assert.ok(files.includes('/styles-garage-showcase.css'));
+    assert.ok(files.includes('/styles-club-honors.css'));
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ startupNewsDownloads: 1, startupFeatureDownloads: 0,
       discussionDetailRequests: detailRequests.length, backgroundWallRequests: 0, errors }));

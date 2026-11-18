@@ -10,6 +10,7 @@ test('an empty friend list skips friend-only sources and retains personal bet ne
   const calls = [], personal = [{ id: 'personal-bet' }];
   const context = {
     base: '', suffix: '', joiner: '?', signature: '',
+    window: { pokerLoadPublicLevelRows: async () => { calls.push('public-levels'); return {levelRows: []}; } },
     cachedFetchJson: async url => { calls.push(url); return {}; },
     fetch: async url => { calls.push(url); return { ok: true, json: async () => ({ ok: true, posts: [] }) }; },
     enrichFriendsWithPoker21: friends => friends, tournamentSnapshotsReady: async () => ({}),

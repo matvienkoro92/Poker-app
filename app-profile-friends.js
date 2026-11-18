@@ -1083,8 +1083,7 @@ function initProfileFriends() {
       }
     } catch (eLevelRowsCache) {}
     var base = typeof getApiBase === "function" ? getApiBase() : "";
-    searchSuggestRowsPromise = fetch(base + "/api/player-crm?publicLevels=1&avatarFormat=url", { cache: "default" })
-      .then(function (r) { return r.json(); })
+    searchSuggestRowsPromise = window.pokerLoadPublicLevelRows(base, 60000)
       .then(function (data) {
         if (!data || !data.ok) throw new Error((data && data.error) || "suggestions_failed");
         try {

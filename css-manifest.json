@@ -88,6 +88,14 @@
     "billiards": {
       "owner": "billiards",
       "scope": "standalone online billiards room, game controls and invitation lobby"
+    },
+    "arcade": {
+      "owner": "arcade",
+      "scope": "Standalone arcade games and campaigns"
+    },
+    "boardGames": {
+      "owner": "boardGames",
+      "scope": "Board game lobby, equipment, tables and tournaments"
     }
   },
   "domains": {
@@ -115,14 +123,18 @@
       "styles-home-club-choice-badge.css",
       "styles-home-sng-reference.css",
       "styles-home-lounge-labels.css",
-      "styles-home-summer-results.css"
+      "styles-home-summer-results.css",
+      "styles-home-daily-poker.css",
+      "styles-home-jackpot-guide.css",
+      "styles-table-alert-settings.css"
     ],
     "tournament": [
       "styles-tournament.css",
       "styles-hall-tournament-day.css",
       "styles-home-overrides.css",
       "styles-tournament-bet.css",
-      "styles-home-tournament-scene.css"
+      "styles-home-tournament-scene.css",
+      "styles-evening-reference.css"
     ],
     "chat": [
       "styles-chat.css",
@@ -158,7 +170,10 @@
     ],
     "download": [
       "styles-download.css",
-      "styles-download-pages.css"
+      "styles-download-pages.css",
+      "styles-play-card.css",
+      "styles-play-portal.css",
+      "styles-play-underwater.css"
     ],
     "rating": [
       "styles-rating.css",
@@ -178,7 +193,8 @@
       "styles-hall-main-players.css",
       "styles-hall-main-responsive.css",
       "styles-hall-footer.css",
-      "styles-club-honors.css"
+      "styles-club-honors.css",
+      "styles-hall-achievements.css"
     ],
     "profile": [
       "styles-profile.css",
@@ -189,7 +205,12 @@
       "styles-profile-modals-tail.css",
       "styles-hero.css",
       "styles-profile-identity.css",
-      "styles-player-hall.css"
+      "styles-player-hall.css",
+      "styles-city-game.css",
+      "styles-city-radio.css",
+      "styles-garage-showcase.css",
+      "styles-garage-technical-menu.css",
+      "styles-player-lounge.css"
     ],
     "equilator": [
       "styles-equilator.css",
@@ -197,7 +218,10 @@
     ],
     "admin": [
       "styles-admin.css",
-      "styles-daily-poker.css"
+      "styles-daily-poker.css",
+      "styles-admin-deposits.css",
+      "styles-header-admin.css",
+      "styles-link-stats.css"
     ],
     "playerCrm": [
       "styles-player-crm.css"
@@ -226,6 +250,23 @@
     ],
     "billiards": [
       "styles-billiards.css"
+    ],
+    "boardGames": [
+      "styles-board-backgrounds.css",
+      "styles-board-games.css",
+      "styles-board-lobby.css",
+      "styles-chess-memes.css",
+      "styles-game-chat.css",
+      "styles-game-setup.css",
+      "styles-nards-tournaments.css"
+    ],
+    "arcade": [
+      "styles-last-buy-in-campaign.css",
+      "styles-last-buy-in-entrance.css",
+      "styles-last-buy-in-lunapark.css",
+      "styles-last-buy-in-race-3d.css",
+      "styles-last-buy-in-td.css",
+      "styles-monkey-race.css"
     ]
   },
   "views": {
@@ -344,5 +385,10 @@
       "cooler-flight",
       "layout"
     ]
-  }
+  },
+  "inactiveStylesheets": [
+    "styles-home-daily-poker.css",
+    "styles-home-summer-results.css",
+    "styles-play-underwater.css"
+  ]
 }

@@ -19,18 +19,29 @@ function response() {
 }
 
 test("feed and read receipts use authenticated canonical account, never client accountId", async () => {
-  const writes = [];
+  const writes = [], fullReads = [];
   const handler = load("../lib/api-handlers/friend-news.js", {
     "../resolve-telegram-auth": { resolveTelegramIdentity: (req) => req.authed ? {} : null, memberIdFromIdentity: () => "mail_transport" },
     "../app-user-blocks": { rejectBlockedAppUser: async () => false },
     "../api-auth": { setCors() {} }, "../redis": { isConfigured: () => true },
     "./friends": { resolveNewsAccountId: async () => "ID400800", readNewsFriends: async () => ({ self: {}, friends: [] }) },
-    "../friend-news": { buildSharedEvents: () => [], readTrackingSince: async () => "2026-09-10T10:00:00Z", readState: async (id) => { assert.equal(id, "ID400800"); return ["read"]; }, markRead: async (id, ids) => writes.push({ id, ids }) },
+    "../friend-news": { buildSharedEvents: () => [], readTrackingSince: async () => "2026-09-10T10:00:00Z", readMembership: async (id, ids) => { assert.equal(id, "ID400800"); return ids.map(key => key === "read" ? "1" : "0").join(""); }, readState: async (id) => { fullReads.push(id); assert.equal(id, "ID400800"); return ["read"]; }, markRead: async (id, ids) => writes.push({ id, ids }) },
     "../friend-tournament-results.json": [],
   });
   const unauth = response(); await handler({ method: "POST", body: {} }, unauth); assert.equal(unauth.statusCode, 401);
   const feed = response(); await handler({ method: "POST", authed: true, body: { accountId: "ID999999" } }, feed);
   assert.equal(feed.body.accountId, "ID400800"); assert.equal(feed.body.readIds[0], "read");
+  const scoped = response();
+  await handler({method:"POST", authed:true, body:{action:"feed", scopedReadStatus:true}}, scoped);
+  assert.equal(scoped.body.scopedReadStatus, true);
+  assert.equal(scoped.body.readIds.length, 0);
+  assert.equal(fullReads.length, 1);
+  const status = response();
+  await handler({method:"POST", authed:true, body:{action:"read-status", accountId:"wrong", ids:["new","read"]}}, status);
+  assert.equal(status.body.membership, "01");
+  const invalid = response();
+  await handler({method:"POST", authed:true, body:{action:"read-status", ids:Array(501).fill("x")}}, invalid);
+  assert.equal(invalid.statusCode, 400);
   const read = response(); await handler({ method: "POST", authed: true, body: { action: "read", accountId: "ID999999", ids: ["one"] } }, read);
   assert.equal(writes[0].id, "ID400800"); assert.equal(writes[0].ids[0], "one");
 });
@@ -62,7 +73,7 @@ test("push is per participant, uses stable dedupe key and excludes old results",
     "./redis": { isConfigured: () => true, hscanall: async () => ({ [a.userId]: JSON.stringify({ nickname: a.pokerPlusNickname }), [b.userId]: JSON.stringify({ nickname: b.pokerPlusNickname }) }) },
     "./account-id": { resolveAccountId: async (id) => id },
     "./api-handlers/friends": { readNewsFriends: async (id) => ({ self: id === a.userId ? a : b, friends: [id === a.userId ? b : a] }) },
-    "./friend-tournament-results.json": require("../lib/friend-tournament-results.json"),
+    "./friend-tournament-results.json": require("./helpers/september-friend-results.cjs"),
     "./chat-webpush-notify": { sendToMemberDevices: async (id, payload) => {
       const key = id + payload.dedupeKey;
       if (seen.has(key)) return 0;
@@ -88,18 +99,53 @@ test("cron cannot send notifications without its server secret", async () => {
 });
 
 test("notification baseline is stable across devices and fails closed on storage errors", async () => {
-  const values = new Map(); let fail = false;
+  const values = new Map(); const calls = []; let fail = false;
   const mod = load("../lib/friend-news.js", {
     crypto, "./chat-webpush-notify": {}, "./account-id": {},
     "./redis": { pipeline: async commands => fail ? null : commands.map(([op,key,value]) => {
-      if(op === "SET" && !values.has(key)) values.set(key,value);
+      calls.push(op);
+      if(op === "SET" && !values.has(key)) { values.set(key,value); return {result:"OK"}; }
       return {result:op === "GET" ? values.get(key) : null};
     }) },
   });
   const first = await mod.readTrackingSince("ID400800");
+  assert.deepEqual(calls, ["GET", "SET"]);
+  calls.length = 0;
   assert.equal(await mod.readTrackingSince("ID400800"),first);
+  assert.deepEqual(calls, ["GET"]);
   await mod.readTrackingSince("ID403173");
   assert.equal(values.size,2);
   fail=true;
   await assert.rejects(mod.readTrackingSince("ID400800"),/unavailable/);
+});
+
+test("two simultaneous first visits use the same Redis notification baseline", async () => {
+  let baseline;
+  const ops = [];
+  const mod = load("../lib/friend-news.js", {
+    crypto, "./chat-webpush-notify": {}, "./account-id": {},
+    "./redis": { pipeline: async ([[op, , value, condition]]) => {
+      ops.push(op);
+      if (op === "GET") return [{result:baseline ?? null}];
+      assert.equal(condition,"NX");
+      if (baseline) return [{result:null}];
+      baseline = value;
+      return [{result:"OK"}];
+    } },
+  });
+  const results = await Promise.all([mod.readTrackingSince("A"), mod.readTrackingSince("A")]);
+  assert.deepEqual(results,[baseline,baseline]);
+  assert.deepEqual(ops,["GET","GET","SET","SET","GET"]);
+});
+
+test("scoped receipts check only the supplied IDs and preserve order", async () => {
+  const calls = [];
+  const mod = load("../lib/friend-news.js", {
+    crypto, "./chat-webpush-notify": {}, "./account-id": {},
+    "./redis": { pipeline: async commands => { calls.push(...commands); return [{ result:[0,1,0] }]; } }
+  });
+  assert.equal(await mod.readMembership("A", []), "");
+  assert.equal(await mod.readMembership("A", ["new","read","new2"]), "010");
+  assert.deepEqual(Array.from(calls[0]), ["SMISMEMBER","poker_app:friend_news_read:A","new","read","new2"]);
+  await assert.rejects(mod.readMembership("A", ["one"]), /unavailable/);
 });

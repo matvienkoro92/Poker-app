@@ -445,6 +445,8 @@
       strip.hidden = !hasEvent;
       strip.dataset.eventId = hasEvent ? data.id : "";
       if (hasEvent) {
+        var chip = strip.querySelector("img[data-src]");
+        if (chip && chip.dataset && chip.dataset.src && !chip.hasAttribute("src")) chip.src = chip.dataset.src;
         var stripCount = Math.max(0, Number(data.participantsCount) || 0);
         var stripWord = stripCount % 100 >= 11 && stripCount % 100 <= 14 ? "участников" : stripCount % 10 === 1 ? "участник" : stripCount % 10 >= 2 && stripCount % 10 <= 4 ? "участника" : "участников";
         strip.querySelector("[data-last-longer-strip-bank]").textContent = "Банк " + rub(data.bank);

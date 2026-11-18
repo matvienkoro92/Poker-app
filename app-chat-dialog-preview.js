@@ -242,7 +242,9 @@ function initChatDialogPreviewRuntime(opts) {
     });
   }
 
+  var previewRequest = 0;
   function closeChatDialogPreviewModal() {
+    previewRequest++;
     var modal = document.getElementById("chatDialogPreviewModal");
     if (!modal) return;
     modal.classList.remove("chat-dialog-preview-modal--open");
@@ -252,7 +254,19 @@ function initChatDialogPreviewRuntime(opts) {
     } catch (eClsPrev) {}
   }
 
-  function openChatDialogPreviewModal(userId, userName, peerP21Id) {
+  async function openChatDialogPreviewModal(userId, userName, peerP21Id) {
+    if (!userId || !base || !pokerApiHasCredential()) return;
+    var request = ++previewRequest;
+    if (!document.getElementById("chatDialogPreviewModal") && typeof window.pokerEnsureGlobalModalsHtml === "function") {
+      try {
+        await window.pokerEnsureGlobalModalsHtml();
+      } catch (error) {
+        console.warn("Chat preview could not load", error);
+        return;
+      }
+      if (request !== previewRequest || document.body.dataset.view !== "chat") return;
+    }
+    bindChatDialogPreviewModalOnce();
     var modal = document.getElementById("chatDialogPreviewModal");
     var titleEl = document.getElementById("chatDialogPreviewTitle");
     var subEl = document.getElementById("chatDialogPreviewSub");
@@ -329,7 +343,7 @@ function initChatDialogPreviewRuntime(opts) {
       });
   }
 
-  (function bindChatDialogPreviewModalOnce() {
+  function bindChatDialogPreviewModalOnce() {
     var modal = document.getElementById("chatDialogPreviewModal");
     if (!modal || modal._chatDialogPreviewModalBound) return;
     modal._chatDialogPreviewModalBound = true;
@@ -365,7 +379,7 @@ function initChatDialogPreviewRuntime(opts) {
         });
       });
     }
-  })();
+  }
 
   return {
     closeChatDialogPreviewModal: closeChatDialogPreviewModal,

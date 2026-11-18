@@ -1,4 +1,4 @@
-import {bounds,metroLand,nearbyLots,metroNearest,metroRoute,gateways} from './metropolis.mjs';
+import {mapPoint,bounds,metroLand,nearbyLots,metroNearest,metroRoute,gateways} from './metropolis.mjs';
 import {buildingSolids,districtTrees} from './district-plan.mjs';
 import {estateFeatures} from './estate-plan.mjs';
 // Metres. Shared by collision, rendering, route guidance and tests.
@@ -13,8 +13,8 @@ export const CAR_START={x:87,z:160,yaw:-Math.PI/2};
 export const villaPoint=(x,z)=>({x:VILLA.x-z,z:VILLA.z+x});
 // Local villa footprint, with a small hysteresis for the roof at door thresholds.
 export function villaInteriorAt(point,margin=0){const x=point.z-VILLA.z,z=VILLA.x-point.x;return Math.abs(x)<22+margin&&Math.abs(z)<16+margin;}
-export const PICKUP={x:85,z:-53};
-export const HOME={x:-24,z:-8};
+export const PICKUP=mapPoint(281.6,512);
+export const HOME=mapPoint(529,230);
 export const LIMITS=bounds;
 export const ISLAND={x:194,z:70,rx:52,rz:65};
 export const PENINSULA={x:73,z:146,rx:55,rz:50};

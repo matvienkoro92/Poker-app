@@ -37,6 +37,8 @@ function harness({free=false,special=false,welcome=false}={}){
       commands.forEach(([op,key,...args])=>{if(op==='SET')values.set(key,String(args[0]));if(op==='HSET'&&key==='poker_app:bonus_balances')balance=Number(args[1]);});
     },
     require: name => {
+      if(name==='../daily-poker-win-notification')return {eligible:()=>false};
+      if(name==='../daily-poker-player-totals')return require('../lib/daily-poker-player-totals');
       assert.equal(name, '../business-event-tracking');
       return {businessEventWrites:async()=>({commands:[],values:[]})};
     },

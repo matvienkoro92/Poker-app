@@ -61,7 +61,7 @@ test('gold transfers conserve funds and reject invalid amounts',()=>{
 });
 test('new mission keeps saved chapter identities and remains before the final',()=>{
  assert.equal(C[14].mode,'td');assert.equal(C[13].mode,'paint');assert.equal(C[11].boss,'Валера · Железный натс');
- const fs=require('node:fs'),story=fs.readFileSync(require.resolve('../app-last-buy-in-story.js'),'utf8');assert.match(story,/activeChapters=\[0,1,2,3,5,6,7,8,9,10,12,13,14,11\]/);
+ const fs=require('node:fs'),story=fs.readFileSync(require.resolve('../app-last-buy-in-story.js'),'utf8');assert.match(story,/activeChapters=chapters.activeOrder/);assert.deepEqual(require('../app-last-buy-in-chapters').activeOrder,[0,1,2,3,5,6,7,8,9,10,12,13,14,11]);
 });
 test('technology research uses its original price and duration',()=>{
  const s=E.create({autostart:false}),p=s.players[2];p.gold=240;p.timber=1;

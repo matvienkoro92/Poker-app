@@ -653,8 +653,9 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits__allfriends>.deposits__allfriends-total{margin-top:2px;padding-top:5px;border-top:1px solid #bba36655}
 
 .deposits__pending-payments{display:grid;gap:6px;margin:0 0 10px}
-.deposits__pending-payment{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 10px;border-radius:8px;background:#d9f2d4;color:#203b28;font-size:12px}
-.deposits__pending-payment button{flex:none;min-width:44px;min-height:44px}
+.deposits__pending-payment{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 8px 2px 10px;border-radius:8px;background:#d9f2d4;color:#203b28;font-size:12px}
+.deposits__pending-payment button{flex:none;min-width:28px;min-height:28px}
+.deposits .deposits__pending-payment button.deposits__secondary{width:28px;height:28px;min-height:28px!important;padding:0;color:#203b28;background:#effbea;border:1px solid #56805b;font-size:16px;line-height:1;font-weight:700}
 
 
 .deposits .deposits__usdt-rate input {

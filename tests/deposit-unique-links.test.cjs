@@ -11,7 +11,7 @@ test('personal link issuance is disabled without ledger mutation, including conf
  assert.throws(()=>issuePaymentLink(state,body,'manager'),/Персональные ссылки отключены/);
  assert.equal(JSON.stringify(state),before);
  const regular=issuePaymentLink(state,{amount:body.amount,requestId:body.requestId},'manager');
- assert.equal(regular.link.unique,undefined);assert.match(regular.link.url,/auth.robokassa.ru\/merchant\/Invoice/);
+ assert.equal(regular.link.unique,undefined);assert.equal(regular.link.providerId,'prodamus');assert.equal(new URL(regular.link.url).hostname,'payform.ru');
  assert.equal(state.paymentLinkOrders,undefined);
 }));
 test('missing identities, secrets and fiscal settings fail without creating an order',()=>{
