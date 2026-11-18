@@ -65,6 +65,7 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/^Турбина\s+500.*ПКО\s+2\/3/i.test(raw)) return "Турбина 500с ПКО 2/3";
   if (/PLO4/i.test(raw) && /20K/i.test(raw) && !/Bounty/i.test(raw)) return "PLO4 🃏🃏🃏 20K 🏆";
   if (/Prime\s+PKO/i.test(raw) && /200K/i.test(raw)) return "Prime PKO 200K";
   if (/PLO6\s+Bounty/i.test(raw) && /12K/i.test(raw)) return "PLO6 Bounty 12K";
@@ -652,6 +653,11 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // IMG_2152: OCR omitted Jindaniels’ seventh-place digit.
+    if (date === "17.11.2026" && blue && time === "18:00" && title === "Black Magic 500K" && playerId === "3382536") {
+      place = 7;
+      needsPlaceCheck = false;
+    }
     // IMG_1089 visibly shows a zero rank for Lorenco.
     if (date === "22.10.2026" && blue && time === "13:00" && playerId === "3106349" && reward === 2.65) {
       place = 0;

@@ -4136,4 +4136,185 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "17.11.2026": [
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Boba7575",
+          "place": 3,
+          "reward": 538.32,
+          "points": 90
+        },
+        {
+          "nick": "Monfokon",
+          "place": 4,
+          "reward": 246.65,
+          "points": 70
+        },
+        {
+          "nick": "isildur",
+          "place": 7,
+          "reward": 224.99,
+          "points": 40
+        },
+        {
+          "nick": "FreshMeat",
+          "place": 16,
+          "reward": 12.48,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Палач",
+          "place": 2,
+          "reward": 1372.65,
+          "points": 110
+        },
+        {
+          "nick": "Monfokon",
+          "place": 4,
+          "reward": 993.75,
+          "points": 70
+        },
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 772.66,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 11256,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 730,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Тракториста",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 39300,
+          "points": 135
+        },
+        {
+          "nick": "cadillac",
+          "place": 3,
+          "reward": 10900,
+          "points": 90
+        },
+        {
+          "nick": "kriak",
+          "place": 4,
+          "reward": 8900,
+          "points": 70
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 5,
+          "reward": 7400,
+          "points": 60
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 9,
+          "reward": 1900,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Black Magic 500K",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 15,
+          "reward": 23905,
+          "points": 0
+        },
+        {
+          "nick": "Jindaniels",
+          "place": 7,
+          "reward": 9481,
+          "points": 40
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Hyper Turbo 40K",
+      "buyin": 600,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Freedom",
+          "place": 3,
+          "reward": 11439,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 4,
+          "reward": 5294.74,
+          "points": 70
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 5,
+          "reward": 2464.97,
+          "points": 60
+        }
+      ]
+    }
+  ]
 };
