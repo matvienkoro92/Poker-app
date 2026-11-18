@@ -19,6 +19,7 @@ for(const b of NARDS_INTERIORS.filter(b=>!process.argv.includes('--six-point-pan
   continue;
  }
  const gold=b.accent;
+ let splitPanels;
  const star=(cx,cy,r,n=8)=>Array.from({length:n*2},(_,i)=>{const a=i*Math.PI/n-Math.PI/2,d=i%2?r*.43:r;return (cx+Math.cos(a)*d).toFixed(2)+','+(cy+Math.sin(a)*d).toFixed(2);}).join(' ');
  let pattern='',ornament='';
  if(b.motif==='marquetry'){pattern='<path d="M0 24Q60 0 120 24T240 24M0 60Q60 40 120 60T240 60M0 92Q60 70 120 92T240 92" fill="none" stroke="'+gold+'" opacity=".12"/>';ornament='<path d="M-80 0L0-46 80 0 0 46zM-54 0L0-30 54 0 0 30z" fill="none" stroke="'+gold+'" stroke-width="3"/><circle r="9" fill="'+gold+'"/>';}
@@ -43,7 +44,9 @@ for(const b of NARDS_INTERIORS.filter(b=>!process.argv.includes('--six-point-pan
   base='<defs>'+artwork+'<linearGradient id="quote-shade" x2="0" y2="1"><stop stop-color="#160f0b" stop-opacity="0"/><stop offset=".2" stop-color="#160f0b" stop-opacity=".78"/><stop offset=".8" stop-color="#160f0b" stop-opacity=".78"/><stop offset="1" stop-color="#160f0b" stop-opacity="0"/></linearGradient></defs><rect width="1200" height="1000" fill="'+b.light+'"/><g><use href="#half-mural"/><use href="#half-mural" transform="translate(1200 0) scale(-1 1)"/></g><path d="M12 12H1188V988H12Z" fill="none" stroke="'+b.dark+'" stroke-width="5"/>'+inscription(291)+inscription(909);
  }
  if(b.splitArt){
-  base=(await Promise.all(['left','right'].map(async(side,i)=>{const encoded=(await require('./six-point-panel.cjs')(path.join(out,'illustration-'+b.art+'-'+side+'.webp'))).toString('base64');return '<image href="data:image/png;base64,'+encoded+'" x="'+(i?618:0)+'" y="0" width="582" height="1000" preserveAspectRatio="xMidYMid slice"/>';}))).join('');
+  const sixPointPanel=require('./six-point-panel.cjs');
+  splitPanels=await Promise.all(['left','right'].map(side=>sixPointPanel(path.join(out,'illustration-'+b.art+'-'+side+'.webp'),b.id)));
+  base=splitPanels.map((panel,i)=>'<image href="data:image/png;base64,'+panel.toString('base64')+'" x="'+(i?618:0)+'" y="0" width="582" height="1000" preserveAspectRatio="none"/>').join('');
  }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';
  let points='';const w=1164/12;for(let row=0;row<2;row++)for(let i=0;i<12;i++){const x=i*w+(i>=6?36:0),y=row?946:54,gap=[50.3,54.5,60.1,60.1,54.5,50.3][i%6],reach=54+446*(1-gap/100),tip=row?1000-reach:reach;points+='<path d="M'+(x+w*.22)+' '+y+'H'+(x+w*.78)+'L'+(x+w/2)+' '+tip+'Z" fill="'+(i%2?gold:b.dark)+'" stroke="'+(i%2?b.dark:gold)+'" stroke-width="2"/><ellipse cx="'+(x+w/2)+'" cy="'+y+'" rx="'+(w*.46)+'" ry="46" fill="#9a8663" stroke="#342516" stroke-width="4"/>';}
@@ -52,9 +55,9 @@ for(const b of NARDS_INTERIORS.filter(b=>!process.argv.includes('--six-point-pan
   const sharp=require('sharp'),normalize=require('../../lib/nards-challenge-art').supportedImages;
   const raster=await sharp(Buffer.from(await normalize(svg(base)))).resize(1200,1000).png().toBuffer();
   await sharp(raster).webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b.surface)));
-  for(const [side,x]of [['left',0],['right',618]]){const panel=b.splitArt?sharp(await require('./six-point-panel.cjs')(path.join(out,'illustration-'+b.art+'-'+side+'.webp'))):sharp(raster).extract({left:x,top:0,width:582,height:1000});await panel.webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b[side+'Surface'])));}
+  for(const [side,x]of [['left',0],['right',618]]){const panel=b.splitArt?sharp(splitPanels[side==='left'?0:1]):sharp(raster).extract({left:x,top:0,width:582,height:1000});await panel.webp({quality:80,effort:6}).toFile(path.join(out,path.basename(b[side+'Surface'])));}
   const preview=Buffer.from(await normalize(svg(base+(b.revision>=2?'':points)+bar)));
-  if(b.splitArt){const panels=await Promise.all(['left','right'].map(async side=>sharp(await require('./six-point-panel.cjs')(path.join(out,'illustration-'+b.art+'-'+side+'.webp'))).resize(228,524,{fit:'cover'}).toBuffer()));await sharp({create:{width:480,height:524,channels:3,background:b.frame}}).composite([{input:panels[0],left:0,top:0},{input:panels[1],left:252,top:0}]).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));}else await sharp(preview).resize(480,400).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));
+  if(b.splitArt){const panels=await Promise.all(splitPanels.map(panel=>sharp(panel).resize(228,524,{fit:'fill'}).toBuffer()));await sharp({create:{width:480,height:524,channels:3,background:b.frame}}).composite([{input:panels[0],left:0,top:0},{input:panels[1],left:252,top:0}]).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));}else await sharp(preview).resize(480,400).webp({quality:76,effort:6}).toFile(path.join(out,path.basename(b.preview)));
  }else{
  fs.writeFileSync(path.join(out,path.basename(b.surface)),svg(base));
  for(const [side,x]of [['left',0],['right',618]])fs.writeFileSync(path.join(out,path.basename(b[side+'Surface'])),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+x+' 0 582 1000" preserveAspectRatio="xMidYMid meet">'+base+'</svg>');
@@ -63,6 +66,8 @@ for(const b of NARDS_INTERIORS.filter(b=>!process.argv.includes('--six-point-pan
 
 }
 console.log('Generated '+NARDS_INTERIORS.length+' nards interiors and previews');
+
+if(process.argv.includes('--six-point-panels'))return;
 
 // Club exteriors reuse their inlay as a strong carved centerpiece, with a quiet rim.
 for(const id of ['club-aces','club-night']){
