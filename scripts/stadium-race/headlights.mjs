@@ -13,21 +13,30 @@ export function createHeadlights(scene){
   fit(root,transport){
    root.updateWorldMatrix(true,true);
    const bounds=new T.Box3(),worldToLocal=root.matrixWorld.clone().invert();
+   const rearOptics=new Set();
    root.traverseVisible(mesh=>{
     if(!mesh.isMesh)return;
+    for(const m of [].concat(mesh.material)){
+     if((m.name==='M5_E60_Taillights'||m.name==='rearlight')&&m.emissive)rearOptics.add(m);
+    }
     if(!mesh.geometry.boundingBox)mesh.geometry.computeBoundingBox();
     bounds.union(mesh.geometry.boundingBox.clone().applyMatrix4(worldToLocal.clone().multiply(mesh.matrixWorld)));
    });
    if(bounds.isEmpty())return;
    const height=transport==='kart'?.59:.72;
-   const tail=new T.MeshBasicMaterial({color:'#d72619',toneMapped:false});
+   for(const m of rearOptics){m.emissive.setHex(0xff150c);m.emissiveIntensity=.45;}
+   const tail=rearOptics.size?null:new T.MeshBasicMaterial({color:'#d72619',toneMapped:false});
    for(const side of [-1,1])for(const rear of [false,true]){
+    if(rear&&!tail)continue;
     const glass=new T.Mesh(lens,rear?tail:lampGlass);
     glass.scale.set(rear?.21:.19,.068,.095);
     glass.position.set(side*(transport==='kart'?.74:.67),height,rear?bounds.min.z+.04:bounds.max.z-.04);
     glass.userData.batchSceneDetail=true;root.add(glass);
    }
-   return braking=>tail.color.set(braking?'#ff5441':'#d72619');
+   return braking=>{
+    for(const m of rearOptics)m.emissiveIntensity=braking?2.6:.45;
+    if(tail)tail.color.set(braking?'#ff5441':'#d72619');
+   };
   },
   update(p,heading,enabled,pitch=0){
    const a=p.a-heading,sin=Math.sin(a),cos=Math.cos(a);

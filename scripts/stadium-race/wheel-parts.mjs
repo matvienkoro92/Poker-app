@@ -7,6 +7,6 @@ export function splitWheelParts(geometry){
 
 export function animateOwnedWheels(vehicle){
  if(vehicle.wheels.length||!vehicle.closedCabin)return;
- vehicle.root.updateMatrixWorld(true);const sources=[];vehicle.root.traverse(m=>{if(m.isMesh&&['tire','Anthracite alloy'].includes(m.material?.name))sources.push(m);});
- for(const source of sources){const geometry=source.geometry.clone().applyMatrix4(source.matrixWorld);for(const part of splitWheelParts(geometry)){const pivot=new T.Group(),spin=new T.Group();pivot.position.copy(part.center);spin.userData.spinAxis='x';spin.add(new T.Mesh(part.geometry,source.material));pivot.add(spin);vehicle.root.add(pivot);vehicle.wheels.push(spin);if(part.front)vehicle.frontWheels.push(pivot);}source.removeFromParent();source.geometry.dispose();geometry.dispose();}
+ vehicle.root.updateMatrixWorld(true);const sources=[];vehicle.root.traverse(m=>{if(m.isMesh&&(['tire','Anthracite alloy'].includes(m.material?.name)||m.material?.name==='lambert1'&&/wheel/i.test(m.name)))sources.push(m);});
+ for(const source of sources){const geometry=source.geometry.clone().applyMatrix4(source.matrixWorld);for(const part of splitWheelParts(geometry)){const pivot=new T.Group(),spin=new T.Group();pivot.position.copy(part.center);spin.userData.spinAxis='x';spin.userData.rollingRadius=vehicle.root.userData.garageLook?.transport==='bmw-e60'?.33:.36;spin.add(new T.Mesh(part.geometry,source.material));pivot.add(spin);vehicle.root.add(pivot);vehicle.wheels.push(spin);if(part.front)vehicle.frontWheels.push(pivot);}source.removeFromParent();source.geometry.dispose();geometry.dispose();}
 }

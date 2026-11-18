@@ -81,12 +81,15 @@ export function createCourseGround(scene,E,sample){
    for(const side of [-1,1]){
     if(side<0&&E.riverbank(d))continue;
     const base=positions.length/3;
-    for(const dist of [d,Math.min(d+25,E.FINISH)])for(const offset of [-.28,4,16,55]){
+    for(const dist of [d,Math.min(d+25,E.FINISH)])for(const offset of [-.28,4,16,32,55]){
      const width=E.roadWidth(dist),p=sample(dist,side*(E.roadLayout(dist).halfWidth+offset)/width);
-     const y=offset<4?p.y-.48:offset===4?p.y-.7:offset===16?Math.min(p.y-.75,-1.92):-2.65;
-     positions.push(p.x,y,p.z);uv.push(p.x*.24,p.z*.24);rgb.push(tint.r,tint.g,tint.b);
+     const slope=offset>16&&(zone==='stands'||zone==='park'||zone==='cutting');
+     const ridge=slope?(zone==='cutting'?3.2:1.8)*(1+Math.sin(dist*.0012+side))*(offset-16)/39:0;
+     const y=offset<4?p.y-.48:offset===4?p.y-.7:offset===16?Math.min(p.y-.75,-1.92):-2.65+ridge;
+     const shade=.96+.07*Math.sin(dist*.004+offset*.19+side);
+     positions.push(p.x,y,p.z);uv.push(p.x*.24,p.z*.24);rgb.push(tint.r*shade,tint.g*shade,tint.b*shade);
     }
-    for(let n=0;n<3;n++){const k=base+n;indices.push(k,k+4,k+1,k+1,k+4,k+5);}
+    for(let n=0;n<4;n++){const k=base+n;indices.push(k,k+5,k+1,k+1,k+5,k+6);}
    }
   }
   if(!indices.length)continue;

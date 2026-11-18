@@ -12,26 +12,40 @@ export function createRaceSky(){
   c.save();c.translate(x,y);c.scale(2.1,.3);const cloud=c.createRadialGradient(0,0,3,0,0,115);cloud.addColorStop(0,'rgba(157,172,196,.07)');cloud.addColorStop(1,'rgba(239,228,209,0)');c.fillStyle=cloud;c.fillRect(-115,-115,230,230);c.restore();
  }
  const sun=c.createRadialGradient(1450,445,2,1450,445,170);sun.addColorStop(0,'rgba(255,189,144,.34)');sun.addColorStop(.1,'rgba(238,169,146,.16)');sun.addColorStop(1,'rgba(255,224,175,0)');c.fillStyle=sun;c.fillRect(1280,275,340,340);
- // A distant shore wraps the panorama. Clusters leave open water between districts.
- for(let layer=0;layer<2;layer++){
-  for(let x=0,n=0;x<2048;n++){
-   const w=8+(n*13+layer*7)%23;
-   const cluster=Math.max(0,Math.sin(x*Math.PI/256+layer*.8));
-   const h=4+cluster*(10+(n*17)%32);
-   const y=Math.floor(516-h+layer*5);
-   c.fillStyle=layer?'#323e53':'#4e5367';
-   c.fillRect(x,y,w,560-y);
-   if(layer){
-    if(n%5===0)c.fillRect(x+w*.24,y-4,w*.52,5);
-    for(let row=y+4;row<514;row+=5)for(let col=3;col<w-2;col+=5){
-     if((col+row+n)%7>2)continue;
-     c.fillStyle=(row+n)%3?'#9e877a':'#8894a1';
-     c.fillRect(x+col,row,2,1);
-    }
-   }
-   x+=w+2+(n%4);
+ // Layer the hills behind the waterfront so the skyline has depth around a full turn.
+ for(const [base,amplitude,shade] of [[481,19,'#68677b'],[492,14,'#555c70'],[502,8,'#495569']]){
+  c.beginPath();c.moveTo(0,560);
+  for(let x=0;x<=2048;x+=4){const t=x*Math.PI/1024;
+   c.lineTo(x,base+amplitude*(Math.sin(t*3)+.49*Math.sin(t*9+.4)+.19*Math.cos(t*23)));
   }
+  c.lineTo(2048,560);c.closePath();c.fillStyle=shade;c.fill();
  }
+ let seed=901;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+ for(let x=0;x<2048;){
+  const t=x*Math.PI/1024,cluster=Math.max(0,Math.cos(3*t-.6))**1.7;
+  const w=6+Math.floor(random()*16),h=5+random()*12+cluster*random()*47,y=515-h;
+  const glass=random()>.49;
+  c.fillStyle=glass?'#424e63':'#534e59';c.fillRect(x,y,w,h);
+  c.fillStyle=glass?'#354357':'#413f4c';c.fillRect(x+w*.65,y,w*.35,h);
+  if(h>27){c.fillRect(x+w*.16,y-3,w*.65,3);c.fillRect(x+w*.45,y-5,1,3);}
+  for(let row=y+3;row<513;row+=3.3)for(let col=2;col<w-1;col+=3.2){
+   const v=random();c.fillStyle=v>.81?'#d7ae88':v>.53?'#8e8580':'#5c6470';c.fillRect(x+col,row,1.4,1);
+  }
+  x+=w+1+random()*3;
+ }
+ // Cable spans and port cranes occupy distinct stretches of the horizon.
+ c.strokeStyle='#3b4858';c.lineWidth=1.8;c.beginPath();
+ for(const x of [320,411]){
+  c.moveTo(x,519);c.lineTo(x+3,474);c.lineTo(x+6,519);
+  for(const dir of [-1,1])for(const reach of [10,19,28,38]){c.moveTo(x+3,477);c.lineTo(x+3+dir*reach,505);}
+ }
+ c.moveTo(267,505);c.lineTo(468,505);c.stroke();
+ for(let i=0;i<4;i++){const x=986+i*24;c.strokeStyle='#49505b';c.lineWidth=2;c.beginPath();
+  c.moveTo(x,516);c.lineTo(x+3,489-i*1.6);c.lineTo(x+25,482-i*1.6);c.lineTo(x+5,495);c.lineTo(x+9,516);c.stroke();
+  c.lineWidth=.8;c.beginPath();c.moveTo(x+24,483-i*1.6);c.lineTo(x+24,495);c.stroke();
+ }
+ c.fillStyle='#303e48';c.fillRect(0,515,2048,55);
+ for(let x=0;x<2048;x+=2+random()*3){const y=516+Math.sin(x*.02)*2;c.fillStyle=random()>.5?'#364648':'#38474b';c.beginPath();c.ellipse(x,y,4+random()*3,2+random()*3,0,0,Math.PI*2);c.fill();}
  const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;texture.mapping=T.EquirectangularReflectionMapping;return texture;
 }
 
