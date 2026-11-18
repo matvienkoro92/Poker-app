@@ -6,7 +6,8 @@ function fixture(){
  const redis=require('./helpers/payment-redis.cjs')();
  const pipeline=redis.pipeline;
  redis.pipeline=async commands=>{
-   if(failAcknowledgement && commands.some(c=>c[0]==='EVAL' && c.at(-1)==='done')){
+   if(failAcknowledgement && commands.some(c=>c[0]==='EVAL' && c[3]==='ledger' &&
+     JSON.parse(c.at(-1)).paymentFormPayments?.some(payment=>payment.notifiedAt))){
      const failure=failAcknowledgement;failAcknowledgement='';
      if(failure==='after')await pipeline(commands);
      throw Error('transient Redis error');
