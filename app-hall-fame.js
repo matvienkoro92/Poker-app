@@ -1945,15 +1945,18 @@ function hallFishRenderHomePlayerMonth(data) {
   var rewards = [
     {key:'playerMonth',title:'Игрок месяца',bonus:'25 000',suit:'♠',leader:player,description:'Бонус за звание «Игрок месяца».'},
     {key:'dayHero',title:'Герой дня',bonus:'30 000',suit:'♥',leader:hero,description:'Больше всего званий «Герой дня» за месяц.'},
-    {key:'threeRebuys',title:'Выиграть 3 турнира DV-ребай подряд',bonus:'25 000',suit:'♣',description:'Выиграть 3 турнира DV-ребай подряд. Бонус — 25 000 ₽.'}
+    {key:'threeRebuys',title:'Выиграть 3 турнира DV-ребай подряд',bonus:'25 000',suit:'♣',description:'Выиграть 3 турнира DV-ребай подряд. Бонус — 25 000 ₽.'},
+    {key:'pokermankiKnockout',title:'Выбить ПокерМанки',bonus:'5 000',suit:'♦',description:'Выбей ПокерМанки после окончания регистрации в турнире вечера в понедельник, среду или пятницу. Награда — билет за 5 000 ₽.'}
   ];
   root.innerHTML = '<section class="home-reward-table" aria-label="Награды клуба в ноябре"><header class="home-reward-table__heading"><span>НАГРАДЫ КЛУБА В НОЯБРЕ</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
+    var knockout = reward.key === 'pokermankiKnockout';
+    var hasConditions = knockout || reward.key === 'threeRebuys';
     var image = reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
-    var art = image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
-    return '<button type="button" class="reward-ace'+(reward.suit==='♥'?' reward-ace--red':'')+'" '+(reward.key==='threeRebuys'?'data-home-month-achievement="threeRebuys"':'data-home-reward-tab="'+reward.key+'"')+' title="'+hallFishEsc(reward.title)+'" data-description="'+hallFishEsc(reward.description)+'" aria-haspopup="dialog">'+
-      '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><h3>'+reward.title+'</h3><span class="reward-ace__bonus"><small>Бонус</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
-      (reward.key==='threeRebuys'?'<span class="reward-ace__condition">Три победы. Одна серия.</span>':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
-      '<span class="reward-ace__action">'+(reward.key==='threeRebuys'?'Условия':'Смотреть')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
+    var art = knockout ? '<span class="reward-ace__knockout-art" role="img" aria-label="Большая боксёрская перчатка нокаутирует ПокерМанки"><img class="reward-ace__manki" src="./assets/summer-rating-player-pokermanki-v3.webp" alt="" decoding="async"><img class="reward-ace__glove" src="./assets/home-pokermanki-knockout-glove-v1.webp" alt="" decoding="async"><b aria-hidden="true">✦</b></span>' : image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
+    return '<button type="button" class="reward-ace'+(/[♥♦]/.test(reward.suit)?' reward-ace--red':'')+'" '+(hasConditions?'data-home-month-achievement="'+reward.key+'"':'data-home-reward-tab="'+reward.key+'"')+' title="'+hallFishEsc(reward.title)+'" data-description="'+hallFishEsc(reward.description)+'" aria-haspopup="dialog">'+
+      '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><h3>'+reward.title+'</h3><span class="reward-ace__bonus"><small>'+(knockout?'Билет':'Бонус')+'</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
+      (knockout?'<span class="reward-ace__condition reward-ace__condition--knockout">После конца регистрации<br>Пн, ср, пт · турнир вечера</span>':reward.key==='threeRebuys'?'<span class="reward-ace__condition">Три победы. Одна серия.</span>':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
+      '<span class="reward-ace__action">'+(hasConditions?'Условия':'Смотреть')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
   }).join('')+'</div></section>'+
     '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';
 }
@@ -1967,7 +1970,7 @@ document.addEventListener('click', function(event) {
   }
   if (button.dataset.homeMonthAchievement) {
     var dialog = document.querySelector('#homePlayerMonth .home-month-award-dialog');
-    var art = button.querySelector('.hall-fish-trophy-art');
+    var art = button.querySelector('.reward-ace__knockout-art, .hall-fish-trophy-art');
     dialog.querySelector('.home-month-award-dialog__art').replaceChildren(...(art ? [art.cloneNode(true)] : []));
     dialog.querySelector('h2').textContent = button.title;
     dialog.querySelector('p').textContent = button.dataset.description;

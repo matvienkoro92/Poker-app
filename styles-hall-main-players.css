@@ -3139,3 +3139,23 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 #homePlayerMonth .reward-ace__hologram img{height:86px}
 #homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}
 @media(max-width:650px){#homePlayerMonth .reward-ace__hologram{height:82px}#homePlayerMonth .reward-ace__hologram img{height:80px}#homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}}
+
+.home-reward-table__cards {grid-template-columns:repeat(4,minmax(0,1fr))}
+#homePlayerMonth .home-reward-table .reward-ace {padding-top:37px}
+.reward-ace__knockout-art {
+  position:relative;
+  display:block;
+  width:min(100%,132px);
+  height:auto;
+  aspect-ratio:1.55;
+  margin:5px auto 0;
+  overflow:hidden;
+  border-radius:8px;
+  background:radial-gradient(ellipse at 55% 72%,#eed8a1,transparent 73%);
+}
+.reward-ace__knockout-art img {position:absolute;max-width:none;height:auto}
+.reward-ace__knockout-art .reward-ace__manki {width:240%;left:-21%;top:-38%;transform:rotate(9deg);transform-origin:40% 32%}
+.reward-ace__knockout-art .reward-ace__glove {width:45%;left:-3%;top:5%;transform:rotate(75deg);filter:drop-shadow(0 3px 2px #402e2255)}
+.reward-ace__knockout-art b {position:absolute;top:8%;left:43%;color:#9a5d17;font-size:16px;text-shadow:0 0 3px #fff3a4}
+#homePlayerMonth .reward-ace__condition--knockout {font-size:10px;font-weight:650}
+#homePlayerMonth .home-month-award-dialog__art .reward-ace__knockout-art {width:min(100%,280px);margin:8px auto}
