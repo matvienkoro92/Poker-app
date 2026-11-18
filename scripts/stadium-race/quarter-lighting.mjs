@@ -9,6 +9,6 @@ export function quarterLightState(distance,E){
 export function createQuarterLighting(scene,E,sample){
  const lights=Array.from({length:2},()=>{const light=new T.PointLight('#ffd19a',0,17,2);scene.add(light);return light;});
  return {update(distance){quarterLightState(distance,E).forEach((state,slot)=>{
-  const light=lights[slot],p=sample(state.distance,state.lateral);light.position.set(p.x,p.y+5.15,p.z);light.intensity=state.intensity;
+  const light=lights[slot],p=sample(state.distance,state.lateral);light.color.set(E.riverbank?.(state.distance)&&state.lateral<0?'#a0d9f4':'#ffd19a');light.position.set(p.x,p.y+5.15,p.z);light.intensity=state.intensity;
  });},snapshot(){return lights.map(light=>({intensity:light.intensity,position:light.position.toArray()}));}};
 }

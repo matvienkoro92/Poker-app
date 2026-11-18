@@ -6,14 +6,16 @@ test('city is exactly three times longer with a single final bridge',()=>{
  assert.equal(E.road(E.FINISH+4000).bridge,true);
 });
 test('all three city stretches have unique pickups and ramps',()=>{
- const keys=new Set();
+ const keys=new Set(),layouts=new Set();
  for(let block=0;block<3;block++){
   const start=E.CITY_START+block*5500;
   const objects=E.trackObjects(start).filter(o=>o.distance>=start&&o.distance<start+5500&&o.key.startsWith('city:'));
+  layouts.add(objects.map(o=>o.kind).join(','));
   assert.equal(objects.length,14);
   assert.ok(objects.some(o=>o.kind==='ramp'));
   for(const o of objects){assert.ok(!keys.has(o.key));keys.add(o.key);}
  }
+ assert.equal(layouts.size,3);
 });
 test('old finish keeps racing and only extended finish ends the race',()=>{
  for(const sprint of [false,true]){

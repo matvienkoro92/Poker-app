@@ -8,7 +8,15 @@ export function createStreetSurfaces(scene,E,sample){
  const patchCanvas=document.createElement('canvas');patchCanvas.width=patchCanvas.height=128;const p=patchCanvas.getContext('2d');p.fillStyle='#262d30';p.beginPath();p.moveTo(9,17);p.lineTo(106,9);p.lineTo(119,92);p.lineTo(98,117);p.lineTo(16,111);p.closePath();p.fill();p.strokeStyle='#111c20';p.lineWidth=3;p.stroke();for(let n=0;n<1500;n++){p.fillStyle=n%2?'#a1a5a40a':'#0000000c';p.fillRect((n*47)%112+8,(n*71)%100+14,1,1);}
  const patchMap=new T.CanvasTexture(patchCanvas);patchMap.colorSpace=T.SRGBColorSpace;
  const patches=new T.InstancedMesh(new T.PlaneGeometry(1,1),new T.MeshStandardMaterial({map:patchMap,transparent:true,alphaTest:.1,roughness:.98,depthWrite:false}),18);patches.frustumCulled=false;patches.receiveShadow=true;scene.add(patches);
+ // Thin irregular films along the kerb reflect the street lamps without changing tyre grip.
+ const streakCanvas=document.createElement('canvas');streakCanvas.width=64;streakCanvas.height=256;
+ const streak=streakCanvas.getContext('2d');
+ for(let y=0;y<256;y++){const fade=Math.sin(Math.PI*y/256),middle=32+7*Math.sin(y*.053);
+  streak.fillStyle='rgba(151,183,197,'+(fade*.68)+')';streak.fillRect(middle-13*fade,y,(22+6*Math.sin(y*.32))*fade,1);}
+ const streakTexture=new T.CanvasTexture(streakCanvas);streakTexture.colorSpace=T.SRGBColorSpace;
+ const wet=new T.InstancedMesh(new T.PlaneGeometry(1,1),new T.MeshStandardMaterial({map:streakTexture,transparent:true,depthWrite:false,roughness:.13,metalness:.43,polygonOffset:true,polygonOffsetFactor:-2}),18);
+ wet.frustumCulled=false;scene.add(wet);
  const transform=new T.Object3D();let last=null;
  function at(mesh,index,d,lateral,w,h){const q=sample(d,lateral),a=sample(d-10,lateral),b=sample(d+10,lateral);transform.position.set(q.x,q.y+.012,q.z);transform.rotation.set(-Math.PI/2-Math.atan2(b.y-a.y,1.2),q.a,0,'YXZ');transform.scale.set(w,h,1);transform.updateMatrix();mesh.setMatrixAt(index,transform.matrix);}
- return {update(distance){const base=Math.floor(distance/220)*220;if(base===last)return;last=base;let count=0;for(let i=0;i<18;i++){const index=base/220+i-2,d=index*220;if(!E.road(d).city||E.road(d).bridge)continue;at(iron,count,d,(index%2?-.7:.65),.8,.8);at(patches,count,d+70,((index*7)%9-4)*.15,1.3,2.1);count++;}for(const mesh of [iron,patches]){mesh.count=count;mesh.instanceMatrix.needsUpdate=true;}}};
+ return {update(distance){const base=Math.floor(distance/220)*220;if(base===last)return;last=base;let count=0,wetCount=0;for(let i=0;i<18;i++){const index=base/220+i-2,d=index*220;if(!E.road(d).city||E.road(d).bridge)continue;if(E.riverbank(d)&&index%3!==0)at(wet,wetCount++,d+30,-.83,1.7,5.8);at(iron,count,d,(index%2?-.7:.65),.8,.8);at(patches,count,d+70,((index*7)%9-4)*.15,1.3,2.1);count++;}wet.count=wetCount;wet.instanceMatrix.needsUpdate=true;for(const mesh of [iron,patches]){mesh.count=count;mesh.instanceMatrix.needsUpdate=true;}}};
 }

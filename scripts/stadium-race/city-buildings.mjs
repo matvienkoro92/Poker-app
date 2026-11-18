@@ -37,6 +37,21 @@ export function createCityBuildingFactory(facades,roofBox,roofCylinder){
    mesh(box,roof,-side*3.85,level*3.1+.5,1.8,.045,.045,2.8);
    for(const z of [.5,1.15,1.8,2.45,3.1])mesh(box,roof,-side*3.85,level*3.1+.25,z,.045,.5,.045);
   }}
+  if(kind===1){
+   // Glass stairwell catches the evening light along the setback corner.
+   for(const z of [-4.8,-3.1])mesh(box,stone,-side*3.61,h/2,z,.26,h,.20);
+   for(let level=1;level<h/2.7;level++)mesh(box,stone,-side*3.62,level*2.7,-3.95,.28,.17,1.85);
+   mesh(box,roof,side*.7,h+1.7,-1.3,3.4,.78,4.1);
+  }
+  if(kind===0){
+   // Ribbed lighthouse-like lantern on the rounded quay buildings.
+   mesh(cylinder,stone,0,h+1.3,0,1.25,1.03,1.25);
+   mesh(cylinder,roof,0,h+1.88,0,1.48,.17,1.48);
+   for(let rib=0;rib<8;rib++){
+    const a=rib*Math.PI/4;
+    mesh(box,roof,Math.cos(a)*1.24,h+1.3,Math.sin(a)*1.24,.12,1.02,.12);
+   }
+  }
   mesh(box,roof,side*.8,h+.45,-1.8,1.6,.55,1.2);
   for(const z of [-2.1,-1.7])mesh(cylinder,roof,side*.8,h+.95,z,.13,.7,.13);
   group.userData.architecture=['rounded','terraced','masonry'][kind];return group;

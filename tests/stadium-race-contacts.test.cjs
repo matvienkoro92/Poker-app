@@ -37,3 +37,19 @@ test('restart clears crash effects, contact momentum and cooldowns',()=>{
  const state=E.create();state.crash={started:9};state.impact={started:9};state.contactVelocity=.02;state.contactCooldown=12;state.bumpCooldown=8;
  E.revive(state);assert.equal(state.crash,null);assert.equal(state.impact,null);assert.equal(state.contactVelocity,0);assert.equal(state.contactCooldown,0);assert.equal(state.bumpCooldown,0);
 });
+
+test('Jersey blocks contact the front bumper at the same metre clearance on both road widths',()=>{
+ for(const barrier of [
+  E.trackObjects(2800).find(o=>o.key==='0:3000'),
+  E.trackObjects(E.cityDistance(7100)).find(o=>o.key==='city:1:7070'),
+ ]){
+  for(const [offset,expectedHits] of [[2.25,1],[2.62,0]]){
+   const s=E.create(9);s.rivals=[];s.countdown=0;s.speed=5;
+   s.distance=barrier.distance-45;
+   s.lateral=barrier.lateral+offset/E.roadWidth(barrier.distance);
+   E.step(s,{});
+   assert.ok(s.distance<barrier.distance);
+   assert.equal(s.hits,expectedHits);
+  }
+ }
+});

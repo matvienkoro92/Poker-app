@@ -61,12 +61,53 @@ export function createRoadPropFactory(block, mat) {
    for(const z of [-1.5,.1,1.6]){const band=panel(part,0,(z+2)*1.1/4+.022,z,3.7,.18);band.rotation.set(-Math.PI/2-Math.atan2(1.1,4),0,0);}
    for(const child of part.children)child.position.z-=2;
   }else if(kind==='box'){
-   mesh(part,bevel(1.15,.85,.85,.08),dark,0,.57,0);for(const side of [-1,1])mesh(part,bevel(.1,.91,.91,.025),steel,side*.43,.57,0);mesh(part,bevel(.4,.1,.14,.03),steel,0,1.06,0);badge(part,'?','#e4c37e',0,.6,-.438,.53);glow(part,'#e9bb5c',.95);
-  }else if(kind==='nitro'||kind==='shield'){
-   const color=kind==='nitro'?'#b68b3e':'#387888';const shell=material(kind,()=>new T.MeshStandardMaterial({color,metalness:.65,roughness:.3}));
-   mesh(part,cylinder,shell,0,.65,0,.34,1,.34);mesh(part,sphere,shell,0,1.15,0,.34,.2,.34);mesh(part,cylinder,dark,0,.15,0,.37,.15,.37);mesh(part,cylinder,steel,0,1.36,0,.08,.16,.08);mesh(part,bevel(.3,.06,.06,.02),steel,0,1.45,0);for(const y of [.35,.95])mesh(part,cylinder,dark,0,y,0,.35,.07,.35);badge(part,kind,kind==='nitro'?'#ffe0a0':'#9ceded',0,.66,-.35,.43);glow(part,kind==='nitro'?'#efc16e':'#6ddce7',.9);
+   mesh(part,bevel(1.4,.78,.84),dark,0,.57,0);
+   mesh(part,bevel(1.42,.18,.87),steel,0,.98,0);
+   for(const side of [-1,1]){
+    mesh(part,bevel(.13,.94,.9),amber,side*.54,.59,0);
+    mesh(part,bevel(.12,.22,.11),steel,side*.36,.82,-.48);
+    mesh(part,bevel(.09,.19,.1),steel,side*.22,1.15,0);
+   }
+   mesh(part,bevel(.52,.085,.1),dark,0,1.25,0);
+   badge(part,'?','#ffe197',0,.60,-.44,.59);glow(part,'#e9bb5c',1);
+  }else if(kind==='nitro'){
+   const enamel=material('nitro enamel',()=>new T.MeshStandardMaterial({color:'#ff7834',roughness:.27,metalness:.46}));
+   for(const side of [-1,1]){
+    const x=side*.26;
+    mesh(part,cylinder,enamel,x,.69,0,.235,.97,.235);
+    mesh(part,sphere,enamel,x,1.17,0,.235,.19,.235);
+    for(const y of [.32,.91])mesh(part,cylinder,steel,x,y,0,.25,.075,.25);
+    mesh(part,cylinder,steel,x,1.39,0,.08,.15,.08);
+   }
+   mesh(part,bevel(.68,.09,.1),amber,0,1.48,0);
+   badge(part,'nitro','#ffd29a',0,.67,-.248,.45);glow(part,'#ff914c',1);
+  }else if(kind==='shield'){
+   const shape=new T.Shape();shape.moveTo(0,.82);shape.lineTo(.57,.58);shape.lineTo(.48,-.14);shape.quadraticCurveTo(.4,-.48,0,-.73);shape.quadraticCurveTo(-.4,-.48,-.48,-.14);shape.lineTo(-.57,.58);shape.closePath();
+   const plate=geometry('shield casting',()=>new T.ExtrudeGeometry(shape,{depth:.12,bevelSize:.045,bevelThickness:.035,bevelSegments:2,steps:1,curveSegments:8}));
+   const rim=material('shield rim',()=>new T.MeshStandardMaterial({color:'#a2fbff',emissive:'#41b8c9',emissiveIntensity:.75,roughness:.3,metalness:.45}));
+   mesh(part,plate,rim,0,.94,0);
+   mesh(part,plate,dark,0,.95,-.045,.83,.83,1);
+   for(const y of [.9,1.14])for(const side of [-1,1]){
+    const rib=mesh(part,bevel(.32,.08,.06),rim,side*.133,y,-.105);
+    rib.rotation.z=-side*.48;
+   }
+   glow(part,'#63dfeb',1);
   }else if(kind==='chips'){
-   for(let i=0;i<3;i++){mesh(part,cylinder,mat('#b38c48'),0,.12+i*.13,0,.43,.105,.43);for(let n=0;n<6;n++){const a=n*Math.PI/3;const mark=block(part,'#e0d1a9',Math.cos(a)*.39,.12+i*.13,Math.sin(a)*.39,.09,.106,.12);mark.rotation.y=-a;}}const top=badge(part,'♠','#d7b66e',0,.438,0,.42);top.rotation.set(-Math.PI/2,0,0);
+   const inlay=material('chip inlay',()=>{
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+    const c=canvas.getContext('2d');c.translate(128,128);
+    c.fillStyle='#972f3e';c.beginPath();c.arc(0,0,127,0,2*Math.PI);c.fill();
+    for(let n=0;n<8;n++){c.rotate(Math.PI/4);c.fillStyle='#f6ddac';c.fillRect(-14,-127,28,31);}
+    c.fillStyle='#283941';c.beginPath();c.arc(0,0,86,0,2*Math.PI);c.fill();
+    c.strokeStyle='#eec58a';c.lineWidth=6;c.stroke();c.fillStyle='#ffe4af';c.textAlign='center';c.textBaseline='middle';c.font='bold 116px Georgia';c.fillText('♠',0,-2);
+    const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
+    return new T.MeshStandardMaterial({map,emissiveMap:map,emissive:'#ffdfb0',emissiveIntensity:.38,roughness:.52});
+   });
+   for(let n=0;n<3;n++)mesh(part,cylinder,n===1?steel:mat('#973545'),-.14,.14+n*.13,.12,.45,.12,.45);
+   const standing=mesh(part,cylinder,mat('#a13a42'),.14,.74,0,.60,.14,.60);
+   standing.rotation.x=-Math.PI*.45;
+   const face=mesh(part,geometry('chip face',()=>new T.CircleGeometry(.597,40)),inlay,.14,.75,-.076);
+   face.rotation.set(-Math.PI*.05,Math.PI,0,'YXZ');glow(part,'#efba7a',.92);
   }else if(kind==='pad'){
    mesh(part,bevel(4,.06,3.5,.02),dark,0,.035,0);for(const side of [-1,1])block(part,'#4e9b9c',side*1.95,.08,0,.09,.04,3.5);for(const z of [-1.1,0,1.1])for(const side of [-1,1]){const arrow=block(part,'#b5ded0',side*.45,.085,z,.12,.025,1.15);arrow.rotation.y=side*.8;}
   }else if(kind==='oil'||kind==='wet'){puddle(part,kind==='oil');

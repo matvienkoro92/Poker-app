@@ -4,14 +4,34 @@ import * as T from '../../vendor/three/three.module.min.js';
 export function createRaceSky(){
  const canvas=document.createElement('canvas');canvas.width=2048;canvas.height=1024;const c=canvas.getContext('2d');
  const gradient=c.createLinearGradient(0,0,0,1024);
- for(const [at,color] of [[0,'#172b43'],[.27,'#3c5974'],[.45,'#738391'],[.5,'#b09882'],[.57,'#596c77'],[1,'#485c68']])gradient.addColorStop(at,color);
+ for(const [at,color] of [[0,'#08182e'],[.27,'#162e50'],[.45,'#344965'],[.5,'#806978'],[.57,'#38485c'],[1,'#253748']])gradient.addColorStop(at,color);
  c.fillStyle=gradient;c.fillRect(0,0,2048,1024);
  // Broad, low-contrast cloud banks keep the skyline readable at phone resolution.
  for(let layer=0;layer<4;layer++)for(let n=0;n<17;n++){
   const x=(n*137+layer*91)%2048,y=260+layer*47+Math.sin(n*1.7+layer)*27;
-  c.save();c.translate(x,y);c.scale(2.1,.3);const cloud=c.createRadialGradient(0,0,3,0,0,115);cloud.addColorStop(0,'rgba(239,228,209,.12)');cloud.addColorStop(1,'rgba(239,228,209,0)');c.fillStyle=cloud;c.fillRect(-115,-115,230,230);c.restore();
+  c.save();c.translate(x,y);c.scale(2.1,.3);const cloud=c.createRadialGradient(0,0,3,0,0,115);cloud.addColorStop(0,'rgba(157,172,196,.07)');cloud.addColorStop(1,'rgba(239,228,209,0)');c.fillStyle=cloud;c.fillRect(-115,-115,230,230);c.restore();
  }
- const sun=c.createRadialGradient(1450,445,2,1450,445,170);sun.addColorStop(0,'rgba(255,239,200,.7)');sun.addColorStop(.1,'rgba(255,224,175,.25)');sun.addColorStop(1,'rgba(255,224,175,0)');c.fillStyle=sun;c.fillRect(1280,275,340,340);
+ const sun=c.createRadialGradient(1450,445,2,1450,445,170);sun.addColorStop(0,'rgba(255,189,144,.34)');sun.addColorStop(.1,'rgba(238,169,146,.16)');sun.addColorStop(1,'rgba(255,224,175,0)');c.fillStyle=sun;c.fillRect(1280,275,340,340);
+ // A distant shore wraps the panorama. Clusters leave open water between districts.
+ for(let layer=0;layer<2;layer++){
+  for(let x=0,n=0;x<2048;n++){
+   const w=8+(n*13+layer*7)%23;
+   const cluster=Math.max(0,Math.sin(x*Math.PI/256+layer*.8));
+   const h=4+cluster*(10+(n*17)%32);
+   const y=Math.floor(516-h+layer*5);
+   c.fillStyle=layer?'#323e53':'#4e5367';
+   c.fillRect(x,y,w,560-y);
+   if(layer){
+    if(n%5===0)c.fillRect(x+w*.24,y-4,w*.52,5);
+    for(let row=y+4;row<514;row+=5)for(let col=3;col<w-2;col+=5){
+     if((col+row+n)%7>2)continue;
+     c.fillStyle=(row+n)%3?'#9e877a':'#8894a1';
+     c.fillRect(x+col,row,2,1);
+    }
+   }
+   x+=w+2+(n%4);
+  }
+ }
  const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;texture.mapping=T.EquirectangularReflectionMapping;return texture;
 }
 
@@ -19,7 +39,7 @@ export function createDistrictDetailFactory(block,sharedCylinder){
  const plane=new T.PlaneGeometry(1,1);
  const contactCanvas=document.createElement('canvas');contactCanvas.width=contactCanvas.height=128;const shade=contactCanvas.getContext('2d'),gradient=shade.createRadialGradient(64,64,8,64,64,64);gradient.addColorStop(0,'rgba(9,18,23,.42)');gradient.addColorStop(.65,'rgba(9,18,23,.24)');gradient.addColorStop(1,'rgba(9,18,23,0)');shade.fillStyle=gradient;shade.fillRect(0,0,128,128);
  const contact=new T.MeshBasicMaterial({map:new T.CanvasTexture(contactCanvas),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
- const labels=['TWO ACES · COFFEE','PORTSIDE · MARKET'];
+ const labels=['КОФЕЙНЯ У РЕКИ','РЫБНЫЙ РЫНОК','МАСТЕРСКАЯ','ВИНИЛ И ДЖАЗ'];
  const shopMaterials=labels.map((label,index)=>{
   const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;const c=canvas.getContext('2d');
   c.fillStyle=['#344b51','#56493f','#3e504a','#424d60'][index];c.fillRect(0,0,512,256);c.fillStyle='#d8c8aa';c.fillRect(6,7,500,3);c.fillRect(6,56,500,2);c.font='bold 25px sans-serif';c.textAlign='center';c.fillText(label,256,40);
@@ -28,9 +48,23 @@ export function createDistrictDetailFactory(block,sharedCylinder){
    const glass=c.createLinearGradient(x,74,x+110,247);glass.addColorStop(0,'#53636b');glass.addColorStop(.3,'#263d47');glass.addColorStop(1,'#0b1e2a');c.fillStyle=glass;c.fillRect(x,74,110,171);
    c.fillStyle='#c4a67545';c.fillRect(x+8,91,94,119);c.fillStyle='#192c31';c.fillRect(x+10,155,90,6);c.fillRect(x+10,202,90,7);
    for(let item=0;item<5;item++){c.fillStyle=['#b4a087','#958773','#c0ae82'][item%3];c.fillRect(x+14+item*17,140-(item%2)*10,10,14+(item%2)*10);}
+   if(index===0){
+    for(let lamp=0;lamp<2;lamp++){
+     const lx=x+28+lamp*48;c.fillStyle='#2c302d';c.fillRect(lx,74,2,20);
+     c.fillStyle='#ffcc88';c.beginPath();c.arc(lx,100,8,Math.PI,2*Math.PI);c.fill();
+    }
+   }else if(index===2||index===3){
+    for(let n=0;n<3;n++){
+     c.strokeStyle=index===2?'#b9b5a6':'#141d24';c.lineWidth=index===2?3:8;
+     c.beginPath();c.arc(x+20+n*32,128+n%2*10,12,0,2*Math.PI);c.stroke();
+    }
+   }else{
+    c.fillStyle='#b18b5a';c.fillRect(x+8,176,94,20);
+    for(let n=0;n<4;n++){c.fillStyle='#b6c5bd';c.beginPath();c.ellipse(x+18+n*22,175,10,3,-.25,0,Math.PI*2);c.fill();}
+   }
    c.fillStyle='#aeb8b83b';c.beginPath();c.moveTo(x,74);c.lineTo(x+47,74);c.lineTo(x+106,245);c.lineTo(x+80,245);c.fill();c.fillStyle='#28393f';c.fillRect(x+52,74,4,171);c.fillStyle='#c8b99b';c.fillRect(x+60,184,3,20);
   }
-  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;return new T.MeshStandardMaterial({map,roughness:.55,metalness:.08,emissive:'#e6c38c',emissiveMap:map,emissiveIntensity:.13});
+  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;return new T.MeshStandardMaterial({map,roughness:.55,metalness:.08,emissive:'#e6c38c',emissiveMap:map,emissiveIntensity:.35});
  });
  const leavesCanvas=document.createElement('canvas');leavesCanvas.width=leavesCanvas.height=512;const leaves=leavesCanvas.getContext('2d');
  let seed=291;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};

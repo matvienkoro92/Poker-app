@@ -9,15 +9,26 @@ export function createQuarterMaterials(){
   for(let row=0;row<3;row++)for(let col=0;col<6;col++){
    const x=22+col*170,y=32+row*220,w=126,h=164;c.fillStyle='#343a3a';c.fillRect(x-10,y-9,w+20,h+20);c.fillStyle='#827d70';c.fillRect(x-7,y-6,w+14,h+14);
    const glass=c.createLinearGradient(x,y,x+w,y+h);glass.addColorStop(0,'#65777b');glass.addColorStop(.38,'#263a45');glass.addColorStop(1,'#101e29');c.fillStyle=glass;c.fillRect(x,y,w,h);
-   if((row*7+col+index)%6===0){c.fillStyle='#b9915759';c.fillRect(x+6,y+7,w-12,h-14);e.fillStyle='#80633f';e.fillRect(x+6,y+7,w-12,h-14);}
+   if((row*7+col*3+index)%7<2){c.fillStyle='#b9915759';c.fillRect(x+6,y+7,w-12,h-14);e.fillStyle=(col+index)%2?'#cfab82':'#92a8b9';e.fillRect(x+6,y+7,w-12,h-14);}
    c.fillStyle='#d9cbb33b';c.fillRect(x+7,y+5,24,h-10);c.fillRect(x+w-31,y+5,24,h-10);c.fillStyle='#253234';c.fillRect(x+w/2-3,y,6,h);c.fillRect(x,y+h*.6,w,5);
    c.fillStyle='#9c9484';c.fillRect(x-14,y+h+5,w+28,10);c.fillStyle='#171d2180';c.fillRect(x-14,y+h+15,w+28,9);
   }
   c.fillStyle='#302e2a';c.fillRect(0,696,1024,328);c.fillStyle=['#30474c','#50453b','#414b45'][index];c.fillRect(10,712,1004,63);c.fillStyle='#dfcba4';c.font='bold 34px serif';c.textAlign='center';c.fillText(['OLD QUAY · COFFEE & RECORDS','TWO ACES · MOTOR WORKS','НАБЕРЕЖНАЯ · ГАЛЕРЕЯ'][index],512,754);
   for(let col=0;col<4;col++){const x=20+col*250;c.fillStyle='#b6aa91';c.fillRect(x,791,232,229);c.fillStyle='#162c35';c.fillRect(x+8,800,216,216);c.fillStyle='#b1905848';c.fillRect(x+18,821,196,173);c.fillStyle='#243437';c.fillRect(x+112,800,6,216);c.fillRect(x+8,931,216,7);for(let n=0;n<6;n++){c.fillStyle=['#9f8b69','#655f50','#b29974'][n%3];c.fillRect(x+24+n*30,911-(n%2)*15,15,20+(n%2)*15);}}
+  // Backlight individual panes, leaving the frame and display silhouettes dark.
+  for(let shop=0;shop<4;shop++){
+   const x=28+shop*250;
+   const inside=e.createLinearGradient(0,800,0,1016);
+   inside.addColorStop(0,index===1?'#b2c9da':'#edc292');
+   inside.addColorStop(.18,index===1?'#718995':'#987653');
+   inside.addColorStop(1,'#302e2a');
+   e.fillStyle=inside;e.fillRect(x,800,216,216);
+   e.fillStyle='#100f10';e.fillRect(x+104,800,6,216);e.fillRect(x,931,216,7);
+   for(let n=0;n<6;n++)e.fillRect(x+16+n*30,911-(n%2)*15,15,20+(n%2)*15);
+  }
   // Grime under cornices, restrained enough not to read as a repeating black band.
   for(let n=0;n<5000;n++){c.fillStyle=n%2?'#ffffff08':'#00000010';c.fillRect(random()*1024,random()*1024,1+random()*3,1+random()*6);}
   const map=new T.CanvasTexture(canvas),emissiveMap=new T.CanvasTexture(glow);map.colorSpace=emissiveMap.colorSpace=T.SRGBColorSpace;map.anisotropy=4;
-  return new T.MeshStandardMaterial({map,emissiveMap,emissive:'#efc38b',emissiveIntensity:.38,bumpMap:map,bumpScale:.025,roughness:.84,metalness:.03});
+  return new T.MeshStandardMaterial({map,emissiveMap,emissive:'#fff1df',emissiveIntensity:.64,bumpMap:map,bumpScale:.025,roughness:.84,metalness:.03});
  });
 }

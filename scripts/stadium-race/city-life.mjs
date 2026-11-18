@@ -63,7 +63,7 @@ export function createCityLife(scene,E,sample,block,clearance){
   nodes.push({root,details,surface,side,type,anchor:null});
  }
  return {update(distance,tick=0){for(const w of walkers)w.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(tick*.045+w.phase+i*Math.PI)*.13);nodes.forEach((node,i)=>{
-  const d=sceneryAnchor(i,nodes.length,distance,900,1),road=E.road(d);node.root.visible=road.city&&!road.bridge&&d>distance-350&&d<distance+3800;
+  const d=sceneryAnchor(i,nodes.length,distance,900,1),road=E.road(d);node.root.visible=road.city&&!road.bridge&&!(node.side>0&&node.type!==0&&E.riverbank(d))&&d>distance-350&&d<distance+3800;
   if(node.anchor===d)return;node.anchor=d;const p=sample(d),edge=E.roadLayout(d).halfWidth;
   node.root.position.set(p.x,p.y,p.z);node.root.rotation.y=p.a;node.surface.rotation.x=-Math.atan2(sample(d+10).y-sample(d-10).y,1.2);
   // Crossroads expand symmetrically; all other scenes sit beyond the new kerb.

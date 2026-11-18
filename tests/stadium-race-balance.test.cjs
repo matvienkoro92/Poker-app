@@ -17,3 +17,15 @@ test('rival acceleration has finite nitro and never teleports to catch the playe
  }
  assert.ok(s.rivals.some(k=>k.nitro<35));
 });
+
+test('clear hairpin exit separates the late braker and the apex driver',()=>{
+ const state=E.create();
+ function target(index){
+  for(const racer of state.rivals)racer.distance=0;
+  const racer=state.rivals[index];racer.distance=4900;racer.lateral=0;
+  E.planRival(state,racer,index);
+  return racer.targetLane;
+ }
+ assert.ok(target(1)<-.3);
+ assert.ok(target(2)>.3);
+});
