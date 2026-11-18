@@ -15,3 +15,16 @@ test('villa rooms remain reachable around solid furniture and roof thresholds ha
 test('lighthouse estate exits directly onto the mainland promenade and stays separate from the park',async()=>{const [,W]=await load();assert.equal(W.blocked(135,40),true,'water between city and island');assert.equal(W.blocked(135,70,1.6),false,'bridge carries the kart');assert.equal(W.blocked(53,144,1.6),true,'estate fence is solid');assert.equal(W.blocked(53,160,1.6),false,'gate opening is wide enough');assert.equal(W.VILLA.x<130&&W.VILLA.z>100,true);const route=[W.CAR_START,...W.roadRoute(W.CAR_START,W.HOME),W.HOME];assert.ok(route.some(p=>p.x===40&&p.z===105));for(let i=1;i<route.length;i++){const a=route[i-1],b=route[i],length=Math.hypot(b.x-a.x,b.z-a.z);for(let n=0;n<=Math.ceil(length);n++){const t=n/Math.max(1,Math.ceil(length));assert.equal(W.blocked(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t,1.6),false,'route must stay on land and clear the fence');}}});
 
 test('ocean lounge replaces the lighthouse and is reachable through the garden passage',async()=>{const [E,W]=await load(),s=E.create();for(const [x,z]of [[87,159],[78,159],[78,171],[103,171],[103,175],[103,181]])walker(E,s,x,z);assert.equal(W.blocked(103,181),false);assert.equal(W.landAt(113,185),true,'deck over water is a supported walking surface');assert.equal(W.SOLIDS.some(b=>b.h===15&&b.minX<109&&b.maxX>109),false,'lighthouse collider must be removed');});
+test('civilian circuits stay clear of solids from the villa gate to downtown and the docks',async()=>{
+ const W=await import('../scripts/city-game/world.mjs');
+ const {fleet}=await import('../scripts/city-game/traffic.mjs');
+ const routes=new Set(fleet.map(vehicle=>vehicle.path));
+ assert.ok(routes.size>=3);
+ for(const path of routes)for(const [i,a] of path.entries()){
+  const b=path[(i+1)%path.length],steps=Math.ceil(Math.hypot(b.x-a.x,b.z-a.z)*2);
+  for(let j=0;j<=steps;j++){
+   const f=j/(steps||1),x=a.x+(b.x-a.x)*f,z=a.z+(b.z-a.z)*f;
+   assert.equal(W.blocked(x,z,1.5),false,`civilian lane blocked at ${x}, ${z}`);
+  }
+ }
+});
