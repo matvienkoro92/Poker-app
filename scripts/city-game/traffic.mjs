@@ -16,12 +16,12 @@ const coast=circuit([[gate.x+2,gate.z-2],[bend.x+2,bend.z+2],[join.x+2,join.z+2]
 const downtown=circuit([[west+2,quay-2],[west+2,port+2],[centre-2,port+2],[centre-2,quay-2]]);
 const docks=circuit([[east+1,club+2],[east+1,port-2],[west-2,port-2],[west-2,club+2]]);
 export const fleet=[
- {path:coast,start:4,pace:6.5,color:'#9e6154'},
- {path:coast,start:46,pace:6.5,color:'#446575'},
+ {path:coast,start:4,pace:6.5,color:'#a54e35',kind:'uaz'},
+ {path:coast,start:46,pace:6.5,color:'#d7c3a0',kind:'vaz'},
  {path:downtown,start:0,pace:8,color:'#d4a54f',kind:'taxi'},
- {path:downtown,start:14,pace:8,color:'#738f80'},
- {path:docks,start:6,pace:6,color:'#b7b4a5',kind:'van'},
- {path:docks,start:19,pace:6,color:'#64758b',kind:'van'}
+ {path:downtown,start:14,pace:8,color:'#607449',kind:'uaz'},
+ {path:docks,start:6,pace:6,color:'#a63540',kind:'vaz'},
+ {path:docks,start:19,pace:6,color:'#496b8c',kind:'uaz'}
 ];
 export function createTraffic(){return fleet.map(({path,start,pace},id)=>{const p=path[start],route=(start+1)%path.length,n=path[route];return {...p,id,route,speed:pace,yaw:Math.atan2(n.x-p.x,n.z-p.z)};});}
 export function advanceTraffic(t,dt){

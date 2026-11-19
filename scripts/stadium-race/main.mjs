@@ -133,7 +133,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
     diffuseColor.rgb=mix(diffuseColor.rgb,pigment,mask*.87);
    `);
   };
-  fleet=await createProductionFleet();if(stopped){fleet.dispose();return;}
+  fleet=await createProductionFleet({rivals:s.rivals.length>0});if(stopped){fleet.dispose();return;}
   const crossingCars=E.crossTrafficAt(0).map((_,i)=>{const car=fleet(i+1,true);scene.add(car.root,car.contactShadow);return car;});
   const trafficCars=E.trafficAt(0).map((_,i)=>{const car=fleet(i,true);scene.add(car.root,car.contactShadow);return car;});
   const upperRoutes=createUpperRoutes(scene,E,sample,block,asphalt);

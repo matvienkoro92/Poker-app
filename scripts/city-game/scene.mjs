@@ -1,3 +1,5 @@
+import {loadUaz,loadVaz} from '../vehicles/road-classics.mjs';
+import {addCityCats} from './city-cats.mjs';
 import {animateOwnedWheels} from '../stadium-race/wheel-parts.mjs';
 import {loadCityPalms,loadCityTrees} from './city-trees.mjs';
 import {buildMetropolis} from './metropolis-view.mjs';
@@ -39,6 +41,8 @@ export async function createCityScene(canvas,onProgress,garage={}){
  }
  registerSurface(87,160,16,15,.041);
  const outdoors=createOutdoors(scene,textures,registerSurface,trees,palms);
+ const classicsLoading=Promise.all([loadUaz(),loadVaz()]);
+ const cats=addCityCats(scene,textures,disposers,groundHeight);
  const npcMaterial=new T.MeshStandardMaterial({vertexColors:true,roughness:.85});
  const facadeColors=new Set(BUILDINGS.map(b=>b.color));
  const mat=(color,emissive=false)=>{const key=color+emissive;if(!materials.has(key)){const glass=['#345b65','#365c61'].includes(color);const material=glass?new T.MeshPhysicalMaterial({color:'#6c8991',metalness:.35,roughness:.15,clearcoat:1,clearcoatRoughness:.13}):new T.MeshStandardMaterial({color,roughness:.82,metalness:.03,...(facadeColors.has(color)?{map:outdoors.facadeMap,bumpMap:outdoors.facadeMap,bumpScale:.035}:{}),...(emissive?{emissive:color,emissiveIntensity:.6}:{})});materials.set(key,material);}return materials.get(key);};
@@ -134,7 +138,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  trees?.flush(scene,textures);
  palms?.flush(scene,textures);
  const staticMeshes=[];for(const b of batches.values()){const mesh=new T.InstancedMesh(geos[b.type],mat(b.color,b.emissive),b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);staticMeshes.push(mesh);}
- await villa.ready;
+ const [updateCats]=await Promise.all([cats,villa.ready]);
  onProgress('Манки выходит в город…');
  const look=garage.owner?garage.look:{...window.PokerGarage.defaults,body:'bodyNormal',suit:'emeraldBomber',pants:'blackDenim',shoes:'ivoryLow',helmet:'none',hair:'hairNatural',patch:'aces',glasses:'none'};
  const hero=await buildSculptedCharacter(window.PokerGarage,look);const avatar=new T.Group();hero.root.scale.setScalar(.57);hero.root.position.y=1.08;avatar.add(hero.root);scene.add(avatar);disposers.push(()=>hero.dispose());
@@ -159,8 +163,8 @@ export async function createCityScene(canvas,onProgress,garage={}){
  for(const sign of [-1,1]){part(.08,.56,.1,paint,sign*.87,1.25,-.25);const rear=part(.085,.77,.095,paint,sign*.87,1.25,-1.42);rear.rotation.x=.66;const front=part(.085,.96,.095,paint,sign*.87,1.25,.63);front.rotation.x=-.88;part(.1,.06,.28,mat('#decba1'),sign*1.12,.9,-.15);part(.25,.14,.35,paint,sign*1.19,1.11,.58);part(.65,.16,.06,mat('#ffe6b1',true),sign*.68,.8,2.33);part(.67,.13,.06,mat('#d45945',true),sign*.68,.8,-2.33);for(const z of [-1.42,1.42]){const pivot=new T.Group();pivot.position.set(sign*1.09,.43,z);g.add(pivot);const tire=new T.Mesh(new T.CylinderGeometry(.43,.43,.27,16),mat('#222b2c'));tire.rotation.z=PI/2;pivot.add(tire);const rim=new T.Mesh(new T.CylinderGeometry(.27,.27,.282,12),mat('#d9b572'));rim.rotation.z=PI/2;pivot.add(rim);wheels.push(pivot);if(z>0)frontWheels.push(pivot);}}
  for(const x of [-.47,.47]){part(.62,.3,.65,mat('#263d3b'),x,.68,-.25);part(.62,.6,.16,mat('#263d3b'),x,.96,-.62);part(.4,.18,.14,mat('#263d3b'),x,1.3,-.62);}
  part(1.1,.18,.07,mat('#1f2b2d'),0,.77,2.36);part(.6,.13,.07,mat('#e3d8b6'),0,.62,-2.37);if(kind==='taxi')part(.74,.26,.32,mat('#ffe7a0',true),0,1.75,-.35);if(kind==='van'){part(2.1,1.36,2.85,paint,0,1.55,-.76);part(.045,.95,.04,mat('#34454a'),0,1.54,-2.2);}if(police){part(1.4,.12,.35,mat('#273c44'),0,1.62,-.3);for(const sign of [-1,1])part(.55,.18,.35,mat(sign<0?'#477ee8':'#f75a53',true),sign*.4,1.76,-.3);}mergeParts(g);for(const w of wheels)mergeParts(w,true);return {root:g,wheels,frontWheels};}
- onProgress('Вывозим машину из гаража…');const playerCar=await createOwnedVehicle(garage.look||window.PokerGarage.defaults);animateOwnedWheels(playerCar);const traffic=fleet.map(v=>car(v.color,false,v.kind)),police=car('#dce4de',true);scene.add(playerCar.root,police.root,...traffic.map(t=>t.root));
- const metropolitanCars=Array.from({length:9},(_,i)=>car(['#648b91','#d7ae6a','#aa7368','#91a38d'][i%4]));
+ onProgress('Вывозим машину из гаража…');const playerCar=await createOwnedVehicle(garage.look||window.PokerGarage.defaults);animateOwnedWheels(playerCar);const [uaz,vaz]=await classicsLoading;for(const classic of [uaz,vaz])if(classic)disposers.push(classic.dispose);const classics={uaz,vaz};const traffic=fleet.map(v=>classics[v.kind]?.(v.color)||car(v.color,false,v.kind)),police=car('#dce4de',true);scene.add(playerCar.root,police.root,...traffic.map(t=>t.root));
+ const metropolitanCars=Array.from({length:9},(_,i)=>{const color=['#648b91','#d7ae6a','#aa7368','#91a38d'][i%4];if(i===1||i===6)return uaz?.(color)||car(color);if(i===2||i===7)return vaz?.(color)||car(color);return car(color);});
  for(const v of metropolitanCars){scene.add(v.root);v.root.visible=false;}
  // Case and rotating marker exist in the scene, never baked into a background.
  const caseGroup=new T.Group();caseGroup.position.set(PICKUP.x,.7,PICKUP.z);scene.add(caseGroup);function casePart(w,h,d,c,x,y,z){const o=new T.Mesh(new T.BoxGeometry(w,h,d),mat(c));o.position.set(x,y,z);o.castShadow=true;caseGroup.add(o);}casePart(1.2,.7,.45,'#28544a',0,0,0);casePart(1.23,.08,.48,'#dcba78',0,.16,0);for(const x of [-.4,.4])casePart(.09,.22,.48,'#d6b574',x,.02,0);casePart(.4,.08,.08,'#dcba78',0,.51,0);for(const x of [-.2,.2])casePart(.06,.16,.08,'#dcba78',x,.43,0);
@@ -199,9 +203,10 @@ export async function createCityScene(canvas,onProgress,garage={}){
    bones.chest.rotation.y=-bones.pelvis.rotation.y*.7;
   }hero.root.updateMatrixWorld(true);hero.rig.skeleton.update();
   const nearbyTraffic=s.metroTraffic.slice().sort((a,b)=>Math.hypot(a.x-pos.x,a.z-pos.z)-Math.hypot(b.x-pos.x,b.z-pos.z));
-  metropolitanCars.forEach((v,i)=>{const t=nearbyTraffic[i];v.root.visible=!!t;if(t){v.root.position.set(t.x,0,t.z);v.root.rotation.y=t.yaw;}});
+  metropolitanCars.forEach((v,i)=>{const t=nearbyTraffic[i];v.root.visible=!!t;if(t){v.root.position.set(t.x,0,t.z);v.root.rotation.y=t.yaw;for(const wheel of v.wheels)wheel.rotation.x+=t.speed*simulationDt/(wheel.userData.rollingRadius||.43);}});
   for(const [visual,data]of [[playerCar,s.car],...traffic.map((v,i)=>[v,s.traffic[i]]),[police,s.police]]){visual.root.position.set(data.x,groundHeight(data.x,data.z),data.z);visual.root.rotation.y=data.yaw;for(const w of visual.wheels)w.rotation[w.userData.spinAxis||'x']+=data.speed*simulationDt/(w.userData.rollingRadius||.43)*(w.userData.spinSign||1);for(const w of visual.frontWheels)w.rotation.y=data===s.car?-(s.steer||0)*.28:0;}police.root.visible=!!s.heat;caseGroup.visible=!s.carrying&&s.missionActive;
   pedestrians.forEach((p,i)=>{const t=s.time*.018+p.offset*.17,velocity=Math.cos(t);p.root.position.z=-2+Math.sin(t)*63;const yaw=velocity>=0?0:PI,difference=Math.atan2(Math.sin(yaw-p.root.rotation.y),Math.cos(yaw-p.root.rotation.y));p.root.rotation.y+=difference*(1-Math.exp(-dt*5));for(const side of ['left','right']){const sign=side==='left'?1:-1,amplitude=Math.min(1,Math.abs(velocity)*3);p.parts[side+'Leg'].rotation.x=Math.sin(s.time*3.4+p.offset)*.4*sign*amplitude;p.parts[side+'Arm'].rotation.x=-Math.sin(s.time*3.4+p.offset)*.3*sign*amplitude;}});
+  updateCats(s.time,pos);
   marker.visible=!!objective.target&&s.missionActive;const target=objective.target;if(target){marker.position.set(target.x,0,target.z);arrow.position.y=3.2+Math.sin(s.time*2.8)*.28;arrow.rotation.y=s.time*.8;}ring.material.opacity=.6+Math.sin(s.time*2)*.2;
   if(frameCount++%3===0){for(let i=0;i<seaPos.count;i++)seaPos.setY(i,seaBase[i*3+1]+Math.sin(seaBase[i*3]*.12+s.time*.65)*.18+Math.cos(seaBase[i*3+2]*.15+s.time*.5)*.1);seaPos.needsUpdate=true;}
   // Camera stays outside solids. Building ray hits shorten the arm instead of clipping.
