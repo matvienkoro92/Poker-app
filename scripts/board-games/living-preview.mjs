@@ -5,7 +5,7 @@ import {pieceSVG,pieceNames} from './pieces.mjs';
 const readyImages=new Map();
 let boardStyles='',boardStylesReady;
 function preloadBoardStyles(){
- return boardStylesReady||(boardStylesReady=fetch('./styles-board-games.css?v=20261111-shared-nards-v2').then(r=>{if(!r.ok)throw Error('Не удалось загрузить оформление доски');return r.text();}).then(css=>{boardStyles=css;}).catch(error=>{boardStylesReady=null;throw error;}));
+ return boardStylesReady||(boardStylesReady=fetch('./styles-board-games.css?v=20261120-unified-joint').then(r=>{if(!r.ok)throw Error('Не удалось загрузить оформление доски');return r.text();}).then(css=>{boardStyles=css;}).catch(error=>{boardStylesReady=null;throw error;}));
 }
 
 export async function preload(game,equipment={}){

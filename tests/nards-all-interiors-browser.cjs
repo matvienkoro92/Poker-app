@@ -10,4 +10,6 @@ const {chromium}=require('playwright'),fs=require('fs'),path=require('path'),ass
  const art=await half.locator('.editor-board').evaluate((table,side)=>table.style.getPropertyValue('--nards-'+side+'-surface'),side);
  assert.ok(art.includes(path.basename(item[side+'Surface'])),item.id+' '+side);
  assert.ok(fs.statSync(item[side+'Surface']).size>0);
+ const backgroundSize=await half.locator('.nards-half-art.is-'+side).evaluate(el=>getComputedStyle(el).backgroundSize);
+ assert.notEqual(backgroundSize,'contain',item.id+' '+side+' must fill the field');
 }}fs.mkdirSync('output/nards-centered',{recursive:true});await p.screenshot({path:'output/nards-centered/all-interiors.png',fullPage:true});assert.deepEqual(errors,[]);console.log('PASS all '+NARDS_INTERIORS.length+' interiors: selected half artwork, 24 points, correct painted-point overlays and valid assets');}finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

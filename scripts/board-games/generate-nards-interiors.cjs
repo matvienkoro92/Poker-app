@@ -45,7 +45,7 @@ for(const b of NARDS_INTERIORS.filter(b=>!process.argv.includes('--six-point-pan
  }
  if(b.splitArt){
   const sixPointPanel=require('./six-point-panel.cjs');
-  splitPanels=await Promise.all(['left','right'].map(side=>sixPointPanel(path.join(out,'illustration-'+b.art+'-'+side+'.webp'),b.id)));
+  splitPanels=await Promise.all(['left','right'].map(side=>sixPointPanel(path.join(out,'illustration-'+b.art+'-'+side+'.webp'),b.id,side)));
   base=splitPanels.map((panel,i)=>'<image href="data:image/png;base64,'+panel.toString('base64')+'" x="'+(i?618:0)+'" y="0" width="582" height="1000" preserveAspectRatio="none"/>').join('');
  }
  const svg=body=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" preserveAspectRatio="none">'+body+'</svg>';

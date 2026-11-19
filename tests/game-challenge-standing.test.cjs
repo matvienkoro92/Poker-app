@@ -5,7 +5,7 @@ test('board challenge uses only the room mode for rank and every counter',async(
  try{const standing=require('../lib/game-challenge-standing');for(const game of ['short','long','chess'])for(const mode of ['free','paid']){
  const commands=async rows=>{if(rows[0][1].endsWith(':results'))return [{}];assert.deepEqual(rows,[['HGETALL',`poker_app:board-games:stats:v2:${game}:${mode}:players`]]);return [{ID111111:JSON.stringify(mode==='paid'?{wins:7,losses:2,draws:1}:{wins:1,losses:5}),ID222222:JSON.stringify({wins:4,losses:0})}];};
  const text=await standing({commands,game,mode,accountId:'ID111111'});assert.match(text,mode==='paid'?/Рейтинг: на фишки\nМесто в рейтинге: 1 из 2/:/Рейтинг: бесплатные\nМесто в рейтинге: 2 из 2/);assert.match(text,mode==='paid'?/9:7\/2$/:/6:1\/5$/);assert.match(text,/Уровень 29/);
- assert.equal(await standing({commands,game,mode,accountId:'ID111111',compact:true}),mode==='paid'?'В рейтинге: 1 из 2':'В рейтинге: 2 из 2');
+ assert.deepEqual(await standing.compactRanks({commands,game,mode,guestAccountId:'ID111111',hostAccountId:'ID222222'}),mode==='paid'?['1 из 2','2 из 2']:['2 из 2','1 из 2']);
  }}finally{[social.memberProfile,stats.migrateLegacy]=old;}
 });
 test('billiards separates saved paid and free results across both disciplines',async()=>{

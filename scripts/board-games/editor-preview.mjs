@@ -1,5 +1,5 @@
 import {nardsShowPoints} from './catalog.mjs';
-import {createCarvedRail,createPointBlade,createSurfaceHalf,paintStorage,layoutNardsHomes,decorateCenterSpine,paintNardsRails} from './nards-carving.mjs';
+import {createPointBlade,createSurfaceHalf,paintStorage,layoutNardsHomes,decorateCenterSpine,paintNardsRails} from './nards-carving.mjs';
 import {createDiceMesh,DICE_REST_X,DICE_REST_Y} from './dice-mesh.mjs';
 import {diceFaces} from './dice-view.mjs';
 import {createBackgammon} from './backgammon.mjs';
@@ -11,7 +11,7 @@ export function paintEditorBoard(root,{board,inside,checkers,dice,size,points,ra
  const field=document.createElement('div');field.className='nards-board';field.dataset.skin=board.id;field.dataset.interior=inside.id;field.dataset.checkers=checkers.id;field.dataset.wells=String(wells===true);field.dataset.mural=String(!(nardsShowPoints(inside,points,rails?.nardsPointsFor)));field.dataset.pointMat=String(!inside.bakedPoints&&points!=null&&inside.revision>=2);
  for(const [key,value]of Object.entries({'nards-light':board.light,'nards-dark':board.dark,'nards-frame':board.frame,'nards-carving':board.cover?'url("'+board.cover+'")':'none','inside-light':inside.light,'inside-dark':inside.dark,'inside-accent':inside.accent,'nards-surface':'url("'+inside.surface+'")','nards-left-surface':'url("'+inside.leftSurface+'")','nards-right-surface':'url("'+inside.rightSurface+'")','checker-white':checkers.white,'checker-black':checkers.black,'checker-white-art':checkers.whiteArt?'url("'+checkers.whiteArt+'")':'none','checker-black-art':checkers.blackArt?'url("'+checkers.blackArt+'")':'none'}))table.style.setProperty('--'+key,value);
  const left=document.createElement('aside'),right=document.createElement('aside');paintStorage(left,1,storageFilled?7:0,home,homeFull);paintStorage(right,0,storageFilled?7:0,home,homeFull);left.classList.add('editor-store-left');right.classList.add('editor-store-right');table.append(left,field,right);
- field.append(createSurfaceHalf('left'),createSurfaceHalf('right'),createCarvedRail('left'),createCarvedRail('right'),createCarvedRail('left',true),createCarvedRail('right',true));
+ field.append(createSurfaceHalf('left'),createSurfaceHalf('right'));
  const state=createBackgammon(kind==='short'?'short':'long');
  for(let row=0;row<2;row++)for(let col=0;col<12;col++){
   const index=row===0?11-col:12+col,count=state.points[index],point=document.createElement('span');point.className='point'+(row?' bottom':'')+(col%2?' light-point':'');point.style.gridRow=row+1;point.style.gridColumn=col+1+(col>=6?1:0);point.style.setProperty('--nards-tip-gap',[50.3,54.5,60.1,60.1,54.5,50.3][col%6]+'%');point.classList.toggle('has-stack',Math.abs(count)>1);point.style.setProperty('--stack-steps',Math.max(1,Math.abs(count)-1));point.style.setProperty('--stack-space','100cqh');point.append(createPointBlade());

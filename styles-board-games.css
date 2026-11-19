@@ -767,10 +767,10 @@ body[data-nards-dice] .cube-face{background:radial-gradient(ellipse at 23% 16%,#
 .nards-table::before,.nards-table::after{content:'';position:absolute;left:0;right:0;height:14px;z-index:4;pointer-events:none;background:#3b2919 url('./assets/board-games/nards/carved-frame-rail-v1.webp') center/180px 14px repeat-x;border-top:1px solid #e3bf7a66;border-bottom:1px solid #0c0906;border-radius:3px 3px 0 0;box-shadow:0 2px 3px #0008}
 .nards-table::before{top:0}.nards-table::after{bottom:0;transform:rotate(180deg)}
 .nards-table .nards-board{box-shadow:inset 0 2px 4px #000b,inset 0 -2px 3px #0009;outline:1px solid #b6995a66;outline-offset:-1px}
-.nards-board .bar{position:relative;isolation:isolate;background:linear-gradient(90deg,#100c08 0%,#bd9a5a66 9%,var(--nards-frame,#47311e) 20%,color-mix(in srgb,var(--nards-frame,#47311e) 65%,#d6b577) 43%,#100c09 49%,#100c09 53%,var(--nards-frame,#47311e) 59%,#e0ba6b55 88%,#100c08 100%);border-left:1px solid #e6c88566;border-right:1px solid #130d09;box-shadow:-2px 0 3px #0007,2px 0 3px #0007,inset 0 0 3px #0008}
+.nards-board .bar{position:relative;isolation:isolate;background:linear-gradient(90deg,var(--nards-frame,#47311e) 0%,var(--nards-frame,#47311e) 35%,#1c120b 48%,#100c09 50%,#1c120b 52%,var(--nards-frame,#47311e) 65%,var(--nards-frame,#47311e) 100%);border-left:1px solid #e6c88566;border-right:1px solid #130d09;box-shadow:-2px 0 3px #0007,2px 0 3px #0007,inset 0 0 3px #0008}
 .nards-center-hinge{position:absolute;left:10%;width:80%;height:20px;transform:translateY(-50%);border:1px solid #62471f;border-radius:3px;background:linear-gradient(90deg,#715026,#d6b874 32%,#705020 47%,#f2dca2 52%,#af8847 72%,#5a3f1d);box-shadow:0 2px 2px #0008,inset 0 1px #ffe9b999;pointer-events:none;z-index:0}
-.nards-center-hinge::before,.nards-center-hinge::after{content:'';position:absolute;left:calc(50% - 1px);width:2px;height:2px;border-radius:50%;background:#35270f;box-shadow:0 1px #f6dfa0aa}
-.nards-center-hinge::before{top:3px}.nards-center-hinge::after{bottom:3px}
+.nards-center-hinge::before,.nards-center-hinge::after{content:'';position:absolute;left:22%;width:2px;height:2px;border-radius:50%;background:#35270f}
+.nards-center-hinge::before{top:3px}.nards-center-hinge::after{left:auto;right:22%;bottom:3px}
 .nards-board .bar>button{position:relative;z-index:2}
 .nards-table::before,.nards-table::after{z-index:20}
 
@@ -1039,7 +1039,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-board[data-interior=santorini] .light-point .point-inlay{fill:var(--inside-light);stroke:var(--inside-accent)}
 .nards-board[data-interior=santorini] .nards-half-art{background-size:100% 100%}
 .nards-board[data-interior=santorini] .nards-carved-rail{opacity:.25}
-.nards-board[data-interior=santorini] .bar{background:linear-gradient(90deg,#092c35,#346b76 40%,#d5c08a 48%,#103d48 58%,#082d36);border-color:#d9bd7966;box-shadow:0 0 2px #05232d}
 
 .nards-table[data-skin=santorini]{border-color:#bbab78;background:linear-gradient(90deg,#082f3a,#1d6170 48%,#103e49);box-shadow:inset 0 0 0 1px #e6ce92,0 4px 12px #0005}
 .nards-table[data-skin=santorini]::before,.nards-table[data-skin=santorini]::after{height:5px;background:linear-gradient(#e3c68c,#7b815f 35%,#164f5b 50%);box-shadow:none}
@@ -1056,7 +1055,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-board[data-interior=obsidian-copper] .nards-point-blade svg{visibility:hidden}
 .nards-board[data-interior=obsidian-copper] .nards-half-art{background-size:100% 100%}
 .nards-board[data-interior=obsidian-copper] :is(.nards-carved-rail,.nards-center-hinge){display:none}
-.nards-board[data-interior=obsidian-copper] .bar{background:url('./assets/board-games/nards/obsidian-copper-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
 .nards-table[data-skin=obsidian-copper]{background:#211f20 url('./assets/board-games/nards/obsidian-copper-frame.webp') center/100% 100%;border-color:#b97a54;box-shadow:inset 0 0 0 1px #e5a577,0 4px 12px #0006}
 .nards-table[data-skin=obsidian-copper]::before,.nards-table[data-skin=obsidian-copper]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
 .nards-table[data-skin=obsidian-copper]::before{background-image:url('./assets/board-games/nards/obsidian-copper-rail-top.webp')}
@@ -1068,7 +1066,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-board[data-interior=arctic-ice] .nards-point-blade svg{visibility:hidden}
 .nards-board[data-interior=arctic-ice] .nards-half-art{background-size:100% 100%}
 .nards-board[data-interior=arctic-ice] :is(.nards-carved-rail,.nards-center-hinge){display:none}
-.nards-board[data-interior=arctic-ice] .bar{background:url('./assets/board-games/nards/arctic-ice-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
 .nards-table[data-skin=arctic-ice]{background:#163e59 url('./assets/board-games/nards/arctic-ice-frame.webp') center/100% 100%;border-color:#a9dfef;box-shadow:inset 0 0 0 1px #c4edff,0 4px 12px #0006}
 .nards-table[data-skin=arctic-ice]::before,.nards-table[data-skin=arctic-ice]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
 .nards-table[data-skin=arctic-ice]::before{background-image:url('./assets/board-games/nards/arctic-ice-rail-top.webp')}
@@ -1080,7 +1077,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-board[data-interior=japan-lacquer] .nards-point-blade svg{visibility:hidden}
 .nards-board[data-interior=japan-lacquer] .nards-half-art{background-size:100% 100%}
 .nards-board[data-interior=japan-lacquer] :is(.nards-carved-rail,.nards-center-hinge){display:none}
-.nards-board[data-interior=japan-lacquer] .bar{background:url('./assets/board-games/nards/japan-lacquer-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
 .nards-table[data-skin=japan-lacquer]{background:#111213 url('./assets/board-games/nards/japan-lacquer-frame.webp') center/100% 100%;border-color:#d6a343;box-shadow:inset 0 0 0 1px #e6b95c,0 4px 12px #0006}
 .nards-table[data-skin=japan-lacquer]::before,.nards-table[data-skin=japan-lacquer]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
 .nards-table[data-skin=japan-lacquer]::before{background-image:url('./assets/board-games/nards/japan-lacquer-rail-top.webp')}
@@ -1092,7 +1088,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-board[data-interior=emerald-deco] .nards-point-blade svg{visibility:hidden}
 .nards-board[data-interior=emerald-deco] .nards-half-art{background-size:100% 100%}
 .nards-board[data-interior=emerald-deco] :is(.nards-carved-rail,.nards-center-hinge){display:none}
-.nards-board[data-interior=emerald-deco] .bar{background:url('./assets/board-games/nards/emerald-deco-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
 .nards-table[data-skin=emerald-deco]{background:#10442e url('./assets/board-games/nards/emerald-deco-frame.webp') center/100% 100%;border-color:#d7b15e;box-shadow:inset 0 0 0 1px #ebc777,0 4px 12px #0006}
 .nards-table[data-skin=emerald-deco]::before,.nards-table[data-skin=emerald-deco]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
 .nards-table[data-skin=emerald-deco]::before{background-image:url('./assets/board-games/nards/emerald-deco-rail-top.webp')}
@@ -1104,7 +1099,6 @@ body[data-nards-dice] .board-dice-stage[data-gilded=true] .dice-cube{--die-face:
 .nards-board[data-interior=cosmic-titanium] .nards-point-blade svg{visibility:hidden}
 .nards-board[data-interior=cosmic-titanium] .nards-half-art{background-size:100% 100%}
 .nards-board[data-interior=cosmic-titanium] :is(.nards-carved-rail,.nards-center-hinge){display:none}
-.nards-board[data-interior=cosmic-titanium] .bar{background:url('./assets/board-games/nards/cosmic-titanium-spine.webp') center/100% 100% no-repeat;border:0;box-shadow:none}
 .nards-table[data-skin=cosmic-titanium]{background:#28262f url('./assets/board-games/nards/cosmic-titanium-frame.webp') center/100% 100%;border-color:#afa0b8;box-shadow:inset 0 0 0 1px #c9b9dd,0 4px 12px #0006}
 .nards-table[data-skin=cosmic-titanium]::before,.nards-table[data-skin=cosmic-titanium]::after{background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;height:clamp(7px,2vw,12px)}
 .nards-table[data-skin=cosmic-titanium]::before{background-image:url('./assets/board-games/nards/cosmic-titanium-rail-top.webp')}
@@ -1276,7 +1270,7 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
 .nards-board[data-interior=santorini]>.nards-half-art{background:none}
 
 /* Sports emblems retain their source aspect ratio; spare height stays behind the points. */
-.nards-board[data-interior^="sport-"]>.nards-half-art{background-size:contain;background-position:center;background-repeat:no-repeat;background-color:var(--inside-dark,#102e35)}
+.nards-board[data-interior^="sport-"]>.nards-half-art{background-size:cover;background-position:center;background-repeat:no-repeat;background-color:var(--inside-dark,#102e35)}
 
 /* Interior controls share one top-level tab and retain their own selection. */
 #nardsEquipment > .nards-editor-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -1299,15 +1293,19 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
 /* Removing the carving removes its individual landing cells as well. */
 .nards-table[data-rails-hidden=true] .nards-board .point::after{display:none}
 
-/* A light rim against dark fields and a dark rim against light fields keep
-   the centre hinge legible without replacing any selected skin's texture. */
+.nards-table .nards-board{overflow:visible}
+
 .nards-table .nards-board .bar{
- border-inline:1px solid #ead8ad;
- box-shadow:-1px 0 0 #101816,1px 0 0 #101816,inset 2px 0 2px #fff1ce55,inset -2px 0 2px #0009;
+ --joint-material:var(--nards-home-base,var(--nards-frame,#47311e));
+ background:linear-gradient(90deg,var(--joint-material) 35%,#17120f 49% 51%,var(--joint-material) 65%);
+ margin-block:calc(-1 * var(--nards-rim-height));
+ z-index:21;
+ border-inline:0;
+ box-shadow:none;
 }
 .nards-table .nards-board .bar::before{
- content:"";position:absolute;inset:0 auto 0 calc(50% - 1px);width:2px;
- background:#101816;box-shadow:1px 0 0 #f3ddb6b3;pointer-events:none;z-index:0;
+ content:"";position:absolute;inset:0 auto 0 50%;width:2px;transform:translateX(-50%);
+ background:#101816;pointer-events:none;z-index:0;
 }
 
 /* Three matching doubles reveal the jackpot ticket. */
@@ -1357,3 +1355,43 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
 #boardSettlement .board-replay p{margin:13px 0 0;font-size:11px;line-height:1.5;color:#95a69a}
 #boardSettlement .board-replay button:disabled{opacity:.5}
 @media(max-width:360px){#boardSettlement{padding:17px}.settlement-payout strong{font-size:38px}#boardSettlement .board-replay button{font-size:12px}}
+
+.nards-board>.nards-half-art{filter:brightness(var(--nards-field-brightness,.8))}
+.nards-board[data-interior=santorini]{
+ --nards-field-dim:rgb(0 0 0 / calc(1 - var(--nards-field-brightness,.8)));
+ background-image:linear-gradient(var(--nards-field-dim),var(--nards-field-dim)),var(--nards-surface);
+}
+
+#game .board-meta-tools:has(.nards-brightness-control:not([hidden])){z-index:30}
+.nards-brightness-control{
+ position:absolute;inset:calc(100% + 4px) 0 auto auto;z-index:30;
+ display:grid;gap:4px;width:min(300px,100%);padding:10px 12px;
+ border:1px solid #b59b657a;border-radius:12px;background:#1e2723;box-shadow:0 8px 24px #0008;
+ color:#e4d9bc;font-size:12px;
+}
+#game .board-action-icons #nardsBrightnessButton[aria-expanded=true]{color:#ffe1a2;background:#394235}
+.nards-brightness-control input{width:100%;min-height:28px;margin:0;accent-color:#c7a66a}
+.nards-brightness-control output{text-align:right;font-variant-numeric:tabular-nums}
+
+.nards-brightness-control label{
+ display:grid;grid-template-columns:minmax(15ch,auto) minmax(0,1fr) 4ch;align-items:center;gap:8px;
+}
+.nards-brightness-control label:has(input:disabled){opacity:.55}
+.nards-brightness-control small{font-size:11px}
+#nardsBoard .nards-point-blade{opacity:var(--nards-point-opacity,1)}
+
+@media (min-width: 800px) and (pointer: fine) {
+ html:not(.board-tournament-embed) #boardGames:has(>#game:not([hidden]):is([data-kind=short],[data-kind=long])) {
+  --desktop-nards-width:clamp(340px,calc((100dvh - 245px) * .88),520px);
+  width:calc(var(--desktop-nards-width) + 24px);
+  padding:10px 12px 14px;
+ }
+ html:not(.board-tournament-embed) #game:is([data-kind=short],[data-kind=long]) #boardArea {
+  width:100%;
+  margin:8px auto;
+ }
+ html:not(.board-tournament-embed) #game:is([data-kind=short],[data-kind=long]) .turn-line {
+  width:100%;
+  margin-inline:auto;
+ }
+}

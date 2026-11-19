@@ -3,12 +3,20 @@ test('invitation artwork renders the host mural and checker art, not empty SVG p
 test('only catalog equipment is used and small dice retain their material',()=>{const svg=art.svgFor({state:{discipline:'short'},equipment:{nardsInterior:'../../secret',checkers:'../../secret',nardsDice:'jade',nardsDiceSize:'small'}});assert.ok(!svg.includes('<text'),'Invitation must not depend on server Cyrillic fonts');assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('width="52.2"'));assert.ok(!svg.includes('../../secret'));assert.equal((svg.match(/id="coin-/g)||[]).length,0);});
 
 test('invite art uses the room host snapshot for both leaves, checkers and dice',()=>{
- const equipment={nardsInterior:'manki-villa',nardsBoard:'classic',checkers:'pearl',nardsDice:'jade',nardsDiceSize:'small'};
+ const catalog=require('../lib/nards-equipment');
+ for(const nardsInterior of ['manki-villa','club-emerald']){
+ const equipment={nardsInterior,nardsBoard:'classic',checkers:'pearl',nardsDice:'jade',nardsDiceSize:'small'};
  const svg=art.svgFor({state:{discipline:'long'},equipment});
- const catalog=require('../lib/nards-equipment'),inside=catalog.NARDS_INTERIORS.find(b=>b.id==='manki-villa');
- for(const side of ['leftSurface','rightSurface'])assert.ok(svg.includes(fs.readFileSync(inside[side]).toString('base64')),'Missing selected '+side);
+ const inside=catalog.NARDS_INTERIORS.find(b=>b.id===nardsInterior);
+ const surfaces=[...svg.matchAll(/<image data-detail="board-surface" [^>]+>/g)].map(match=>match[0]);
+ assert.equal(surfaces.length,2);
+ for(const [index,side] of ['leftSurface','rightSurface'].entries()){
+  assert.ok(surfaces[index].includes(fs.readFileSync(inside[side]).toString('base64')),'Missing corrected '+side);
+  assert.ok(surfaces[index].includes('preserveAspectRatio="xMidYMid slice"'));
+ }
  assert.ok(svg.includes('#286b54'));assert.ok(svg.includes('#374655'));assert.ok(svg.includes('width="52.2"'));
  const basic=art.svgFor({state:{discipline:'long'},equipment:{...equipment,nardsInterior:'classic'}});assert.notEqual(svg,basic);
+ }
 });
 
 test('Monfokon hides the same point overlays in challenge artwork as in the editor',()=>{
@@ -21,7 +29,8 @@ test('Monfokon hides the same point overlays in challenge artwork as in the edit
 test('current case details survive rasterization and preserve the selected host design',async()=>{
  const view={state:{discipline:'long'},equipment:{nardsBoard:'club-aces',nardsInterior:'club-obsidian',checkers:'jade',nardsDice:'jade'}};
  const svg=art.svgFor(view);
- for(const [detail,count] of [['case-carving',2],['scalloped-rail',4],['brass-hinge',2],['storage-well',30]])assert.equal((svg.match(new RegExp('data-detail="'+detail+'"','g'))||[]).length,count);
+ for(const [detail,count] of [['case-carving',2],['brass-hinge',2],['storage-well',30]])assert.equal((svg.match(new RegExp('data-detail="'+detail+'"','g'))||[]).length,count);
+ assert.doesNotMatch(svg,/data-detail="(?:straight|scalloped)-rail"/);
  const photo=await art.render(view),sharp=require('sharp');
  const carved=await sharp(photo).extract({left:15,top:0,width:860,height:18}).stats();
  assert.ok(carved.channels.some(c=>c.stdev>20),'Carved rim must retain visible relief');
@@ -46,7 +55,7 @@ test('material collections use the same textured point assets as live play',()=>
 
 test('host can hide homes and carving in the invitation just as on the live board',()=>{
  const svg=art.svgFor({state:{discipline:'long'},equipment:{nardsHome:'none',nardsRailsHidden:true,nardsInterior:'obsidian-copper'}});
- for(const detail of ['storage-well','case-carving','scalloped-rail','brass-hinge'])assert.ok(!svg.includes('data-detail="'+detail+'"'));
+ for(const detail of ['storage-well','case-carving','straight-rail','brass-hinge'])assert.ok(!svg.includes('data-detail="'+detail+'"'));
  assert.ok(svg.includes('data-detail="plain-rim"'));
 });
 
@@ -56,7 +65,7 @@ test('invitation respects independent relief selections and fitted home shapes',
  for(const id of ['frost','wave'])assert.ok(svg.includes(fs.readFileSync('assets/board-games/nards/rail-'+id+'-relief-v3.webp').toString('base64')));
  assert.ok(svg.includes('data-home="octagon" data-home-full="true"'));
  assert.equal((svg.match(/<polygon points=/g)||[]).length,30);
- assert.ok(svg.includes('preserveAspectRatio="xMidYMid meet"'));
+ assert.ok(svg.includes('preserveAspectRatio="xMidYMid slice"'));
  const tray=art.svgFor({state:{discipline:'long'},equipment:{...equipment,nardsHome:'tray'}});
  assert.equal((tray.match(/data-detail="storage-tray"/g)||[]).length,2);
  assert.ok(!tray.includes('data-detail="storage-well"'));
@@ -81,7 +90,7 @@ test('retired landing wells stay hidden even in old equipment snapshots',async()
 });
 test('reference interiors suppress wooden lips and brass hinges like the editor',()=>{
  const svg=art.svgFor({state:{discipline:'long'},equipment:{nardsInterior:'obsidian-copper'}});
- assert.ok(!svg.includes('data-detail="scalloped-rail"'));
+ assert.ok(!svg.includes('data-detail="straight-rail"'));
  assert.ok(!svg.includes('data-detail="brass-hinge"'));
  assert.equal((svg.match(/data-detail="case-carving"/g)||[]).length,2);
 });
