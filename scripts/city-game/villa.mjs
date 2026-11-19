@@ -1,3 +1,4 @@
+import {createVillaGuests} from './villa-guests.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 import {VILLA,villaPoint,villaInteriorAt} from './world.mjs';
 import {furnishVilla} from './villa-details.mjs';
@@ -121,7 +122,8 @@ export function buildVilla({scene,textures,label,box:rawBox,cylinder:rawCylinder
  const loadFurniture=()=>loadHallFurniture(root,textures,m).then(result=>{if(root.userData.disposed)return;for(const range of [...legacyPokerTable,...legacyPokerCups,...legacyBench,...legacyTyres,...(result.chair?[...legacyChair,...legacyPokerChairs]:[]),...(result.table?legacyTable:[]),...(result.plant?[...legacyPlants,...legacyEntryPlants,...legacyRoomPlants]:[]),...(result.pendant?[...legacyPendant,...legacyRoomPendants]:[]),...(result.toolCart?legacyToolCart:[]),...(result.helmets?legacyHelmets:[])]){const mesh=root.children.find(o=>o.name==='Villa '+range.key);if(!mesh)continue;dummy.scale.setScalar(0);dummy.updateMatrix();for(let i=range.start;i<range.end;i++)mesh.setMatrixAt(i,dummy.matrix);mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();}root.userData.authoredFurniture=result;});
  // Existing pier and yacht remain connected to the ocean terrace.
  worldBox('#8f7856',133,.12,57,22,.28,2.8);for(let x=124;x<145;x+=2.5)worldBox('#69543d',x,-.9,57,.3,2.1,2.8);batch('ball','#d8ded2',149+VILLA.x-98,.6,57+VILLA.z-40,3,.9,8.5);worldBox('#f0ebd8',149,1.35,56,4.6,.6,11);worldBox('#b5c3bd',149,2.1,55,3.6,1.2,4.5);worldBox('#3f666c',149,2.6,56.3,3.8,.7,.12);worldBox('#ece4ca',149,3.05,55,4.2,.18,5);worldCylinder('#c7cbbb',149,4.1,54.5,.05,2.1);
- const interior=createInteriorProximity(()=>Promise.all([awards.load(),loadFurniture(),hallFinish.userData.loadArt()]),{x:VILLA.x,z:VILLA.z,disposed:()=>!!root.userData.disposed});
+ const guests=createVillaGuests(root,textures);
+ const interior=createInteriorProximity(()=>{void guests.load();return Promise.all([awards.load(),loadFurniture(),hallFinish.userData.loadArt()]);},{x:VILLA.x,z:VILLA.z,disposed:()=>!!root.userData.disposed});
  root.userData.loadInterior=interior.ensure;
- let alpha=1,inside=false;return {root,roof,ready:Promise.resolve(),loadInterior:interior.ensure,update(position,dt,intro=false){interior.update(position);inside=!intro&&villaInteriorAt(position,inside?.65:0);hallKey.visible=inside;alpha=T.MathUtils.damp(alpha,inside?0:1,9,dt);roof.visible=alpha>.015;roofMaterial.opacity=alpha;roofMaterial.depthWrite=false;return inside;},get status(){return {interiorState:interior.state,inside,roofVisible:roof.visible,roofOpacity:alpha,awards:awards.count};}};
+ let alpha=1,inside=false;return {root,roof,ready:Promise.resolve(),loadInterior:interior.ensure,update(position,dt,intro=false){interior.update(position);inside=!intro&&villaInteriorAt(position,inside?.65:0);if(inside)guests.update(dt);hallKey.visible=inside;alpha=T.MathUtils.damp(alpha,inside?0:1,9,dt);roof.visible=alpha>.015;roofMaterial.opacity=alpha;roofMaterial.depthWrite=false;return inside;},get status(){return {interiorState:interior.state,inside,roofVisible:roof.visible,roofOpacity:alpha,awards:awards.count};}};
 }

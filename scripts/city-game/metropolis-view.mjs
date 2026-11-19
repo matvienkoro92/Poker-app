@@ -2,7 +2,7 @@ import * as T from '../../vendor/three/three.module.min.js';
 import {mapPoint,atlasTrees,shores,lagoon,parks,roads,lots,landmarks} from './metropolis.mjs';
 
 // Static instances share one draw per visible 200 m cell and primitive.
-export function buildMetropolis(scene){
+export function buildMetropolis(scene,trees,palms){
  const bins=new Map(),box=new T.BoxGeometry(),crown=new T.IcosahedronGeometry(1,0),material=new T.MeshStandardMaterial({roughness:.86});
  // A tapered, drooping palm leaf with a raised spine. Both sides share geometry.
  const frond=new T.BufferGeometry(),vertices=[],indices=[];
@@ -74,6 +74,7 @@ export function buildMetropolis(scene){
   const a=coast[i-1],b=coast[i],length=Math.hypot(b.x-a.x,b.z-a.z);
   for(let m=16;m<length;m+=36){
    const x=a.x+(b.x-a.x)*m/length-32,z=a.z+(b.z-a.z)*m/length;
+   if(palms){palms.add(x,z,7.25+(i%4)*.24,-.02,true);continue;}
    add(x,3.2,z,.55,6.4,.55,0x84684c);
    for(let k=0;k<8;k++){
     const angle=i*1.32+k*2.4;
@@ -83,12 +84,14 @@ export function buildMetropolis(scene){
  }
  for(const [i,p] of atlasTrees.entries()){
   const height=4+(i%5)*.7;
+  if(trees){trees.add(p.x,p.z,height,0,true);continue;}
   add(p.x,height*.35,p.z,.42,height*.7,.42,0x795d48);
   add(p.x,height*.78,p.z,height*.49,height*.4,height*.46,i%3?0x526f41:0x647e49,i*.82,true);
  }
  for(const p of parks){
   add(p.x,.02,p.z,p.w,.12,p.d,0x829867);add(p.x,.09,p.z,3,.04,p.d,0xdcc9a1);
   for(let i=0;i<24;i++){const x=p.x+((i*37%97)/97-.5)*p.w,z=p.z+((i*53%101)/101-.5)*p.d;if(Math.abs(x-p.x)<5)continue;
+   if(trees){trees.add(x,z,6.85,.08,true);continue;}
    add(x,2,z,.65,4,.65,0x715e47);add(x,5,z,3.6,3.7,3.6,0x58744e,0,true);}
  }
  for(const {a,b,bridge,width} of roads){

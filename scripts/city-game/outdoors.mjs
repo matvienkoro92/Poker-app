@@ -1,6 +1,6 @@
 import * as T from '../../vendor/three/three.module.min.js';
 // Shared instancing keeps detailed leaves, planting and textured surfaces affordable.
-export function createOutdoors(scene,textures,registerSurface){
+export function createOutdoors(scene,textures,registerSurface,trees,palms){
  let seed=716;const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
  function texture(kind){const c=document.createElement('canvas');c.width=c.height=512;const ctx=c.getContext('2d');ctx.fillStyle={grass:'#536744',bark:'#78604a',plaster:'#c1bdb0',stone:'#a79e8e',wood:'#806249',asphalt:'#515b5b'}[kind];ctx.fillRect(0,0,512,512);
  if(kind==='asphalt'){for(let i=0;i<45000;i++){ctx.fillStyle=i%3?'#e1ded41d':'#0a171a35';ctx.fillRect(rnd()*512,rnd()*512,.6+rnd()*1.4,.6+rnd()*1.4);}for(let i=0;i<5;i++){ctx.beginPath();let x=rnd()*512,y=rnd()*512;ctx.moveTo(x,y);for(let j=0;j<7;j++){x+=(rnd()-.5)*26;y+=12+rnd()*15;ctx.lineTo(x,y);}ctx.strokeStyle='#14232348';ctx.lineWidth=.6;ctx.stroke();}}
@@ -19,7 +19,7 @@ export function createOutdoors(scene,textures,registerSurface){
  const leafGeometry=new T.BufferGeometry();leafGeometry.setAttribute('position',new T.Float32BufferAttribute([0,0,-1,.4,0,0,0,.08,0,.4,0,0,0,0,1,0,.08,0,0,0,1,-.4,0,0,0,.08,0,-.4,0,0,0,0,-1,0,.08,0,.4,0,0,0,0,-1,0,-.04,0,0,0,1,.4,0,0,0,-.04,0,-.4,0,0,0,0,1,0,-.04,0,0,0,-1,-.4,0,0,0,-.04,0],3));leafGeometry.computeVertexNormals();
  const geos={trunk,frond,crown,branch:new T.CylinderGeometry(1,1.25,1,8),leaf:leafGeometry,rock:new T.IcosahedronGeometry(1,1)},bins=new Map(),dummy=new T.Object3D();
  function add(kind,material,x,y,z,sx,sy,sz,rx=0,ry=0,rz=0){const key=kind+material;if(!bins.has(key))bins.set(key,{kind,material,items:[]});bins.get(key).items.push([x,y,z,sx,sy,sz,rx,ry,rz]);}
- function palm(x,z,h=7){const bend=rnd()*6.28;add('trunk','trunk',x,0,z,h,h,h,0,bend,0);const cx=x+Math.cos(bend)*h*.08,cz=z-Math.sin(bend)*h*.08;for(let i=0;i<13;i++){const a=i*2.399+Math.sin(x+z),length=(i<9?3.4:2.4)*(h/7)*(.88+rnd()*.2);add('frond','leaf',cx,h-.16,cz,length,length,length,0,a,i<9?-.07:.55);}for(let i=0;i<3;i++)add('rock','trunk',cx+Math.sin(i*2)*.2,h-.28,cz+Math.cos(i*2)*.2,.16,.2,.16);}
+ function palm(x,z,h=7,base=0){if(palms)return palms.add(x,z,h,base);const bend=rnd()*6.28;add('trunk','trunk',x,base,z,h,h,h,0,bend,0);const cx=x+Math.cos(bend)*h*.08,cz=z-Math.sin(bend)*h*.08;for(let i=0;i<13;i++){const a=i*2.399+Math.sin(x+z),length=(i<9?3.4:2.4)*(h/7)*(.88+rnd()*.2);add('frond','leaf',cx,base+h-.16,cz,length,length,length,0,a,i<9?-.07:.55);}for(let i=0;i<3;i++)add('rock','trunk',cx+Math.sin(i*2)*.2,base+h-.28,cz+Math.cos(i*2)*.2,.16,.2,.16);}
  function shrub(x,z,s=1,base=0){for(let i=0;i<3;i++){const a=i*2.399;foliage(x+Math.sin(a)*s*.28,.5*s+(i%2)*.15+base,z+Math.cos(a)*s*.28,s*.52);}}
  function branch(a,b,r){const start=new T.Vector3(...a),end=new T.Vector3(...b),v=end.clone().sub(start),mid=start.add(end).multiplyScalar(.5),q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),v.clone().normalize()),rotation=new T.Euler().setFromQuaternion(q);add('branch','trunk',mid.x,mid.y,mid.z,r,v.length(),r,rotation.x,rotation.y,rotation.z);}
  function foliage(x,y,z,s=1){
@@ -27,6 +27,7 @@ export function createOutdoors(scene,textures,registerSurface){
   for(let j=0;j<54;j++){const a=j*2.399,v=1-2*(j+.5)/54,rad=Math.sqrt(1-v*v)*s;add('leaf','bush',x+Math.cos(a)*rad,y+v*s*.72,z+Math.sin(a)*rad,.55*s,.7*s,.48*s,.7*Math.sin(j*3.1),a,.6*Math.cos(j*1.7));}
  }
  function tree(x,z,h=6){
+  if(trees)return trees.add(x,z,h);
   branch([x,0,z],[x+.12,h*.63,z],h*.033);
   for(let i=0;i<9;i++){const a=i*2.399,reach=h*(i<6?.27:.15),y=h*(.55+i*.035),tip=[x+Math.sin(a)*reach,y+h*.12,z+Math.cos(a)*reach];branch([x+.08,y-h*.17,z],tip,h*(.015-i*.0008));foliage(tip[0],tip[1],tip[2],h*.20);}
   foliage(x,h*.94,z,h*.17);

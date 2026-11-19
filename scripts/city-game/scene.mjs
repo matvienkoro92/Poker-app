@@ -1,4 +1,5 @@
 import {animateOwnedWheels} from '../stadium-race/wheel-parts.mjs';
+import {loadCityPalms,loadCityTrees} from './city-trees.mjs';
 import {buildMetropolis} from './metropolis-view.mjs';
 import {nearbyLots,missionSites} from './metropolis.mjs';
 import {fleet} from './traffic.mjs';
@@ -18,7 +19,8 @@ const PI=Math.PI;
 export async function createCityScene(canvas,onProgress,garage={}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
- const scene=new T.Scene();buildMetropolis(scene);scene.background=new T.Color('#ab919e');scene.fog=new T.Fog('#a995a2',145,395);
+ const [trees,palms]=await Promise.all([loadCityTrees(),loadCityPalms()]);
+ const scene=new T.Scene();buildMetropolis(scene,trees,palms);scene.background=new T.Color('#ab919e');scene.fog=new T.Fog('#a995a2',145,395);
  const dusk=new T.TextureLoader().load('assets/last-buy-in/optimized/city-coastal-sky-v1.webp',map=>{
   scene.background=map;
  });
@@ -36,7 +38,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
   return height;
  }
  registerSurface(87,160,16,15,.041);
- const outdoors=createOutdoors(scene,textures,registerSurface);
+ const outdoors=createOutdoors(scene,textures,registerSurface,trees,palms);
  const npcMaterial=new T.MeshStandardMaterial({vertexColors:true,roughness:.85});
  const facadeColors=new Set(BUILDINGS.map(b=>b.color));
  const mat=(color,emissive=false)=>{const key=color+emissive;if(!materials.has(key)){const glass=['#345b65','#365c61'].includes(color);const material=glass?new T.MeshPhysicalMaterial({color:'#6c8991',metalness:.35,roughness:.15,clearcoat:1,clearcoatRoughness:.13}):new T.MeshStandardMaterial({color,roughness:.82,metalness:.03,...(facadeColors.has(color)?{map:outdoors.facadeMap,bumpMap:outdoors.facadeMap,bumpScale:.035}:{}),...(emissive?{emissive:color,emissiveIntensity:.6}:{})});materials.set(key,material);}return materials.get(key);};
@@ -100,7 +102,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  box('#755444',-32,1.1,-28,9,2.2,2);box('#d2af68',-32,2.25,-28,9.4,.14,2.3);box('#3d6560',-32,3.8,-34.6,10,2.5,.3);label('ГОСТЕВАЯ',-32,3.8,-34.42,9.5,2.1);box('#315550',-17,1.1,-27,4,2.2,5);
  box('#bfa36b',-24,.27,-23,3,.015,22);box('#244b44',-24,.28,-23,2.84,.015,22);
  for(const [x,z]of [[-30,-20],[-16,-19]]){cylinder('#3e2f23',x,.6,z,.3,1.2);cylinder('#183d36',x,1.3,z,2, .2);cylinder('#d2b46e',x,1.22,z,2.12,.12);for(let i=0;i<4;i++){const a=i*PI/2;const xx=x+Math.sin(a)*2.7,zz=z+Math.cos(a)*2.7;box('#4b3830',xx,.55,zz,.9,1,.9);box('#7e5143',xx,1,zz,.82,.16,.82);box('#7e5143',xx+Math.sin(a)*.32,1.4,zz+Math.cos(a)*.32,.95,.75,.16,a);box('#f3e4c2',x+.5,1.42,z,.42,.015,.62,.25);for(let n=0;n<3;n++)cylinder('#cea55e',x-.6,1.43+n*.07,z+.3,.17,.06); }}
- for(const x of [-35,-13]){box('#b49350',x,1,-7,2,2,2);palm(x, -7,6);}
+ for(const x of [-35,-13]){box('#b49350',x,1,-7,2,2,2);palm(x,-7,6,2);}
  // Keep the doorway clear for the chase camera; the HUD already marks the exit.
  // Port buildings, shipping yard, crane, quay and water.
  box('#768f8e',PORT.x,5,PORT.z,PORT.w,10,PORT.d);box('#566e70',PORT.x,10.2,PORT.z,PORT.w+1,.45,PORT.d+1);box('#3c5556',85,2.6,-57.8,8,5.2,.2);label('ПРИЧАЛ ВИЛЛЫ',85,7.5,-57.7,17,2);
@@ -112,7 +114,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  for(let i=0;i<16;i++){const x=151+(i%5)*21,z=-95+Math.floor(i/5)*61;if(landAt(x,z))continue;box('#dbe4ce',x,1,z,2,.5,6);box('#436b77',x,1.7,z-1,1.5,1.2,2);cylinder('#cbb993',x,4,z,.06,6);}
  // Park at the southwest. Repeated palms and café objects share instanced geometry.
  outdoors.lawnRect(-47,55,20,13,.085);outdoors.lawnRect(31,54,31,12,.085);
- function palm(x,z,height=8){outdoors.palm(x,z,height);}
+ function palm(x,z,height=8,base=groundHeight(x,z)){outdoors.palm(x,z,height,base);}
 
  for(let z=-97;z<90;z+=21){for(const x of [11,60,94])if(!ROAD_Z.some(v=>Math.abs(z-v)<9)&&!ROAD_X.some(v=>Math.abs(x-v)<9)&&!(x===94&&z<-45)&&!(Math.abs(x-VILLA.x)<VILLA.w/2+4&&Math.abs(z-VILLA.z)<VILLA.d/2+4)&&!BUILDINGS.some(b=>Math.abs(x-b.x)<b.w/2+2&&Math.abs(z-b.z)<b.d/2+2))palm(x,z,7+Math.sin(z)*1.5);}
  for(const [x,z]of [[-56,14],[-56,61],[-5,55],[9,60],[63,55],[-56,-68],[58,-88]])palm(x,z,8);
@@ -129,6 +131,8 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const villa=buildVilla({box,cylinder,batch,label,scene,textures,hall:garage.hall});
  const awards=createAwardInteraction({root:villa.root,scene,camera,canvas});
  outdoors.flush();
+ trees?.flush(scene,textures);
+ palms?.flush(scene,textures);
  const staticMeshes=[];for(const b of batches.values()){const mesh=new T.InstancedMesh(geos[b.type],mat(b.color,b.emissive),b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);staticMeshes.push(mesh);}
  await villa.ready;
  onProgress('Манки выходит в город…');
