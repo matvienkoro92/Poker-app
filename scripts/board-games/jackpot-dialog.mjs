@@ -16,7 +16,7 @@ function die(face){return '<span class="jackpot-die">'+Array.from({length:9},(_,
 export function showNardsJackpot(award,name='Игрок'){
  if(!dialog){
   dialog=document.createElement('dialog');dialog.className='nards-jackpot-dialog';dialog.setAttribute('aria-labelledby','nardsJackpotTitle');
-  dialog.innerHTML='<div class="jackpot-glow" aria-hidden="true">✦</div><small>ДЖЕКПОТ В НАРДАХ</small><h2 id="nardsJackpotTitle"></h2><div class="jackpot-rolls" aria-hidden="true"></div><p class="jackpot-description"></p><div class="jackpot-ticket">Билет на покерный турнир<strong>1 000 ₽</strong></div><button type="button" class="primary" autofocus>ОК</button>';
+  dialog.innerHTML='<div class="jackpot-glow" aria-hidden="true">✦</div><small>ДЖЕКПОТ В НАРДАХ</small><h2 id="nardsJackpotTitle"></h2><div class="jackpot-rolls" aria-hidden="true"></div><p class="jackpot-description"></p><div class="jackpot-ticket-stage"><div class="jackpot-ticket">Билет на покерный турнир<strong>1 000 ₽</strong></div><div class="jackpot-case" aria-hidden="true"><i></i><i></i></div></div><button type="button" class="primary" autofocus>ОК</button>';
   dialog.querySelector('button').onclick=()=>dialog.close();dialog.addEventListener('close',()=>dialog.querySelector('.jackpot-confetti')?.remove());document.body.append(dialog);
  }
  dialog.dataset.celebration=String(!!award);

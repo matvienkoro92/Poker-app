@@ -1395,3 +1395,66 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
   margin-inline:auto;
  }
 }
+
+.nards-board-effects{position:absolute;inset:0;z-index:24;pointer-events:none}
+.nards-effect-checker,.nards-effect-glow,.nards-effect-ripple{position:absolute}
+.nards-effect-checker>.checker{position:absolute;inset:0;width:100%;height:100%;margin:0}
+.nards-effect-arriving{visibility:hidden!important}
+.nards-effect-glow{border-radius:50%}
+.nards-effect-hit{border:2px solid #fff0b4;box-shadow:0 0 16px #ffac4d,inset 0 0 11px #e8913b99}
+.nards-effect-home{border-radius:5px;border:1px solid #b6f7d4ae;background:linear-gradient(0deg,transparent,#6ee7a048,transparent);box-shadow:inset 0 0 10px #9cfbc077}
+.nards-effect-tray{border-radius:5px;background:#ffd87c4d;box-shadow:inset 0 0 6px #fff7c1,0 0 7px #ffcb5db3}
+.nards-effect-ripple{border-radius:50%;border:2px solid #ffd678bf;box-shadow:0 0 16px #ffbb4970,inset 0 0 12px #ffbb495c}
+#remainingDice.is-six-double>.remaining-die{border-color:#f6ca74;box-shadow:0 0 8px #ffc6537a}
+.nards-board .bar>button:has(.nards-bar-checker){
+ display:grid;place-items:center;width:27px;height:27px;min-height:27px;padding:0;flex:none;
+ background:none;border:0;overflow:visible;box-shadow:none;
+}
+.nards-board .bar>button:disabled:has(.nards-bar-checker){opacity:1}
+.nards-board .bar>button.selected:has(.nards-bar-checker){outline:2px solid #ffdf8a}
+.nards-board .bar>button>.nards-bar-checker{position:absolute;inset:0;width:100%;height:100%;margin:0;pointer-events:none}
+.nards-bar-count{position:absolute;z-index:1;inset:auto -5px -4px auto;min-width:15px;padding:1px 3px;border-radius:8px;background:#21160f;color:#fff0c8;font:700 9px/13px system-ui}
+
+.nards-victory-reveal{
+ --victory-light:#f2ca7d;--victory-dark:#462818;
+ position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;
+ background:radial-gradient(ellipse at center,#17110bd9 0%,#1d120d91 40%,transparent 74%);
+}
+.nards-victory-reveal[data-kind=koks]{--victory-light:#ffc8a4;--victory-dark:#5f2117}
+.nards-victory-seal{
+ position:relative;z-index:1;display:grid;justify-items:center;gap:1px;
+ min-width:min(210px,75%);padding:14px 24px 12px;color:var(--victory-light);
+ border:1px solid currentColor;outline:1px solid currentColor;outline-offset:4px;
+ background:linear-gradient(135deg,var(--victory-dark),#1c130f);
+ box-shadow:0 8px 26px #080503b3;animation:nards-seal-mars .52s .35s both;
+}
+.nards-victory-reveal[data-kind=koks]>.nards-victory-seal{animation-name:nards-seal-koks}
+.nards-effect-stamp{font:800 clamp(35px,11vw,58px)/1.05 Georgia,serif;letter-spacing:.12em}
+.nards-victory-seal>span{font:700 12px/1.5 system-ui;letter-spacing:.25em}
+.nards-victory-reveal>i{
+ position:absolute;width:42%;aspect-ratio:1;display:block;border:1px solid var(--victory-light);
+ rotate:45deg;animation:nards-seal-ring 1s calc(.38s + var(--ripple)*.13s) both;
+}
+@keyframes nards-seal-mars{from{opacity:0;transform:scale(1.65) rotate(-12deg)}to{opacity:1;transform:none}}
+@keyframes nards-seal-koks{from{opacity:0;transform:scale(.48) rotate(14deg)}55%{opacity:1;transform:scale(1.1) rotate(-3deg)}to{transform:none}}
+@keyframes nards-seal-ring{from{opacity:0;scale:.68}20%{opacity:.85}to{opacity:0;scale:1.56}}
+
+.jackpot-ticket-stage{position:relative;isolation:isolate}
+.jackpot-case{display:none}
+.nards-jackpot-dialog[data-celebration=true] .jackpot-case{
+ position:absolute;inset:0;display:flex;overflow:hidden;border-radius:10px;pointer-events:none;
+}
+.jackpot-case i{
+ width:50%;border:1px solid #b99a57;
+ background:repeating-linear-gradient(5deg,#10090422 0 2px,transparent 2px 5px),linear-gradient(#644022,#392215);
+ animation:jackpot-open-case .8s 1.5s cubic-bezier(.25,.7,.2,1) both;
+}
+.jackpot-case i:first-child{--case-slide:-105%;border-radius:10px 0 0 10px}
+.jackpot-case i:last-child{--case-slide:105%;border-radius:0 10px 10px 0}
+.nards-jackpot-dialog[data-celebration=true] .jackpot-ticket{animation:jackpot-uncover .8s 1.5s ease-out both}
+@keyframes jackpot-open-case{to{transform:translateX(var(--case-slide));opacity:0}}
+@keyframes jackpot-uncover{from{transform:translateY(10px) scale(.92)}to{transform:none}}
+@media(prefers-reduced-motion:reduce){
+ .nards-jackpot-dialog[data-celebration=true] .jackpot-case{display:none}
+ .nards-jackpot-dialog[data-celebration=true] .jackpot-ticket{animation:none}
+}
