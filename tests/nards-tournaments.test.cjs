@@ -417,6 +417,7 @@ test('scheduled freeroll posts one group reminder at thirty minutes', async () =
   await f.service.sweep();
   assert.equal(sent.length,count+1);
   assert.match(sent.at(-1).text,/фриролла по нардам.*осталось полчаса/);
+  assert.equal(sent.at(-1).reply_markup.inline_keyboard[0][0].text,'Зарегистрироваться');
   assert.ok(sent.at(-1).reply_markup.inline_keyboard[0][0].url.endsWith('nards_tour_'+t.id));
 });
 
