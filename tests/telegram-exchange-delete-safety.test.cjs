@@ -10,12 +10,21 @@ test('queue entry alone never permits deleting a message',async()=>{
   const f=fixture({receipt});assert.equal((await f.send()).ok,false);assert.equal(f.sent.length,0);
  }
 });
-test('a board is retained and only a confirmed amount can be deleted',async()=>{
+test('a legacy board is retained and a confirmed amount can be deleted',async()=>{
  const b=fixture({receipt:JSON.stringify(board())});assert.equal((await b.send()).ok,false);
- const amount={type:'amount',chat:'-123',messageId:7,createdAt:Date.now(),userId:42,amount:300};
+ const amount={type:'amount',chat:'-123',messageId:7,createdAt:Date.now(),userId:42,amount:10000};
  const a=fixture({submitted:JSON.stringify(amount)});assert.equal((await a.send()).ok,true);
- for(const patch of [{amount:1001},{userId:0},{type:'other'},{chat:'-999'}]){
+ for(const patch of [{amount:10001},{userId:0},{type:'other'},{chat:'-999'}]){
   const f=fixture({submitted:JSON.stringify({...amount,...patch})});assert.equal((await f.send()).ok,false);
+ }
+});
+test('only matching group exchange permits can delete after ten minutes',async()=>{
+ for(const type of ['group-command','group-board']){
+  const permit={...board(),type,createdAt:Date.now()-600000};
+  assert.equal((await fixture({receipt:JSON.stringify(permit)}).send()).ok,true);
+  assert.equal((await fixture({receipt:JSON.stringify({...permit,createdAt:Date.now()})}).send()).ok,false);
+  assert.equal((await fixture({receipt:JSON.stringify({...permit,chat:'123'})}).send(123)).ok,false);
+  assert.equal((await fixture({receipt:JSON.stringify(permit)}).send(-123,8)).ok,false);
  }
 });
 test('future timers and missing queue entries fail closed',async()=>{

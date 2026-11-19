@@ -40,18 +40,19 @@ function completedHarness() {
 test('completion announces actual winners for all prize types, with a button to completed results', async () => {
   const h = completedHarness();
   for (const prizeKind of ['cash', 'tournament_ticket']) {
-    await h.notify({ id: prizeKind, completedNumber: 42, status: 'drawn', prizeKind, title: 'Вечерний розыгрыш', totalWinners: 10, winners: [{ userId: '1' }, { userId: '2' }] });
+    await h.notify({ id: prizeKind, completedNumber: 42, status: 'drawn', prizeKind, title: 'Вечерний розыгрыш', totalWinners: 10, groups: [{count: 2, prize: 'Беккинг-билет 500 ₽ — Вечерний & турнир'}], winners: [{ userId: '1', name: 'Игрок', p21Id: '1234' }, { userId: '2' }] });
   }
   assert.equal(h.sent.length, 2);
   for (const message of h.sent) {
     assert.equal(message.chatId, '-1001227353220');
     assert.equal(message.notificationScope, 'raffle-completed');
-    assert.match(message.text, /Розыгрыш завершён!/);
-    assert.match(message.text, /Победителей: 2\n/);
+    assert.match(message.text, /завершён!/);
+    assert.match(message.text, /Победителей: 2(?:\n|$)/);
     assert.equal(message.buttonText, 'Посмотреть розыгрыш');
     assert.match(message.buttonUrl, /startapp=raffle_42$/);
     assert.equal(message.parseMode, "HTML");
   }
+  assert.equal(h.sent[1].text, '🎉 Розыгрыш билетов на турнир Вечерний &amp; турнир · 500 ₽ завершён!\nПобедителей: 2');
 });
 test('completion ignores unfinished/cancelled raffles and deduplicates parallel or repeated callbacks', async () => {
   const h = completedHarness(), raffle = { id: 'one', status: 'drawn', winners: [] };
