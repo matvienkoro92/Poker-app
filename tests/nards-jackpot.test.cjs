@@ -19,6 +19,17 @@ test('opening throws, generated crazy doubles and unaccepted throws cannot win',
  assert.equal(check(room(history),0,'opening'),undefined);
  assert.equal(check(room(history.map(r=>({...r,opening:true})))),undefined);
  const r=room(history);record(r,{phase:'moving',rollCount:r.state.rollCount},0);assert.equal(r.state.jackpot,undefined);
+ assert.equal(check(room([...history,roll(1,4)])),undefined);
+});
+test('winner dialog validates the awarded throw against the current game history',async()=>{
+ const {verifiedNardsJackpot}=await import('../scripts/board-games/jackpot-dialog.mjs');
+ const r=room([roll(0,4),roll(1,5),roll(0,4),roll(0,4)]);
+ const award=check(r);
+ assert.equal(verifiedNardsJackpot(r.state),award);
+ r.state.rollHistory.push(roll(1,1,2));r.state.rollCount++;
+ assert.equal(verifiedNardsJackpot(r.state),award);
+ r.state.rollHistory[2]=roll(0,4,5);
+ assert.equal(verifiedNardsJackpot(r.state),null);
 });
 test('free and paid rooms and tournaments award the same 1000 ticket',()=>{
  for(const extra of [{wagered:true},{tournament:{entryType:'chips'}},{tournament:{}}])assert.equal(check(room([roll(0,6),roll(0,6),roll(0,6)],extra)).amount,1000);
