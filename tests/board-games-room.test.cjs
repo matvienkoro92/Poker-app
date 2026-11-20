@@ -97,16 +97,16 @@ for(const discipline of ['short','long','chess'])for(const first of ['host','gue
 test('Sprint room validates and preserves the checker count for both players and spectators',async()=>{
  const {service}=fixture(),options={action:'create',discipline:'long',variant:'sprint'};
  await assert.rejects(service.call('host',{...options,sprintCheckers:4}),e=>e.status===400);
- const legacy=await service.call('host',options);
- assert.deepEqual(legacy.state.points.filter(Boolean),[3,-3]);
+ const defaultRoom=await service.call('host',options);
+ assert.deepEqual(defaultRoom.state.points.filter(Boolean),[1,1,1,-1,-1,-1]);
  const {roomId}=await service.call('host',{...options,sprintCheckers:5});
  const preview=await service.call('guest',{action:'preview',roomId});
  assert.equal(preview.sprintCheckers,5);
  const joined=await service.call('guest',{action:'join',roomId,sprintCheckers:3});
  const watched=await service.call('viewer',{action:'watch',roomId});
- for(const view of [joined,watched])assert.deepEqual(view.state.points.filter(Boolean),[5,-5]);
+ for(const view of [joined,watched])assert.deepEqual(view.state.points.filter(Boolean),[1,1,1,1,1,-1,-1,-1,-1,-1]);
  const finished=await service.call('guest',{action:'move',roomId,revision:joined.revision,move:{type:'resign'}});
  const offered=await service.call('host',{action:'rematch',roomId,revision:finished.revision});
  const rematch=await service.call('guest',{action:'rematch',roomId,revision:offered.revision});
- assert.deepEqual(rematch.state.points.filter(Boolean),[5,-5]);
+ assert.deepEqual(rematch.state.points.filter(Boolean),[1,1,1,1,1,-1,-1,-1,-1,-1]);
 });

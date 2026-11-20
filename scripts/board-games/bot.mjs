@@ -1,10 +1,12 @@
 import {Chess} from 'chess.js';
 import {caftarBestMove} from './caftar-bot.mjs';
+import {strongUnsportingMove} from './unsporting-bot.mjs';
 import {turnSequences,progress,backgammonLegal,unsportingActions} from './backgammon.mjs';
 const values={p:100,n:320,b:330,r:500,q:900,k:0};
 function evaluate(c,player){if(c.isCheckmate())return c.turn()===(player===0?'w':'b')?-100000:100000;if(c.isStalemate()||c.isInsufficientMaterial())return 0;let score=0;for(const row of c.board())for(const piece of row)if(piece){const file=piece.square.charCodeAt(0)-97,rank=Number(piece.square[1])-1,center=3.5-Math.max(Math.abs(file-3.5),Math.abs(rank-3.5));score+=(piece.color===(player===0?'w':'b')?1:-1)*(values[piece.type]+(piece.type==='p'?(piece.color==='w'?rank:7-rank)*5:center*8));}return score;}
 export function botMove(s,level='normal',budgetMs=450){
  if(s.winner!==null)return null;
+ if(s.variant==='unsporting'&&level==='hard')return strongUnsportingMove(s);
  if(s.variant==='unsporting'&&s.phase==='moving'){
   const moves=backgammonLegal(s);
   const move=moves.find(m=>m.trick==='return'||m.trick==='swap')||moves[0];

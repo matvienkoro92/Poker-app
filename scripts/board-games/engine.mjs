@@ -21,11 +21,16 @@ export function expireTurn(s,rollDice=()=>[1+Math.floor(Math.random()*6),1+Math.
   if(missed>=3){restoreMisses();finish(s,1-expiredPlayer,'timeout-skips');s.winKind='koks';s.winPoints=3;s.scores[1-expiredPlayer]=3;s.phase='finished';s.dice=[];s.stepUndo=[];return true;}
   if(s.ply!==startPly){restoreMisses();return true;}
   const player=s.turn,ply=s.ply;
-  while(s.winner===null&&s.ply===ply&&s.phase==='moving'){
+  while(s.winner===null&&s.ply===ply){
+   if(s.phase==='roll'&&s.variant==='unsporting'&&s.reserveTurn){
+    backgammonRoll(s,player,rollDice());
+    continue;
+   }
+   if(s.phase!=='moving')break;
    const move=backgammonLegal(s).sort((a,b)=>
     (b.from===-1?-1:progress(s,player,b.from))-(a.from===-1?-1:progress(s,player,a.from))
    )[0];
-   if(!move){endBackgammonTurn(s);break;}
+   if(!move){endBackgammonTurn(s);continue;}
    backgammonMove(s,player,move);
   }
   restoreMisses();

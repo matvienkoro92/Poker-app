@@ -77,7 +77,7 @@ export function createNardsBoardEffects(area,board,storage){
   const opponentSign=opponent===0?1:-1;
   let hits=[];
   if(state.bar[opponent]>before.bar[opponent]){
-   if(state.variant==='sprint')hits=before.points.flatMap((count,index)=>count===opponentSign&&state.points[index]*opponentSign<=0?[index]:[]);
+   if(state.variant==='sprint'&&!state.sprintShortRules)hits=before.points.flatMap((count,index)=>count===opponentSign&&state.points[index]*opponentSign<=0?[index]:[]);
    else hits=[...new Set((move.path?.length?move.path:[move]).map(step=>step.to))].filter(index=>before.points[index]*opponentSign>0);
   }
   const hit=hits.map(index=>snapshot(lastChecker(pointFor(board,index)))).filter(Boolean);

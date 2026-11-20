@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {action,createGame} from '../scripts/board-games/engine.mjs';
+import {action,createGame,expireTurn} from '../scripts/board-games/engine.mjs';
 import {backgammonLegal,unsportingActions} from '../scripts/board-games/backgammon.mjs';
 import {botMove} from '../scripts/board-games/bot.mjs';
 
@@ -71,4 +71,62 @@ test('blocked 6–6 remains playable as a saving action, including for the compu
  const s=position({0:15,6:-1,12:-14});roll(s,6);
  assert.deepEqual(backgammonLegal(s),[]);
  assert.deepEqual(botMove(s),{type:'stash-six'});
+});
+
+test('Strong bot uses saved sixes to finish immediately',()=>{
+ const state=position({18:1,12:-15});
+ state.off[0]=14;
+ state.sixReserve[0]=1;
+ const before=structuredClone(state);
+ assert.deepEqual(botMove(state,'hard'),{type:'use-sixes',count:1});
+ assert.deepEqual(state,before);
+ command(state,'use-sixes',1);
+ const move=botMove(state,'hard');
+ assert.equal(move.to,24);
+ assert.equal(action(state,state.turn,move),true);
+ assert.equal(state.winner,0);
+});
+
+
+test('A saved six is played before the normal roll and shares the head limit',()=>{
+ const state=position({0:15,12:-15});
+ state.turns[0]=1;
+ state.sixReserve[0]=2;
+ command(state,'use-sixes',1);
+ step(state,0,6);
+ assert.equal(state.turn,0);
+ assert.equal(state.phase,'roll');
+ assert.equal(state.ply,0);
+ assert.deepEqual(unsportingActions(state),[]);
+ roll(state,1,2);
+ assert.ok(backgammonLegal(state).every(move=>move.from!==0));
+ step(state,6,7);
+ step(state,7,9);
+ assert.equal(state.turn,1);
+ assert.equal(state.turns[0],2);
+ assert.equal(state.sixReserve[0],1);
+});
+
+test('Blocked saved sixes stay in reserve and the player still gets a normal roll',()=>{
+ const state=position({0:15,6:-1,12:-14});
+ state.sixReserve[0]=1;
+ command(state,'use-sixes',1);
+ assert.equal(state.turn,0);
+ assert.equal(state.phase,'roll');
+ assert.equal(state.sixReserve[0],1);
+ roll(state,1,2);
+ assert.equal(state.phase,'moving');
+ assert.equal(state.rollCount,1);
+});
+
+test('A timeout during saved sixes also rolls and completes the ordinary turn',()=>{
+ const state=position({0:15,12:-15});
+ state.sixReserve[0]=1;
+ command(state,'use-sixes',1);
+ assert.equal(expireTurn(state,()=>[1,2]),true);
+ assert.equal(state.turn,1);
+ assert.equal(state.ply,1);
+ assert.equal(state.rollCount,1);
+ assert.equal(state.moves.length,3);
+ assert.deepEqual(state.missedTurns,[1,0]);
 });
