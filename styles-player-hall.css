@@ -1254,6 +1254,7 @@ body:has(.board-games-shell.billiards-shell--overlay[open]) .living-board-focus 
 .player-hall-dialog .villa-living-copy svg { width: 23px; height: 23px; }
 .player-hall-dialog .villa-living-share-actions button:focus-visible { outline: 2px solid #ffe5a1; outline-offset: 3px; }
 
+.player-hall-dialog .living-board-focus[data-game=nards] .living-focus-play > .living-focus-nards-play,
 .player-hall-dialog .living-board-focus[data-game=nards] .living-focus-play > .living-focus-tournament-dice {
   grid-column: 1 / -1;
   width: 100%;
