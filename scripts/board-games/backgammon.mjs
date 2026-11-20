@@ -1,8 +1,9 @@
-export function createBackgammon(discipline='short',options={}){const points=Array(24).fill(0);if(discipline==='long'){points[0]=15;points[12]=-15;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,variant:discipline==='long'&&['crazy','six-one','unsporting'].includes(options.variant)?options.variant:'classic',doubleQueue:[],...(discipline==='long'&&options.variant==='unsporting'?{sixReserve:[0,0],trick:null,turnStart:null,previousTurn:null}:{}),allowUndo:options.allowUndo!==false,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,rollHistory:[],rollTotals:[0,0],missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
+export const checkerCount=state=>state.variant==='sprint'?3:15;
+export function createBackgammon(discipline='short',options={}){const points=Array(24).fill(0);if(discipline==='long'){const count=checkerCount(options);points[0]=count;points[12]=-count;}else{for(const [i,n]of [[0,2],[11,5],[16,3],[18,5]])points[i]=n;for(const[i,n]of [[23,2],[12,5],[7,3],[5,5]])points[i]=-n;}return {discipline,variant:discipline==='long'&&['crazy','six-one','unsporting','sprint'].includes(options.variant)?options.variant:'classic',doubleQueue:[],...(discipline==='long'&&options.variant==='unsporting'?{sixReserve:[0,0],trick:null,turnStart:null,previousTurn:null}:{}),allowUndo:options.allowUndo!==false,points,bar:[0,0],off:[0,0],scores:[0,0],turn:0,winner:null,endReason:null,phase:'opening',dice:[],roll:[],rollCount:0,rollPlayer:null,rollHistory:[],rollTotals:[0,0],missedTurns:[0,0],stepUndo:[],opening:true,headTaken:0,turns:[0,0],ply:0,moves:[],lastMove:null,drawOffer:null,drawUsed:[false,false],message:'Бросьте кости для первого хода'};}
 export function backgammonWinPoints(s,winner){
  const loser=1-winner;if(s.off[loser]>0)return {points:1,kind:'single'};
  const opponent=v=>v*(loser===0?1:-1)>0;
- const trapped=s.discipline==='short'?(s.bar[loser]>0||s.points.some((v,i)=>opponent(v)&&progress(s,winner,i)>=18)):s.points.some((v,i)=>opponent(v)&&progress(s,loser,i)<6);
+ const trapped=(s.discipline==='short'||s.variant==='sprint')?(s.bar[loser]>0||s.points.some((v,i)=>opponent(v)&&progress(s,winner,i)>=18)):s.points.some((v,i)=>opponent(v)&&progress(s,loser,i)<6);
  return trapped?{points:3,kind:'koks'}:{points:2,kind:'mars'};
 }
 const sign=p=>p===0?1:-1;
@@ -30,8 +31,8 @@ function caftarMoves(s){
 function rawMoves(s,die){const p=s.turn,sgn=sign(p),moves=[];if(s.bar[p]){const to=index(s,p,die-1);if(s.points[to]*sgn>=-1)moves.push({from:-1,to,die});return moves;}
  for(let from=0;from<24;from++){if(s.points[from]*sgn<=0)continue;const n=progress(s,p,from),next=n+die;let to;
  if(next>=24){if(!home(s,p))continue;if(next>24&&s.points.some((v,i)=>v*sgn>0&&progress(s,p,i)<n))continue;to=24;}
- else{to=index(s,p,next);if(s.points[to]*sgn<-(s.discipline==='long'?0:1))continue;}
- if(s.discipline==='long'){const head=p===0?0:12,limit=s.variant!=='crazy'&&s.turns[p]===0&&s.roll[0]===s.roll[1]&&[3,4,6].includes(s.roll[0])?2:1;if(from===head&&s.headTaken>=limit)continue;const points=[...s.points];points[from]-=sgn;if(to!==24)points[to]+=sgn;if(forbiddenBlock(s,p,points))continue;}
+ else{to=index(s,p,next);if(s.points[to]*sgn<-(s.discipline==='long'&&s.variant!=='sprint'?0:1))continue;}
+ if(s.discipline==='long'){const head=p===0?0:12,limit=!['crazy','sprint'].includes(s.variant)&&s.turns[p]===0&&s.roll[0]===s.roll[1]&&[3,4,6].includes(s.roll[0])?2:1;if(from===head&&s.headTaken>=limit)continue;const points=[...s.points];points[from]-=sgn;if(to!==24)points[to]+=sgn;if(forbiddenBlock(s,p,points))continue;}
  moves.push({from,to,die});
  }return moves;
 }
@@ -80,7 +81,28 @@ function applyTrick(s,m){
  if(m.trick==='return'||m.trick==='swap')s.trick=null;
  s.dice.splice(s.dice.indexOf(m.die),1);
 }
-function applyStep(s,m){if(m.trick){applyTrick(s,m);return;}if(s.trick==='return'||s.trick==='rewind')s.trick=null;const p=s.turn,sgn=sign(p);if(m.from===-1)s.bar[p]--;else{s.points[m.from]-=sgn;if(s.discipline==='long'&&m.from===index(s,p,0)&&!isCaftarTransfer(s,p,m))s.headTaken++;}if(m.to===24)s.off[p]++;else{if(s.points[m.to]===-sgn){s.points[m.to]=0;s.bar[1-p]++;}s.points[m.to]+=sgn;}s.dice.splice(s.dice.indexOf(m.die),1);}
+function hitBlot(s,point,player){
+ if(s.points[point]!==-sign(player))return;
+ s.points[point]=0;s.bar[1-player]++;
+}
+function applyStep(s,m){
+ if(m.trick){applyTrick(s,m);return;}
+ if(s.trick==='return'||s.trick==='rewind')s.trick=null;
+ const p=s.turn,sgn=sign(p);
+ if(m.from===-1){
+  s.bar[p]--;
+ }else{
+  s.points[m.from]-=sgn;
+  if(s.discipline==='long'&&m.from===index(s,p,0)&&!isCaftarTransfer(s,p,m))s.headTaken++;
+  if(s.variant==='sprint'){
+   const start=progress(s,p,m.from);
+   for(let n=start+1;n<Math.min(24,start+m.die);n++)hitBlot(s,index(s,p,n),p);
+  }
+ }
+ if(m.to===24)s.off[p]++;
+ else{hitBlot(s,m.to,p);s.points[m.to]+=sgn;}
+ s.dice.splice(s.dice.indexOf(m.die),1);
+}
 // Enumerate legal continuations so partial moves cannot evade the maximum-dice rule.
 export function turnSequences(s){
  if(s.winner!==null||s.phase!=='moving')return [];
@@ -177,7 +199,7 @@ export function backgammonMove(s,player,m){
   next.lastMove={from:valid.from,to:valid.to,die:valid.die,path:valid.path,player};
   Object.assign(s,next);return true;
  }
-if(s.winner!==null||player!==s.turn||s.phase!=='moving')return false;const legal=backgammonLegal(s).find(v=>v.from===m.from&&v.to===m.to&&v.die===m.die&&v.trick===m.trick);if(!legal)return false;(s.stepUndo||=[]).push({turn:s.turn,ply:s.ply,rollCount:s.rollCount,doubleQueue:[...(s.doubleQueue||[])],roll:[...s.roll],points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice],headTaken:s.headTaken,trick:s.trick,lastMove:s.lastMove?{...s.lastMove}:null,movesLength:s.moves.length});applyStep(s,legal);s.lastMove={...legal,player};s.moves.push({...s.lastMove,roll:[...s.roll]});if(s.off[player]===15){s.winner=player;s.endReason='borne-off';s.phase='finished';const result=backgammonWinPoints(s,player);s.winPoints=result.points;s.winKind=result.kind;s.scores[player]=result.points;s.message='Все 15 шашек выведены'+(result.kind==='single'?' · 1 очко':result.kind==='mars'?' · Марс · 2 очка':' · Кокс · 3 очка');}else if(!s.dice.length){if(!advanceCrazy(s))endBackgammonTurn(s);}else if(!backgammonLegal(s).length&&!['stash','rewind'].includes(s.trick)){s.doubleQueue=[];endBackgammonTurn(s);}return true;}
+if(s.winner!==null||player!==s.turn||s.phase!=='moving')return false;const legal=backgammonLegal(s).find(v=>v.from===m.from&&v.to===m.to&&v.die===m.die&&v.trick===m.trick);if(!legal)return false;(s.stepUndo||=[]).push({turn:s.turn,ply:s.ply,rollCount:s.rollCount,doubleQueue:[...(s.doubleQueue||[])],roll:[...s.roll],points:[...s.points],bar:[...s.bar],off:[...s.off],dice:[...s.dice],headTaken:s.headTaken,trick:s.trick,lastMove:s.lastMove?{...s.lastMove}:null,movesLength:s.moves.length});applyStep(s,legal);s.lastMove={...legal,player};s.moves.push({...s.lastMove,roll:[...s.roll]});if(s.off[player]===checkerCount(s)){s.winner=player;s.endReason='borne-off';s.phase='finished';const result=backgammonWinPoints(s,player);s.winPoints=result.points;s.winKind=result.kind;s.scores[player]=result.points;s.message='Все шашки выведены'+(result.kind==='single'?' · 1 очко':result.kind==='mars'?' · Марс · 2 очка':' · Кокс · 3 очка');}else if(!s.dice.length){if(!advanceCrazy(s))endBackgammonTurn(s);}else if(!backgammonLegal(s).length&&!['stash','rewind'].includes(s.trick)){s.doubleQueue=[];endBackgammonTurn(s);}return true;}
 
 export function canUndoBackgammon(s,player=s.turn){const last=s.stepUndo?.at(-1);return s.allowUndo!==false&&s.discipline!=='chess'&&s.winner===null&&s.phase==='moving'&&player===s.turn&&!!last&&last.turn===s.turn&&last.ply===s.ply&&last.rollCount===s.rollCount;}
 export function undoBackgammonStep(s,player){if(!canUndoBackgammon(s,player))return false;const last=s.stepUndo.pop();for(const field of ['points','bar','off','dice'])s[field]=[...last[field]];s.doubleQueue=[...(last.doubleQueue||[])];s.roll=[...(last.roll||s.roll)];s.headTaken=last.headTaken;if(s.variant==='unsporting')s.trick=last.trick;s.lastMove=last.lastMove?{...last.lastMove}:null;s.moves.length=last.movesLength;return true;}

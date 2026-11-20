@@ -1,5 +1,5 @@
 import {diceJoke,fenceJoke,customsJoke} from './nards-jokes.mjs';
-import {progress} from './backgammon.mjs';
+import {progress,checkerCount} from './backgammon.mjs';
 
 const isNards=state=>['short','long'].includes(state?.discipline);
 const pointFor=(board,index)=>board.querySelector('[data-point="'+index+'"]');
@@ -74,9 +74,12 @@ export function createNardsBoardEffects(area,board,storage){
  function capture(state,move){
   if(!isNards(state)||!before||!move||motion.matches||document.hidden)return null;
   const opponent=1-move.player;
-  const hits=state.bar[opponent]>before.bar[opponent]
-   ? (move.path?.length?move.path:[move]).map(step=>step.to).filter((index,j,all)=>all.indexOf(index)===j&&before.points[index]*(opponent===0?1:-1)>0)
-   : [];
+  const opponentSign=opponent===0?1:-1;
+  let hits=[];
+  if(state.bar[opponent]>before.bar[opponent]){
+   if(state.variant==='sprint')hits=before.points.flatMap((count,index)=>count===opponentSign&&state.points[index]*opponentSign<=0?[index]:[]);
+   else hits=[...new Set((move.path?.length?move.path:[move]).map(step=>step.to))].filter(index=>before.points[index]*opponentSign>0);
+  }
   const hit=hits.map(index=>snapshot(lastChecker(pointFor(board,index)))).filter(Boolean);
   const entry=move.from===-1?snapshot(barFor(board,move.player)?.querySelector('.nards-bar-checker')):null;
   const bearingOff=move.to===24?snapshot(lastChecker(pointFor(board,move.from))):null;
@@ -140,8 +143,8 @@ export function createNardsBoardEffects(area,board,storage){
    const tray=storage(player);
    const slots=[...tray.querySelectorAll('.nards-storage-slots i.is-filled,.nards-off-discs .checker')];
    const slot=slots.at(-1);
-   if(previous.off[player]===0&&state.off[player]<15)customsJoke(layer,slot,captured?.bearingOff);
-   if(state.off[player]===15&&previous.off[player]<15){
+   if(previous.off[player]===0&&state.off[player]<checkerCount(state))customsJoke(layer,slot,captured?.bearingOff);
+   if(state.off[player]===checkerCount(state)&&previous.off[player]<checkerCount(state)){
     glow(tray.querySelector('strong')?.getBoundingClientRect(),'nards-effect-tray',850);
     slots.forEach((slot,i)=>glow(slot.getBoundingClientRect(),'nards-effect-tray',850+i*33));
    }
