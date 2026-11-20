@@ -907,6 +907,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             45050
           ]
         ]
+      ],
+      [
+        "18.11.2026",
+        [
+          [
+            3,
+            "51region",
+            18300
+          ]
+        ]
       ]
     ]
   },
@@ -1125,6 +1135,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             2,
             "BlackJackovich",
             6780
+          ]
+        ]
+      ],
+      [
+        "19.11.2026",
+        [
+          [
+            1,
+            "YuraK700",
+            23660
           ]
         ]
       ]

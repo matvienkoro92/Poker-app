@@ -368,7 +368,24 @@ function parseBlueResultCard(file, tokens) {
   };
 }
 
+// These two screenshots show gross awards, which the owner approved for this import.
+const approvedAwardScreens = {
+  "19ef7c9864b96dbd63732a6442d9b9534ebb447bf089ad5525d02cf0f1fa7336":
+    { time: "10:00", name: "DV Turbo 500🏆 50K", buyin: 500, place: 2, reward: 112.86 },
+  "99388bff2720837760b1888f22fd9cafa4f2b1ac11d61543771b4d11862e3253":
+    { time: "13:00", name: "DV 🏃 Bounty 🥊 100k", buyin: 1000, place: 3, reward: 73.75 }
+};
+
 async function parseOcrFile(file) {
+  if (/photo_2026-11-21 06\.34\.(49|52)\.jpeg$/i.test(file.source)) {
+    const hash = crypto.createHash("sha256").update(fs.readFileSync(file.source)).digest("hex");
+    const award = approvedAwardScreens[hash];
+    if (award) return {
+      source: file.source, date: "18.11.2026", time: award.time, name: award.name,
+      buyin: award.buyin, league: inferLeague(award.buyin), blue: true,
+      rows: [{ place: award.place, reward: award.reward, nick: "Em13!!", playerId: "2462690" }]
+    };
+  }
   const tokens = (file.tokens || []).map((token) => ({
     ...token,
     text: String(token.text || "").trim()
