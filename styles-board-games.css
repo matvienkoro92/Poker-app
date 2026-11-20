@@ -1473,3 +1473,12 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
  font:850 10px/1 system-ui;letter-spacing:.06em;
 }
 .nards-joke-customs.nards-joke-right{translate:-100% -50%;margin-left:-10px;rotate:12deg}
+
+.nards-trick-controls{
+ width:min(580px,100%);margin:7px auto 10px;padding:8px 10px;
+ display:grid;gap:4px;border:1px solid #b49b644f;border-radius:10px;background:#1a2a23;
+}
+.nards-trick-controls strong{font-size:13px;color:#ffe0a2}
+.nards-trick-controls small{font-size:11px;color:#d9ccb0}
+.nards-trick-controls>div{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.nards-trick-controls button{min-height:32px;padding:4px 9px;font-size:12px}

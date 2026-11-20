@@ -1,7 +1,7 @@
 import {createDarts,dartsThrow,expireDarts} from './darts.mjs';
 import {Chess} from 'chess.js';
 import {createChess,chessMove,chessLegal,claimable,canClaimMove} from './chess.mjs';
-import {createBackgammon,backgammonMove,backgammonRoll,backgammonLegal,undoBackgammonStep,endBackgammonTurn,progress} from './backgammon.mjs';
+import {createBackgammon,backgammonMove,backgammonRoll,backgammonLegal,undoBackgammonStep,endBackgammonTurn,progress,unsportingAction} from './backgammon.mjs';
 export const DISCIPLINES=['chess','short','long','darts'];
 export function createGame(discipline='chess',options={}){if(!DISCIPLINES.includes(discipline))throw Error('Неизвестная игра');return discipline==='darts'?createDarts(options):discipline==='chess'?createChess(undefined,options.whitePlayer??0):createBackgammon(discipline,options);}
 export function legalMoves(s){return s.discipline==='darts'?[]:s.discipline==='chess'?chessLegal(s):backgammonLegal(s);}
@@ -47,5 +47,6 @@ export function action(s,player,m,dice){if(![0,1].includes(player)||!m||s.winner
  if(m.type==='undo-step'&&s.discipline!=='chess')return undoBackgammonStep(s,player);
  if(m.type==='move')return s.discipline==='chess'?chessMove(s,player,m):backgammonMove(s,player,m);
  if(m.type==='roll'&&s.discipline!=='chess')return backgammonRoll(s,player,dice);
+ if(s.variant==='unsporting')return unsportingAction(s,player,m);
  return false;
 }

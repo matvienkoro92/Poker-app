@@ -18,16 +18,16 @@ export function createDiceView(container,onSettled,onThrow=()=>{}){
   if(options.context!==context){reset();context=options.context;}
   if(state.roll.length!==2){cancel();key='';layer.replaceChildren();layer.hidden=true;initialized=true;return false;}
   const rollKey=context+':'+(state.rollCount??(state.ply+':'+state.roll.join()))+':'+diceOwner(state);
-  const next=rollKey+':'+state.roll.join('-');
+  const next=rollKey+':'+state.roll.join('-')+(state.reserveTurn?':reserve':'');
   const chainShift=state.variant==='crazy'&&key.startsWith(rollKey+':')&&next!==key;
   if(rolling&&next!==key){if(!pending.some(item=>item.key===next)){pending.push({key:next,state:structuredClone(state),options:{...options}});if(pending.length>8)pending.shift();}return false;}
   const scale=options.size==='small'?.72:1,flipped=options.flipped===true,resized=next===key&&(Math.abs(container.getBoundingClientRect().width-lastWidth)>1||lastFlipped!==flipped||lastScale!==scale);if(next===key&&!resized){mark(state);if(state.winner!==null)settle(false);return false;}
   // A mobile viewport update must not cancel a throw already in flight.
   if(next===key&&rolling){mark(state);return false;}
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const animate=initialized&&!resized&&typeof layer.animate==='function'&&!document.hidden;
+  const animate=initialized&&!resized&&!state.reserveTurn&&typeof layer.animate==='function'&&!document.hidden;
   const duration=chainShift?(reduced?200:650):reduced?900:DICE_DURATION;
-  cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;layer.dataset.gilded='false';layer.dataset.goldenDouble=String(!isOpeningThrow(state)&&state.roll[0]===state.roll[1]);
+  cancel();key=next;initialized=true;layer.replaceChildren();layer.hidden=false;layer.dataset.rollKey=key;layer.dataset.gilded='false';layer.dataset.goldenDouble=String(!state.reserveTurn&&!isOpeningThrow(state)&&state.roll[0]===state.roll[1]);
   const box=container.getBoundingClientRect(),size=Math.max(20,Math.max(26,Math.min(46,box.width*.091))*scale),width=box.width,height=box.height;
   lastWidth=width;lastFlipped=flipped;lastScale=scale;const roller=diceOwner(state),opening=isOpeningThrow(state);layer.style.setProperty('--cube-size',size+'px');dice=[];meshes=[];
   state.roll.forEach((value,i)=>{

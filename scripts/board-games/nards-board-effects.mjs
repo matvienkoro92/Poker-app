@@ -104,7 +104,7 @@ export function createNardsBoardEffects(area,board,storage){
     else if(pair&&roll.dice[0]===1&&!state.jackpot)diceJoke(layer,dice,'ones');
    }
   }
-  if(!rolling&&state.phase==='moving'&&state.roll?.length===2&&state.roll.every(value=>value===6)){
+  if(!rolling&&!state.reserveTurn&&state.phase==='moving'&&state.roll?.length===2&&state.roll.every(value=>value===6)){
    const key=state.turn+':'+state.rollCount;
    if(doubleKey!==key){
     const dice=[...area.querySelectorAll('.dice-cube')].map(die=>die.getBoundingClientRect());
