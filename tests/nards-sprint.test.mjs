@@ -51,3 +51,17 @@ test('Sprint prioritizes the bar and ends when the third checker is borne off',(
  assert.equal(finish.off[0],3);
  assert.equal(finish.winKind,'koks');
 });
+
+test('Five-checker sprint starts with five per side and ends on the fifth bear-off',()=>{
+ const state=createGame('long',{variant:'sprint',sprintCheckers:5});
+ assert.deepEqual(state.points.filter(Boolean),[5,-5]);
+ state.points.fill(0);
+ state.points[23]=2;
+ state.points[12]=-5;
+ Object.assign(state,{phase:'moving',opening:false,dice:[1,1],roll:[1,1],off:[3,0]});
+ move(state,23,24);
+ assert.equal(state.winner,null);
+ move(state,23,24);
+ assert.equal(state.winner,0);
+ assert.equal(state.off[0],5);
+});
