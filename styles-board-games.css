@@ -1458,3 +1458,18 @@ body[data-nards-dice] .dice-cube{--die-material:var(--nards-die-material,plain)}
  .nards-jackpot-dialog[data-celebration=true] .jackpot-case{display:none}
  .nards-jackpot-dialog[data-celebration=true] .jackpot-ticket{animation:none}
 }
+
+.nards-board-joke{
+ position:absolute;translate:-50% -50%;z-index:3;pointer-events:none;
+}
+.nards-joke-ones{color:#fff0b1;text-shadow:0 0 7px #edaa43;font:800 27px/1 system-ui}
+.nards-joke-repeat{color:#ffe2a0;text-shadow:0 1px 3px #170c05;font:900 23px/1 system-ui;letter-spacing:.16em}
+.nards-joke-fence{
+ margin:-19px 0 0 23px;color:#fff0ad;text-shadow:0 1px 4px #150805;font:800 19px/1 system-ui;
+}
+.nards-joke-customs{
+ translate:0 -50%;margin-left:10px;padding:3px 5px;rotate:-12deg;
+ border:2px solid #f2ac73;border-radius:3px;color:#ffe4af;background:#773a26;
+ font:850 10px/1 system-ui;letter-spacing:.06em;
+}
+.nards-joke-customs.nards-joke-right{translate:-100% -50%;margin-left:-10px;rotate:12deg}
