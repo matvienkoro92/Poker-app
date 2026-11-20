@@ -98,3 +98,14 @@ test('hidden homes expand the field without clipping its bottom edge',async()=>{
  const photo=await art.render({state:{discipline:'long'},equipment:{nardsHome:'none'}});
  const meta=await require('sharp')(photo).metadata();assert.equal(meta.height,1005);
 });
+
+test('Sprint invitation uses each room’s starting points for three or five checkers',async()=>{
+ const {createGame}=await import('../scripts/board-games/engine.mjs');
+ for(const count of [3,5]){
+  const state=createGame('long',{variant:'sprint',sprintCheckers:count});
+  const svg=art.svgFor({state,equipment:{nardsInterior:'manki-villa'}});
+  const stacks=[...svg.matchAll(/data-detail="checker-stack" data-point="(\d+)"/g)].map(match=>Number(match[1]));
+  const expected=Array.from({length:count},(_,i)=>i);
+  assert.deepEqual(stacks,[...expected,...expected.map(i=>24-count+i)]);
+ }
+});

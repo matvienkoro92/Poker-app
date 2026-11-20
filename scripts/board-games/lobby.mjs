@@ -18,7 +18,7 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  $('boardSetupMode').before(nardsOptions);
  const variantLabel=document.createElement('label');variantLabel.innerHTML='Формат нард<select id="nardsVariant"><option value="short">Короткие нарды</option><option value="classic">Длинные нарды · классика</option><option value="crazy">Бешеные</option><option value="six-one">6:1</option><option value="unsporting">Неспортивные</option><option value="sprint">Спринт</option></select><small data-variant-rules></small>';
  const variantSelect=variantLabel.querySelector('select');
- if(getKind()==='short')variantSelect.value='short';
+ variantSelect.value=getKind()==='short'?'short':'classic';
  const sprintLabel=document.createElement('label');
  sprintLabel.innerHTML='Шашек у каждого<select id="sprintCheckers"><option value="3">3</option><option value="5">5</option></select>';
  const variantRules=variantLabel.querySelector('[data-variant-rules]');
@@ -33,6 +33,12 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  const applyNardsVariant=()=>{if(getKind()!=='chess')onKind?.(variantSelect.value==='short'?'short':'long');};
  variantSelect.addEventListener('change',()=>{applyNardsVariant();paint();});
  nardsOptions.append(variantLabel,sprintLabel);
+ const rememberLabel=document.createElement('label');
+ rememberLabel.className='board-remember-settings';
+ const remember=document.createElement('input');
+ remember.type='checkbox';
+ rememberLabel.append(remember,'Запомнить настройки игры');
+ nardsOptions.after(rememberLabel);
 
  const undoLabel=document.createElement('label');undoLabel.id='allowUndoLabel';undoLabel.innerHTML='Отмена хода<select id="allowUndo"><option value="yes" selected>Да</option><option value="no">Нет</option></select><small>Последнее перемещение можно отменить до конца своего хода.</small>';$('boardSetupFormat').append(undoLabel);
  const turnOptions=document.createElement('div');turnOptions.className='setup-turn-options';$('boardSetupFormat').insertBefore(turnOptions,undoLabel);turnOptions.append($('turnTimeLabel'),undoLabel);const undoHint=undoLabel.querySelector('small');undoHint.className='setup-undo-hint';turnOptions.after(undoHint);
@@ -49,6 +55,7 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  function stages(){return mode==='join'?['Mode','Join']:['friend','challenge'].includes(mode)?['Mode','Wager','Format']:['Mode','Format'];}
  function paint(){paintReward();wagerRules.hidden=!['short','long'].includes(getKind())||!['friend','challenge'].includes(mode)||wagerMode!=='chips';updateReserve();undoLabel.hidden=getKind()==='chess';scoreNote.hidden=getKind()==='chess'||mode==='training';scoreNote.querySelector('[data-koks-explanation]').textContent=getKind()==='long'&&variantLabel.querySelector('select').value!=='sprint'?'Кокс — 3 очка: соперник не вывел ни одной шашки и хотя бы одна его шашка осталась в начальной четверти.':'Кокс — 3 очка: соперник не вывел ни одной шашки и у него осталась шашка на баре или в доме победителя.';const pointsMode=getKind()!=='chess';$('boardFormatButtons').querySelector('[data-format="3"] strong').textContent=pointsMode?'До трёх очков':'До трёх побед';$('boardFormatButtons').querySelector('[data-format="3"] small').textContent=pointsMode?'Победа — 1 · марс — 2 · кокс — 3':'Серия игр с общим счётом';for(const button of $('boardWagerModes').children)button.setAttribute('aria-pressed',String(button.dataset.wager===wagerMode));$('boardWagerAmountLabel').hidden=$('boardWagerTerms').hidden=wagerMode!=='chips';const current=stages()[step],training=mode==='training',solo=mode==='solo';
  nardsOptions.hidden=getKind()==='chess'||!(current==='Mode'||(current==='Wager'&&directCreate));
+ rememberLabel.hidden=nardsOptions.hidden;
  sprintLabel.hidden=variantSelect.value!=='sprint';
  variantRules.textContent=rules[variantSelect.value]||rules.classic;for(const id of ['Mode','Wager','Format','Join'])$('boardSetup'+id).hidden=current!==id;
  wizard.querySelector('.setup-brand').textContent='TWO ACES · '+({chess:'ШАХМАТЫ',short:'КОРОТКИЕ НАРДЫ',long:'ДЛИННЫЕ НАРДЫ'}[getKind()]);$('boardSetupBackFooter').hidden=step===0;
@@ -59,10 +66,38 @@ export function mountBoardLobby({launch,join,back,getKind,onKind}){
  $('boardWagerModes').onclick=e=>{const b=e.target.closest('[data-wager]');if(!b)return;wagerMode=b.dataset.wager;for(const c of $('boardWagerModes').children)c.setAttribute('aria-pressed',String(c===b));$('boardWagerAmountLabel').hidden=$('boardWagerTerms').hidden=wagerMode!=='chips';paintReward();};
  $('boardWagerAmount').oninput=()=>{$('boardSetupError').textContent='';paintReward();};
  $('boardFormatButtons').onclick=e=>{const b=e.target.closest('[data-format]');if(!b)return;$('raceTo').value=b.dataset.format;for(const c of $('boardFormatButtons').children)c.setAttribute('aria-pressed',String(c===b));paintReward();};
- const draftKey='p21-board-create-draft:'+getKind(),draftFields=['nardsVariant','sprintCheckers','boardWagerAmount','raceTo','turnSeconds','chessTime','side','allowUndo','marsEnabled','marsMultiplier','koksEnabled','koksMultiplier','difficulty'];
- function saveDraft(){try{sessionStorage.setItem(draftKey,JSON.stringify({at:Date.now(),step,mode,wagerMode,discipline:getKind(),fields:Object.fromEntries(draftFields.map(id=>[id,$(id)?.value]))}));}catch{}}
- function restoreDraft(){try{const raw=sessionStorage.getItem(draftKey);sessionStorage.removeItem(draftKey);if(!new URLSearchParams(location.search).has('gameRelease')||!raw)return false;const draft=JSON.parse(raw);if(Date.now()-draft.at>15*60*1000||!options[draft.mode]||!['chips','free'].includes(draft.wagerMode))return false;mode=draft.mode;wagerMode=draft.wagerMode;step=Math.max(0,Math.min(Number(draft.step)||0,stages().length-1));for(const id of draftFields)if($(id)&&typeof draft.fields?.[id]==='string')$(id).value=draft.fields[id];if((draft.discipline||getKind())==='short')variantSelect.value='short';applyNardsVariant();for(const b of $('boardFormatButtons').children)b.setAttribute('aria-pressed',String(b.dataset.format===$('raceTo').value));return true;}catch{return false;}}
+ const draftKey='p21-board-create-draft:'+getKind(),savedGameKey='p21-nards-last-game';
+ const setupFields=['nardsVariant','sprintCheckers','boardWagerAmount','raceTo','turnSeconds','chessTime','side','allowUndo','marsEnabled','marsMultiplier','koksEnabled','koksMultiplier','difficulty'];
+ const captureSetup=()=>({mode,wagerMode,discipline:getKind(),fields:Object.fromEntries(setupFields.map(id=>[id,$(id)?.value]))});
+ function restoreSetup(setup){
+  wagerMode=setup.wagerMode;
+  for(const id of setupFields)if($(id)&&typeof setup.fields?.[id]==='string')$(id).value=setup.fields[id];
+  if((setup.discipline||getKind())==='short')variantSelect.value='short';
+  applyNardsVariant();
+  for(const b of $('boardFormatButtons').children)b.setAttribute('aria-pressed',String(b.dataset.format===$('raceTo').value));
+ }
+ function restoreRememberedGame(){
+  if(getKind()==='chess')return;
+  try{
+   const raw=localStorage.getItem(savedGameKey);
+   remember.checked=raw!==null;
+   const setup=JSON.parse(raw);
+   if(!setup||!['short','long'].includes(setup.discipline)||!['solo','training','friend','challenge'].includes(setup.mode)||!['chips','free'].includes(setup.wagerMode))return;
+   if(!directCreate||step===0)mode=setup.mode;
+   restoreSetup(setup);
+  }catch{}
+ }
+ remember.onchange=()=>{
+  try{
+   if(remember.checked)localStorage.setItem(savedGameKey,'null');
+   else localStorage.removeItem(savedGameKey);
+  }catch{}
+ };
+ function saveDraft(setup){try{sessionStorage.setItem(draftKey,JSON.stringify({...setup,at:Date.now(),step}));}catch{}}
+ function restoreDraft(){try{const raw=sessionStorage.getItem(draftKey);sessionStorage.removeItem(draftKey);if(!new URLSearchParams(location.search).has('gameRelease')||!raw)return false;const draft=JSON.parse(raw);if(Date.now()-draft.at>15*60*1000||!options[draft.mode]||!['chips','free'].includes(draft.wagerMode))return false;mode=draft.mode;step=Math.max(0,Math.min(Number(draft.step)||0,stages().length-1));restoreSetup(draft);return true;}catch{return false;}}
  const goBack=()=>{if(step){step--;paint();}else back();};$('boardSetupBack').onclick=goBack;$('boardSetupBackFooter').onclick=goBack;
- $('boardSetupNext').onclick=async()=>{const current=stages()[step],stake=['friend','challenge'].includes(mode)&&wagerMode==='chips'?Number($('boardWagerAmount').value):0;if(current==='Wager'&&wagerMode==='chips'&&(!Number.isSafeInteger(stake)||stake<100)){$('boardSetupError').textContent='Введите целое число фишек от 100.';return;}if(step<stages().length-1){step++;paint();return;}if(!wagerRules.hidden&&['mars','koks'].some(k=>$(k+'Enabled').value==='yes'&&(!Number.isFinite(Number($(k+'Multiplier').value))||Number($(k+'Multiplier').value)<1||Number($(k+'Multiplier').value)>10))){$('boardSetupError').textContent='Укажите коэффициенты от 1 до 10.';return;}if(!wagerRules.hidden){try{wagerRulesPolicy.rules({discipline:getKind(),marsMultiplier:$('marsEnabled').value==='yes'?Number($('marsMultiplier').value):1,koksMultiplier:$('koksEnabled').value==='yes'?Number($('koksMultiplier').value):1});}catch(e){$('boardSetupError').textContent=e.message;return;}}if(loading)return;saveDraft();$('boardSetupNext').disabled=true;setLoading(mode==='join'?'Подключаемся к комнате…':mode==='solo'||mode==='training'?'Подготавливаем доску…':'Создаём комнату и проверяем условия входа…');try{if(mode==='join')await join($('roomInput').value);else await launch(mode,stake);}finally{if(!window.__gameVersionReload)try{sessionStorage.removeItem(draftKey);}catch{}setLoading(null);$('boardSetupNext').disabled=false;const message=$('lobbyError').textContent;if(message)$('boardSetupError').textContent=message;}};
- const ranking=footer.querySelector('[data-rank]')||document.createElement('button');ranking.type='button';ranking.setAttribute('data-rank','');if(ranking){ranking.textContent='Статистика и рейтинг';ranking.classList.add('board-ranking-entry');wizard.querySelector('.lobby-wizard__footer').append(ranking);}footer.remove();const restored=restoreDraft();paint();if(restored)$('boardSetupError').textContent='Игра обновлена. Настройки сохранены — нажмите кнопку ещё раз, чтобы продолжить.';return {loading:setLoading,refresh:paint,reset(){if(loading)return;step=0;wagerMode='chips';paint();}};
+ $('boardSetupNext').onclick=async()=>{const current=stages()[step],stake=['friend','challenge'].includes(mode)&&wagerMode==='chips'?Number($('boardWagerAmount').value):0;if(current==='Wager'&&wagerMode==='chips'&&(!Number.isSafeInteger(stake)||stake<100)){$('boardSetupError').textContent='Введите целое число фишек от 100.';return;}if(step<stages().length-1){step++;paint();return;}if(!wagerRules.hidden&&['mars','koks'].some(k=>$(k+'Enabled').value==='yes'&&(!Number.isFinite(Number($(k+'Multiplier').value))||Number($(k+'Multiplier').value)<1||Number($(k+'Multiplier').value)>10))){$('boardSetupError').textContent='Укажите коэффициенты от 1 до 10.';return;}if(!wagerRules.hidden){try{wagerRulesPolicy.rules({discipline:getKind(),marsMultiplier:$('marsEnabled').value==='yes'?Number($('marsMultiplier').value):1,koksMultiplier:$('koksEnabled').value==='yes'?Number($('koksMultiplier').value):1});}catch(e){$('boardSetupError').textContent=e.message;return;}}if(loading)return;const setup=captureSetup();saveDraft(setup);$('boardSetupNext').disabled=true;setLoading(mode==='join'?'Подключаемся к комнате…':mode==='solo'||mode==='training'?'Подготавливаем доску…':'Создаём комнату и проверяем условия входа…');try{if(mode==='join')await join($('roomInput').value);else if(await launch(mode,stake)&&remember.checked&&setup.discipline!=='chess'){
+  try{localStorage.setItem(savedGameKey,JSON.stringify(setup));}catch{}
+ }}finally{if(!window.__gameVersionReload)try{sessionStorage.removeItem(draftKey);}catch{}setLoading(null);$('boardSetupNext').disabled=false;const message=$('lobbyError').textContent;if(message)$('boardSetupError').textContent=message;}};
+ const ranking=footer.querySelector('[data-rank]')||document.createElement('button');ranking.type='button';ranking.setAttribute('data-rank','');if(ranking){ranking.textContent='Статистика и рейтинг';ranking.classList.add('board-ranking-entry');wizard.querySelector('.lobby-wizard__footer').append(ranking);}footer.remove();restoreRememberedGame();const restored=restoreDraft();paint();if(restored)$('boardSetupError').textContent='Игра обновлена. Настройки сохранены — нажмите кнопку ещё раз, чтобы продолжить.';return {loading:setLoading,refresh:paint,reset(){if(loading)return;step=0;wagerMode='chips';restoreRememberedGame();paint();}};
 }

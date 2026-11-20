@@ -167,3 +167,9 @@ body:has(#lobby:not([hidden])) main{min-height:100dvh;display:flex;align-items:c
 #lobby #nardsWagerRules label:not([hidden]){margin:0;padding:12px;gap:10px;font-size:15px;grid-template-rows:40px 48px;align-content:start}
 #lobby #nardsWagerRules label :is(select,input){padding:10px;min-width:0}
 #lobby #nardsReserveNote{grid-column:1/-1}
+
+#lobby .board-remember-settings{
+ display:flex;align-items:center;gap:8px;min-height:44px;margin:-4px 0 8px;padding:2px 6px;
+ color:#f6e2b4;font-size:14px;font-weight:650;cursor:pointer;
+}
+#lobby .board-remember-settings input{width:18px;height:18px;margin:0;accent-color:#e4c47f}
