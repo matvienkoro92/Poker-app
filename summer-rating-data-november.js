@@ -4687,4 +4687,151 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "20.11.2026": [
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 2,
+          "reward": 2301.25,
+          "points": 110
+        },
+        {
+          "nick": "Playerj8WeU6",
+          "place": 4,
+          "reward": 801.25,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 3,
+          "reward": 4900,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "CD_u_Dymau",
+          "place": 3,
+          "reward": 542.5,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Пятница Прогрессив",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 52992.98,
+          "points": 135
+        },
+        {
+          "nick": "Евгений.А",
+          "place": 5,
+          "reward": 11947.76,
+          "points": 60
+        },
+        {
+          "nick": "myhomor4ik",
+          "place": 6,
+          "reward": 6059.61,
+          "points": 50
+        },
+        {
+          "nick": "mishan9",
+          "place": 15,
+          "reward": 1655,
+          "points": 0
+        },
+        {
+          "nick": "Waaar",
+          "place": 10,
+          "reward": 1312.23,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Luck_is_Suck",
+          "place": 1,
+          "reward": 30520,
+          "points": 135
+        },
+        {
+          "nick": "Бабник",
+          "place": 6,
+          "reward": 920,
+          "points": 50
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 4,
+          "reward": 820,
+          "points": 70
+        },
+        {
+          "nick": "51region",
+          "place": 5,
+          "reward": 220,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 18822.55,
+          "points": 135
+        },
+        {
+          "nick": "myhomor4ik",
+          "place": 2,
+          "reward": 9135.38,
+          "points": 110
+        },
+        {
+          "nick": "51region",
+          "place": 3,
+          "reward": 1404.15,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };
