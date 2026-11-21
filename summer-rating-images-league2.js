@@ -1135,6 +1135,7 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
 ,
   "20.11.2026": [
     "rating-compressed-preview/rating-20-11-2026-league2-ok-10h.jpg",
-    "rating-compressed-preview/rating-20-11-2026-league2-mok-17h.jpg"
+    "rating-compressed-preview/rating-20-11-2026-league2-mok-17h.jpg",
+    "rating-compressed-preview/rating-20-11-2026-league2-black-friday-340k-18h.jpg"
   ]
 };

@@ -4832,6 +4832,74 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
           "points": 90
         }
       ]
+    },
+    {
+      "time": "10:00",
+      "name": "DV Turbo 500🏆 50K",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 10615,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Em13!!",
+          "place": 2,
+          "reward": 13376,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "15:00",
+      "name": "BLACKOUT 70K",
+      "buyin": 700,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 14850,
+          "points": 135
+        },
+        {
+          "nick": "Evgen1722",
+          "place": 14,
+          "reward": 1190,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Black Friday 340K",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 8,
+          "reward": 8027,
+          "points": 30
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 28,
+          "reward": 1980,
+          "points": 0
+        }
+      ]
     }
   ]
 };

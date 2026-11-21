@@ -65,6 +65,7 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/Black\s+Friday/i.test(raw) && /340K/i.test(raw)) return "Black Friday 340K";
   if (/^Турбина\s+500.*ПКО\s+2\/3/i.test(raw)) return "Турбина 500с ПКО 2/3";
   if (/PLO4/i.test(raw) && /20K/i.test(raw) && !/Bounty/i.test(raw)) return "PLO4 🃏🃏🃏 20K 🏆";
   if (/Prime\s+PKO/i.test(raw) && /200K/i.test(raw)) return "Prime PKO 200K";
@@ -543,6 +544,7 @@ async function parseOcrFile(file) {
   if (blue && date === "06.11.2026" && time === "18:00" && title === "500K Black Friday") { title = "Black Friday 500K"; buyin = 1500; }
   if (blue && date === "07.11.2026" && time === "19:00" && /300K.*Triple Chance/i.test(title)) { title = "Triple Chance 300K"; buyin = 3000; }
   if (blue && date === "10.11.2026" && time === "18:00" && /200K.*Deep Freeze/i.test(title)) { title = "Deep Freeze 200K"; buyin = 4000; }
+  if (blue && date === "20.11.2026" && time === "18:00" && title === "Black Friday 340K") buyin = 100;
   // Entry fees confirmed by the owner for the November 13–15 screenshots.
   if (blue && date === "15.11.2026") {
     if (time === "13:00" && title === "Black Magic 60K") buyin = 500;
@@ -670,6 +672,14 @@ async function parseOcrFile(file) {
       needsPlaceCheck = false;
     }
     const playerId = playerIdFromText(idToken.text);
+    // November 20 DV screenshots: the silver trophy shows second place.
+    if (date === "20.11.2026" && blue && playerId === "2462690" &&
+        ((time === "10:00" && title === "DV Turbo 500🏆 50K" && reward === 106.15) ||
+         (time === "13:00" && title === "DV 🏃 Bounty 🥊 100k" && reward === 133.76))) {
+      place = 2;
+      needsPlaceCheck = false;
+    }
+
     // IMG_2152: OCR omitted Jindaniels’ seventh-place digit.
     if (date === "17.11.2026" && blue && time === "18:00" && title === "Black Magic 500K" && playerId === "3382536") {
       place = 7;
