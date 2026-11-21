@@ -2297,9 +2297,17 @@
         '<div class="player-crm__link-identity"><button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + esc(crmLinkTitle(link)) + '</button>' +
         '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
         (crmLinkParams(link).category ? '<span class="player-crm__link-category">'+esc(crmLinkParams(link).category)+'</span>' : '') + '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
-        '<dl class="player-crm__link-metrics">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + crmLinkMetricHelp(metric[0],metric[1]) + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '<small class="player-crm__link-metric-hint">' + metric[2] + '</small></dd></div>'; }).join("") + '</dl>' +
+        '<dl class="player-crm__link-metrics' + (ownOnly ? ' player-crm__link-metrics--overview' : '') + '">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + crmLinkMetricHelp(metric[0],metric[1]) + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '<small class="player-crm__link-metric-hint">' + metric[2] + '</small></dd></div>'; }).join("") + (ownOnly ? [
+          ['Подписаны на бота', 'botSubscribers'],
+          ['В чате', 'playersChatSubscribers'],
+          ['Привязка Poker21', 'poker21Linked'],
+          ['Внесли депозит', 'depositors']
+        ].map(function (metric) {
+          return '<div><dt>' + metric[0] + '</dt><dd><button type="button" class="crm-link-card-metric" data-crm-link-card-metric="' + metric[1] + '" title="Открыть общую сводку" aria-label="Открыть общую сводку: ' + metric[0] + '">—</button>' +
+            (metric[1] === 'depositors' ? '<small class="player-crm__link-metric-hint" data-crm-link-card-deposit>—</small>' : '') + '</dd></div>';
+        }).join('') : '') + '</dl>' +
         (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
-        (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button></div><button type="button" class="player-crm__ghost-btn" data-crm-link-report-refresh>Обновить расчёт</button><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
+        (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
         '<div class="player-crm__link-actions">'+(ownOnly?'':'<button type="button" data-crm-link-details="'+id+'">Отклик</button>')+'<button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
 
@@ -2497,6 +2505,20 @@
     delete details.crmFreshReport;
     details.crmSummaryPromise = fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&pinReport=1&period=all&id=' + encodeURIComponent(id) + freshReport).then(function (r) { return r.json(); }).then(function (data) {
       if (!data.ok || !data.summary) throw new Error('summary');
+      var card = details.closest?.('.player-crm__link-card');
+      if (card) {
+        card.querySelectorAll('[data-crm-link-card-metric]').forEach(function (cell) {
+          var key = cell.dataset.crmLinkCardMetric;
+          var count = data.summary[key];
+          var unknown = { botSubscribers: 'botUnknown', playersChatSubscribers: 'playersChatUnknown', depositors: 'depositUnknown' }[key];
+          cell.textContent = count == null || (!count && unknown && data.summary[unknown]) ? '—' : intFmt(count);
+          if (unknown && data.summary[unknown]) cell.title = 'Не удалось проверить: ' + intFmt(data.summary[unknown]);
+          else cell.title = 'Открыть общую сводку';
+        });
+        var deposit = card.querySelector('[data-crm-link-card-deposit]');
+        var amount = data.summary.depositAmount;
+        if (deposit) deposit.textContent = amount == null ? '—' : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount) + ' ₽';
+      }
       details.crmReportToken = data.reportToken || '';
       target.innerHTML = crmLinkAggregateHtml(data.summary) + '<p class="crm-link-overview__unknown">Обе вкладки показывают один расчёт. Для свежих данных нажмите «Обновить расчёт».</p>'; details.dataset.previewLoaded = '1';
     }).catch(function () { target.innerHTML = '<p role="status">Сводка не загрузилась. Закройте и откройте её, чтобы повторить.</p>'; }).finally(function () { delete details.dataset.previewLoading; });
@@ -5453,6 +5475,13 @@
       if (sendSection) {
         sendCrmSectionData(sendSection.getAttribute("data-crm-send-section") || state.tab);
         return;
+      var cardMetric = e.target.closest('[data-crm-link-card-metric]');
+      if (cardMetric) {
+        var cardDetails = cardMetric.closest('.player-crm__link-card').querySelector('[data-crm-link-preview]');
+        cardDetails.open = true;
+        cardDetails.querySelector('[data-crm-link-view="summary"]').click();
+        return;
+      }
       }
       var reportRefresh = e.target.closest('[data-crm-link-report-refresh]');
       if (reportRefresh) {
