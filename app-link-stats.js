@@ -166,6 +166,7 @@
    budgetGaps.hidden = budgetSplit.checked;
  }
 
+ var budgetUndated = document.getElementById('budget-undated');
  var budgetFrom = document.getElementById('budget-from');
  var budgetTo = document.getElementById('budget-to');
  var budgetAmount = document.getElementById('budget-amount');
@@ -182,11 +183,14 @@
    return value.split('-').reverse().join('.');
  }
  function budgetDates(entry) {
+   if (!entry.from) return 'Без даты';
    return formatBudgetDate(entry.from) + ' — ' + formatBudgetDate(entry.to);
  }
  function refreshBudgetPanel() {
    budgetMessage.textContent = '';
-   var entries = expenseEntries(budgetLink.value);
+   budgetFrom.disabled = budgetTo.disabled = budgetUndated.checked;
+   budgetGaps.hidden = budgetSplit.checked || budgetUndated.checked;
+   var entries = expenseEntries(budgetLink.value).filter(function(entry) { return entry.from; });
    var datesValid = budgetFrom.value && budgetTo.value && budgetFrom.value <= budgetTo.value;
    var bounds = periodBounds || (datesValid ? {from:budgetFrom.value,to:budgetTo.value} :
      monthBounds(today.slice(5,7), today.slice(0,4)));
@@ -217,8 +221,11 @@
    };
  }
  function setBudgetRange(entry) {
-   budgetFrom.value = entry.from;
-   budgetTo.value = entry.to;
+   budgetUndated.checked = !entry.from;
+   if (entry.from) {
+     budgetFrom.value = entry.from;
+     budgetTo.value = entry.to;
+   }
    budgetAmount.value = entry.amount ?? '';
    refreshBudgetPanel();
    budgetAmount.focus();
@@ -227,6 +234,7 @@
    budgetPanel.hidden = !open;
    budgetToggle.setAttribute('aria-expanded', String(open));
    if (!open) return;
+   budgetUndated.checked = false;
    var selected = budgetLink.value;
    budgetLink.replaceChildren(...links.map(function(link) { return new Option(link.label,link.id); }));
    if (links.some(function(link) { return String(link.id) === selected; })) budgetLink.value = selected;
@@ -252,11 +260,12 @@
    syncBudgetSplit();
    refreshBudgetPanel();
  };
+ budgetUndated.onchange = refreshBudgetPanel;
  budgetFrom.onchange = refreshBudgetPanel;
  budgetTo.onchange = refreshBudgetPanel;
  budgetForm.addEventListener('submit', function(event) {
    event.preventDefault();
-   var bounds = {from:budgetFrom.value,to:budgetTo.value};
+   var bounds = budgetUndated.checked ? {from:'',to:''} : {from:budgetFrom.value,to:budgetTo.value};
    if (bounds.from > bounds.to) {
      budgetMessage.textContent = 'Дата окончания должна быть не раньше начала.';
      return;
@@ -291,10 +300,10 @@
    catch (_) { budgetMessage.textContent = 'Браузер не смог сохранить расходы.'; return; }
    ledger = Object.assign(Object.create(null),updated);
    refreshBudgetPanel();
-   var savedMessage = 'Сохранено: ' + num(cents / 100) + ' ₽ за ' + budgetDates(bounds) +
+   var savedMessage = 'Сохранено: ' + num(cents / 100) + ' ₽ · ' + budgetDates(bounds) +
      (budgetSplit.checked ? ' · ссылки: ' + ids.length : '') + '.';
    budgetMessage.textContent = savedMessage;
-   if (!periodBounds || bounds.from < periodBounds.from || bounds.to > periodBounds.to) {
+   if (bounds.from && (!periodBounds || bounds.from < periodBounds.from || bounds.to > periodBounds.to)) {
      showBudgetStatistics(bounds,savedMessage);
    } else {
      root.querySelectorAll('[data-link-id]').forEach(updateCosts);
@@ -601,6 +610,7 @@
        autoBudgetPeriod = false;
        var recent = data.links.filter(function(link) { return !hiddenIds.has(String(link.id)); })
          .flatMap(function(link) { return expenseEntries(link.id); })
+         .filter(function(entry) { return entry.from; })
          .sort(function(a,b) { return b.to.localeCompare(a.to) || a.from.localeCompare(b.from); })[0];
        if (recent) {
          var initialRange = new URLSearchParams({period:'range',from:recent.from,to:recent.to});
