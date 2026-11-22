@@ -77,6 +77,8 @@
      var count = Number(cell.dataset.count);
      var cost = Number.isFinite(budget) && count > 0 ? num(budget / count) + ' ₽' : '—';
      cell.textContent = cell.dataset.costLabel + ': ' + cost;
+     cell.title = !Number.isFinite(budget) ? 'Укажи расходы за период статистики' :
+       count <= 0 ? 'За период нет подтверждённого значения для расчёта' : '';
    });
  }
 
@@ -116,13 +118,25 @@
      var button = event.target.closest('[data-budget-gap]');
      if (button) setBudgetRange(gaps[Number(button.dataset.budgetGap)]);
    };
-   budgetRecords.innerHTML = entries.length ? '<h3>Сохранённые расходы</h3><ul>' + entries.map(function(entry,index) {
-     return '<li><span>' + budgetDates(entry) + ' · ' + num(entry.amount) + ' ₽</span> ' +
-       '<button type="button" data-budget-edit="' + index + '">Изменить сумму</button></li>';
-   }).join('') + '</ul>' : '';
+   var groups = links.filter(function(link) { return expenseEntries(link.id).length; });
+   budgetRecords.innerHTML = groups.length ? '<h3>Сохранённые расходы</h3>' + groups.map(function(link) {
+     var id = esc(link.id);
+     return '<section class="budget-record-group" data-budget-record-link="' + id + '"><h4>' + esc(link.label) +
+       '</h4><ul>' + expenseEntries(link.id).map(function(entry,index) {
+         return '<li><span>' + budgetDates(entry) + ' · ' + num(entry.amount) + ' ₽</span> ' +
+           '<button type="button" data-budget-edit="' + index + '">Изменить сумму</button>' +
+           '<button type="button" data-budget-show="' + index + '">Показать статистику</button></li>';
+       }).join('') + '</ul></section>';
+   }).join('') : '';
    budgetRecords.onclick = function(event) {
-     var button = event.target.closest('[data-budget-edit]');
-     if (button) setBudgetRange(entries[Number(button.dataset.budgetEdit)]);
+     var button = event.target.closest('[data-budget-edit], [data-budget-show]');
+     if (!button || budgetToggle.disabled) return;
+     var id = button.closest('[data-budget-record-link]').dataset.budgetRecordLink;
+     var entry = expenseEntries(id)[Number(button.dataset.budgetEdit ?? button.dataset.budgetShow)];
+     budgetLink.value = id;
+     setBudgetRange(entry);
+     if (button.hasAttribute('data-budget-show')) showBudgetStatistics(entry);
+
    };
  }
  function setBudgetRange(entry) {
@@ -167,10 +181,24 @@
    try { localStorage.setItem(ledgerKey, JSON.stringify({...ledger,[id]:entries})); }
    catch (_) { budgetMessage.textContent = 'Браузер не смог сохранить расходы.'; return; }
    ledger[id] = entries;
-   showBudgetPanel(false);
-   budgetToggle.focus({preventScroll:true});
-   root.querySelectorAll('[data-link-id]').forEach(updateCosts);
+   refreshBudgetPanel();
+   var savedMessage = 'Сохранено: ' + num(budgetAmount.valueAsNumber) + ' ₽ за ' + budgetDates(bounds) + '.';
+   budgetMessage.textContent = savedMessage;
+   if (!periodBounds || bounds.from < periodBounds.from || bounds.to > periodBounds.to) {
+     showBudgetStatistics(bounds,savedMessage);
+   } else {
+     root.querySelectorAll('[data-link-id]').forEach(updateCosts);
+   }
  });
+
+ function showBudgetStatistics(bounds, message = '') {
+   periodSelect.value = 'range';
+   fromInput.value = bounds.from;
+   toInput.value = bounds.to;
+   syncPeriodForm();
+   appliedPeriod = new URLSearchParams({period:'range',from:bounds.from,to:bounds.to});
+   load({keepBudget:true,budgetMessage:message});
+ }
 
  var metrics = [
    ['Переходы', 'totalClicks', 'Цена перехода'],
@@ -387,7 +415,7 @@
    }
    root.querySelectorAll('[data-link-id]').forEach(updateCosts);
  }
- async function load() {
+ async function load(options = {}) {
    var seq = ++loadSeq;
    matrixRenderSeq++;
    fullMatrix.disabled = true;
@@ -404,7 +432,9 @@
    renderHiddenLinks();
    refresh.disabled = true;
    budgetToggle.disabled = true;
-   showBudgetPanel(false);
+   if (!options.keepBudget) showBudgetPanel(false);
+   var budgetSave = budgetForm.querySelector('button[type="submit"]');
+   budgetSave.disabled = true;
    try {
      if (!/^[a-f0-9]{64}(?:\.[a-f0-9]{64})?$/.test(token)) throw Error('Откройте персональную ссылку, полученную от владельца.');
      var data = await request(selection.toString());
@@ -422,6 +452,10 @@
      loadBudgets();
      links = data.links;
      budgetToggle.disabled = !links.length;
+     if (options.keepBudget) {
+       refreshBudgetPanel();
+       budgetMessage.textContent = options.budgetMessage;
+     }
      render();
      var incomplete = periodStart && links.some(function(link) {
        return metrics.some(function(metric) { return link[metric[1]] == null; });
@@ -432,7 +466,11 @@
      status.textContent = error.message;
      status.className = 'error';
    } finally {
-     if (seq === loadSeq) refresh.disabled = false;
+     if (seq === loadSeq) {
+       refresh.disabled = false;
+       budgetSave.disabled = !links.length;
+       if (options.keepBudget) budgetToggle.disabled = false;
+     }
    }
  }
  var fields=[['С историей','visitors'],['Новые регистрации','registrations'],['Активные посетители','activeVisitors'],['Всего действий','activityCount'],['Участники розыгрышей','raffleParticipants'],['Участий','raffleCount'],['Крутили','spinners'],['Круток','spinCount'],['Poker21 привязан','poker21Linked'],['Подписаны на бота','botSubscribers'],['В чате игроков','playersChatSubscribers'],['Депозиторов','depositors'],['Пополнений','depositCount'],['Депозиты, ₽','depositAmount']];
@@ -478,13 +516,16 @@
    fullMatrix.setAttribute('aria-pressed',String(expanded));
    render();
  });
- periodSelect.onchange = function() {
+ function syncPeriodForm() {
    var period = periodSelect.value;
    monthGroup.hidden = monthGroup.disabled = period !== 'month';
    rangeGroup.hidden = rangeGroup.disabled = period !== 'range';
    periodForm.hidden = monthGroup.hidden && rangeGroup.hidden;
+ }
+ periodSelect.onchange = function() {
+   syncPeriodForm();
    if (!periodForm.hidden) return;
-   appliedPeriod = new URLSearchParams({period:period});
+   appliedPeriod = new URLSearchParams({period:periodSelect.value});
    load();
  };
  periodForm.addEventListener('submit', function(event) {
