@@ -6,6 +6,13 @@
 
 .toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}
 #matrix[aria-pressed="true"]{background:#e6c986;color:#131d29}
-#links.is-matrix{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));align-items:start;gap:10px}
-#links.is-matrix article{min-width:0;margin:0}
-#links.is-matrix .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+.link-matrix{overflow:auto;max-height:70vh;border:1px solid #ffffff20;border-radius:10px}
+.link-matrix table{min-width:720px}
+.link-matrix th,.link-matrix td{padding:9px}
+.link-matrix tbody th{top:auto;white-space:normal;overflow-wrap:anywhere;min-width:110px;width:20%}
+.link-matrix thead th{white-space:normal}
+.link-matrix th:first-child{max-width:180px}
+.link-matrix .link-budget{display:block;margin:0}
+.link-matrix .link-budget input{width:88px}
+.link-matrix td strong{font-size:16px}
+.link-matrix .metric-cost{display:block;color:#dec38b}

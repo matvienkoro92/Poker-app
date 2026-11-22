@@ -7,7 +7,7 @@
  try { Object.assign(budgets, JSON.parse(localStorage.getItem(budgetKey) || '{}')); } catch (_) {}
  function metricCell(label, count, costLabel) {
    var cost = costLabel ? '<small class="metric-cost" data-count="' + esc(count) + '" data-cost-label="' + esc(costLabel) + '"></small>' : '';
-   return '<div><small>' + esc(label) + '</small><strong>' + num(count) + '</strong>' + cost + '</div>';
+   return '<div>' + (label ? '<small>' + esc(label) + '</small>' : '') + '<strong>' + num(count) + '</strong>' + cost + '</div>';
  }
  function updateCosts(article) {
    var budget = budgets[article.dataset.linkId];
@@ -20,7 +20,7 @@
  root.addEventListener('input', function(event) {
    var input = event.target;
    if (!input.matches('[data-budget]')) return;
-   var article = input.closest('article');
+   var article = input.closest('[data-link-id]');
    var amount = input.valueAsNumber;
    if (input.validity.badInput || (input.value && !input.validity.valid)) return;
    if (Number.isFinite(amount) && amount >= 0) budgets[article.dataset.linkId] = amount;
@@ -28,16 +28,63 @@
    try { localStorage.setItem(budgetKey, JSON.stringify(budgets)); } catch (_) {}
    updateCosts(article);
  });
- function render(){var sort=document.getElementById('sort').value;root.innerHTML=links.slice().sort(function(a,b){return sort==='label'?a.label.localeCompare(b.label,'ru'):b[sort]-a[sort];}).map(function(link){return '<article data-link-id="'+esc(link.id)+'"><h2>'+esc(link.label)+'</h2><label class="link-budget">Бюджет ссылки, ₽ <input data-budget type="number" min="0" step="0.01" inputmode="decimal" value="'+esc(budgets[link.id])+'"><small>Сохраняется в этом браузере</small></label><div class="metrics">'+[['Переходы',link.totalClicks,'Цена перехода'],['Посетители',link.uniqueClicks,'Цена лида'],['Активные посетители',link.activeVisitors,'Цена активного посетителя'],['Всего открытий и нажатий',link.actionEvents,'Цена действия']].map(function(pair){return metricCell(pair[0],pair[1],pair[2]);}).join('')+'</div><details data-summary="'+esc(link.id)+'"><summary>Общая статистика</summary><div data-body></div></details><details data-players="'+esc(link.id)+'"><summary>По игрокам</summary><div data-body></div></details></article>';}).join('')||'<p>В этой категории пока нет ссылок.</p>';root.querySelectorAll('article').forEach(updateCosts);}
- async function load(){status.textContent='Загружаем…';document.getElementById('refresh').disabled=true;try{if(!/^[a-f0-9]{64}$/.test(token))throw Error('Откройте персональную ссылку, полученную от владельца.');var data=await request('');document.getElementById('category').textContent=data.category;document.getElementById('recipient').textContent='Доступ: '+data.name;links=data.links;render();status.textContent='';}catch(error){root.innerHTML='';status.textContent=error.message;status.className='error';}finally{document.getElementById('refresh').disabled=false;}}
+ var metrics = [
+   ['Переходы', 'totalClicks', 'Цена перехода'],
+   ['Посетители', 'uniqueClicks', 'Цена лида'],
+   ['Активные посетители', 'activeVisitors', 'Цена активного посетителя'],
+   ['Всего открытий и нажатий', 'actionEvents', 'Цена действия']
+ ];
+ var matrix = document.getElementById('matrix');
+
+ function budgetInput(link, label, showHint) {
+   return '<label class="link-budget">' + label +
+     '<input data-budget type="number" min="0" step="0.01" inputmode="decimal" aria-label="Бюджет ссылки ' +
+     esc(link.label) + ', ₽" value="' + esc(budgets[link.id]) + '">' +
+     (showHint ? '<small>Сохраняется в этом браузере</small>' : '') + '</label>';
+ }
+
+ function linkDetails(id) {
+   return '<details data-summary="' + id + '"><summary>Общая статистика</summary><div data-body></div></details>' +
+     '<details data-players="' + id + '"><summary>По игрокам</summary><div data-body></div></details>';
+ }
+
+ function renderMatrix(rows) {
+   return '<div class="link-matrix" tabindex="0" role="region" aria-label="Матрица статистики ссылок">' +
+     '<table><thead><tr><th scope="col">Ссылка</th><th scope="col" title="Бюджет сохраняется в этом браузере">Бюджет, ₽</th>' +
+     metrics.map(function(metric) { return '<th scope="col">' + metric[0] + '</th>'; }).join('') +
+     '</tr></thead><tbody>' + rows.map(function(link) {
+       return '<tr data-link-id="' + esc(link.id) + '"><th scope="row">' + esc(link.label) + '</th><td>' +
+         budgetInput(link, '', false) + '</td>' + metrics.map(function(metric) {
+           return '<td>' + metricCell('', link[metric[1]], metric[2]) + '</td>';
+         }).join('') + '</tr>';
+     }).join('') + '</tbody></table></div>';
+ }
+
+ function render() {
+   var sort = document.getElementById('sort').value;
+   var rows = links.slice().sort(function(a, b) {
+     return sort === 'label' ? a.label.localeCompare(b.label, 'ru') : b[sort] - a[sort];
+   });
+   if (!rows.length) root.innerHTML = '<p>В этой категории пока нет ссылок.</p>';
+   else if (matrix.getAttribute('aria-pressed') === 'true') root.innerHTML = renderMatrix(rows);
+   else root.innerHTML = rows.map(function(link) {
+     var id = esc(link.id);
+     return '<article data-link-id="' + id + '"><h2>' + esc(link.label) + '</h2>' +
+       budgetInput(link, 'Бюджет ссылки, ₽ ', true) + '<div class="metrics">' +
+       metrics.map(function(metric) { return metricCell(metric[0], link[metric[1]], metric[2]); }).join('') +
+       '</div>' + linkDetails(id) + '</article>';
+   }).join('');
+   root.querySelectorAll('[data-link-id]').forEach(updateCosts);
+ }
+ async function load(){status.textContent='Загружаем…';document.getElementById('refresh').disabled=true;try{if(!/^[a-f0-9]{64}$/.test(token))throw Error('Откройте персональную ссылку, полученную от владельца.');var data=await request('');document.getElementById('category').textContent=data.category;document.getElementById('recipient').textContent='Доступ: '+data.name;links=data.links;render();status.textContent='';}catch(error){root.innerHTML='';links=[];status.textContent=error.message;status.className='error';}finally{document.getElementById('refresh').disabled=false;}}
  var fields=[['С историей','visitors'],['Новые регистрации','registrations'],['Активные посетители','activeVisitors'],['Всего действий','activityCount'],['Участники розыгрышей','raffleParticipants'],['Участий','raffleCount'],['Крутили','spinners'],['Круток','spinCount'],['Poker21 привязан','poker21Linked'],['Подписаны на бота','botSubscribers'],['В чате игроков','playersChatSubscribers'],['Депозиторов','depositors'],['Пополнений','depositCount'],['Депозиты, ₽','depositAmount']];
  function bool(v){return '<span class="'+(v===true?'yes':v===false?'no':'unknown')+'">'+(v===true?'Да':v===false?'Нет':'—')+'</span>';}
  async function players(details,offset,append){var body=details.querySelector('[data-body]'),button=body.querySelector('button');if(button)button.disabled=true;try{var data=await request('id='+encodeURIComponent(details.dataset.players)+'&view=players&offset='+offset);var rows=data.rows.map(function(r){return '<tr><td>'+esc(r.nick)+'</td>'+[r.visitCount,r.activityCount].map(function(v){return '<td>'+num(v)+'</td>';}).join('')+'<td>'+bool(r.registered)+'</td><td>'+num(r.raffleCount)+'</td><td>'+num(r.spinCount)+'</td><td>'+esc(r.pokerId||'—')+'</td><td>'+num(r.heroLevel)+'</td><td>'+bool(r.bot)+'</td><td>'+bool(r.playersChat)+'</td><td>'+num(r.depositCount)+'</td><td>'+num(r.depositAmount)+'</td></tr>';}).join('');if(!append)body.innerHTML='<div class="players" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат','Пополнения','Депозиты CRM, ₽'].map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr></thead><tbody></tbody></table></div>';body.querySelector('tbody').insertAdjacentHTML('beforeend',rows);if(button)button.remove();if(data.nextOffset!=null){var more=document.createElement('button');more.textContent='Ещё игроки';more.onclick=function(){players(details,data.nextOffset,true);};body.appendChild(more);}details.dataset.loaded='1';}catch(error){if(!append)body.textContent=error.message;else{button.disabled=false;status.textContent=error.message;}}}
  root.addEventListener('toggle',async function(event){var details=event.target;if(!details.open||details.dataset.loaded||details.dataset.loading)return;details.dataset.loading='1';var body=details.querySelector('[data-body]');body.textContent='Загрузка…';try{if(details.dataset.players){await players(details,0,false);return;}var data=await request('id='+encodeURIComponent(details.dataset.summary)+'&view=summary');body.innerHTML='<div class="summary-grid">'+fields.map(function(pair){return metricCell(pair[0],data.summary[pair[1]],pair[1]==='depositAmount'?'':pair[1]==='registrations'?'Цена регистрации':'Цена за единицу');}).join('')+'</div>';if(data.summary.coverageUnavailable)body.insertAdjacentHTML('afterbegin','<p class="unknown">Полноту старой истории проверить не удалось.</p>');if(data.summary.registrationUnknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Дата регистрации не установлена: '+num(data.summary.registrationUnknown)+'</p>');if(data.summary.coverage?.visitorsWithoutJourney)body.insertAdjacentHTML('afterbegin','<p class="unknown">Без подробной истории: '+num(data.summary.coverage.visitorsWithoutJourney)+' из '+num(data.summary.coverage.trackedVisitors)+' посетителей.</p>');var unknown=(data.summary.botUnknown||0)+(data.summary.playersChatUnknown||0)+(data.summary.depositUnknown||0);if(unknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Часть подписок или депозитов не проверена и не включена в подтверждённые итоги.</p>');updateCosts(details.closest('article'));details.dataset.loaded='1';}catch(error){body.textContent=error.message;}finally{delete details.dataset.loading;}},true);
- var matrix = document.getElementById('matrix');
  matrix.addEventListener('click', function() {
-   var enabled = root.classList.toggle('is-matrix');
+   var enabled = matrix.getAttribute('aria-pressed') !== 'true';
    matrix.setAttribute('aria-pressed', String(enabled));
+   if (links.length) render();
  });
  document.getElementById('sort').onchange=render;document.getElementById('refresh').onclick=load;load();
 })();
