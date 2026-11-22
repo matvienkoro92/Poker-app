@@ -166,6 +166,7 @@
    budgetGaps.hidden = budgetSplit.checked;
  }
 
+ var editingExpense = null;
  var budgetUndated = document.getElementById('budget-undated');
  var budgetFrom = document.getElementById('budget-from');
  var budgetTo = document.getElementById('budget-to');
@@ -188,7 +189,10 @@
  }
  function refreshBudgetPanel() {
    budgetMessage.textContent = '';
-   budgetFrom.disabled = budgetTo.disabled = budgetUndated.checked;
+   for (var input of [budgetFrom, budgetTo]) {
+     input.disabled = budgetUndated.checked;
+     input.closest('label').hidden = budgetUndated.checked;
+   }
    budgetGaps.hidden = budgetSplit.checked || budgetUndated.checked;
    var entries = expenseEntries(budgetLink.value).filter(function(entry) { return entry.from; });
    var datesValid = budgetFrom.value && budgetTo.value && budgetFrom.value <= budgetTo.value;
@@ -221,6 +225,7 @@
    };
  }
  function setBudgetRange(entry) {
+   editingExpense = entry.amount == null ? null : entry;
    budgetUndated.checked = !entry.from;
    if (entry.from) {
      budgetFrom.value = entry.from;
@@ -234,6 +239,7 @@
    budgetPanel.hidden = !open;
    budgetToggle.setAttribute('aria-expanded', String(open));
    if (!open) return;
+   editingExpense = null;
    budgetUndated.checked = false;
    var selected = budgetLink.value;
    budgetLink.replaceChildren(...links.map(function(link) { return new Option(link.label,link.id); }));
@@ -250,8 +256,9 @@
    refreshBudgetPanel();
  }
  budgetToggle.onclick = function() { showBudgetPanel(budgetPanel.hidden); };
- budgetLink.onchange = function() { budgetAmount.value = ''; refreshBudgetPanel(); };
+ budgetLink.onchange = function() { editingExpense = null; budgetAmount.value = ''; refreshBudgetPanel(); };
  budgetSplit.onchange = function() {
+   editingExpense = null;
    if (budgetSplit.checked && !budgetSplitLinks.querySelector(':checked')) {
      Array.from(budgetSplitLinks.querySelectorAll('input')).forEach(function(input) {
        input.checked = input.value === budgetLink.value;
@@ -285,7 +292,11 @@
    var updated = {...ledger};
    for (var index = 0; index < ids.length; index++) {
      var id = ids[index];
-     var entries = expenseEntries(id).filter(function(entry) { return entry.from !== bounds.from || entry.to !== bounds.to; });
+     var original = editingExpense || (budgetUndated.checked ? {from:budgetFrom.value,to:budgetTo.value} : null);
+     var entries = expenseEntries(id).filter(function(entry) {
+       if (original && entry.from === original.from && entry.to === original.to) return false;
+       return entry.from !== bounds.from || entry.to !== bounds.to;
+     });
      if (entries.some(function(entry) { return entry.from <= bounds.to && entry.to >= bounds.from; })) {
        var label = links.find(function(link) { return String(link.id) === id; })?.label;
        budgetMessage.textContent = 'Даты пересекаются с сохранённой записью для «' + label +
@@ -299,6 +310,7 @@
    try { localStorage.setItem(ledgerKey, JSON.stringify(updated)); }
    catch (_) { budgetMessage.textContent = 'Браузер не смог сохранить расходы.'; return; }
    ledger = Object.assign(Object.create(null),updated);
+   editingExpense = budgetSplit.checked ? null : bounds;
    refreshBudgetPanel();
    var savedMessage = 'Сохранено: ' + num(cents / 100) + ' ₽ · ' + budgetDates(bounds) +
      (budgetSplit.checked ? ' · ссылки: ' + ids.length : '') + '.';

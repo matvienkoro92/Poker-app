@@ -66,7 +66,7 @@
 #subgroup-new[hidden]{display:none}
 .link-matrix .matrix-subgroup-total :is(th,td){background:#1b2b3b;border-top:1px solid #c5a46170}
 .link-matrix .matrix-subgroup-total th{color:#edd59f}
-#budget-single-link[hidden],#budget-split-links[hidden],#budget-gaps[hidden]{display:none}
+#budget-form label[hidden],#budget-single-link[hidden],#budget-split-links[hidden],#budget-gaps[hidden]{display:none}
 .budget-panel .budget-split-toggle,#budget-split-links label{display:flex;align-items:center;gap:6px}
 .budget-panel .budget-split-toggle{align-self:center}
 #budget-split-links{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:6px 12px;border:0;padding:0;margin:0;min-width:0}
