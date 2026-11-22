@@ -29,8 +29,8 @@
 #budget-amount{width:12ch}
 #budget-gaps,#budget-records{margin:12px 0}
 #budget-gaps h3,#budget-records h3{margin:0 0 6px;font-size:13px}
-#budget-records ul{margin:0;padding:0;list-style:none}
-#budget-records li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-bottom:4px}
+#budget-records ul{margin:0;padding:0;list-style:none;overflow-x:auto}
+#budget-records li{display:flex;align-items:center;gap:8px;margin-bottom:4px;white-space:nowrap}
 
 #matrix-full[aria-pressed="true"]{background:#e6c986;color:#131d29}
 .link-matrix:has(.matrix-groups) table{min-width:920px;table-layout:fixed;font-size:11px}
@@ -60,8 +60,7 @@
 .subgroups-actions{display:flex;flex-wrap:wrap;align-items:end;gap:8px 12px}
 #subgroups-message:empty{display:none}
 .link-matrix .matrix-subgroup th{position:static;background:#223447;color:#edd59f;text-align:left}
-.budget-record-group+.budget-record-group{margin-top:10px}
-.budget-record-group h4{margin:0 0 4px;color:#eddbb4}
+#budget-records strong{color:#eddbb4}
 #subgroup-new[hidden]{display:none}
 .link-matrix .matrix-subgroup-total :is(th,td){background:#1b2b3b;border-top:1px solid #c5a46170}
 .link-matrix .matrix-subgroup-total th{color:#edd59f}

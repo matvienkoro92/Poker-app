@@ -177,26 +177,21 @@
      if (button) setBudgetRange(gaps[Number(button.dataset.budgetGap)]);
    };
    var groups = links.filter(function(link) { return expenseEntries(link.id).length; });
-   budgetRecords.innerHTML = groups.length ? '<h3>Сохранённые расходы</h3>' + groups.map(function(link) {
-     var id = esc(link.id);
-     return '<section class="budget-record-group" data-budget-record-link="' + id + '"><h4>' + esc(link.label) +
-       '</h4><ul>' + expenseEntries(link.id).map(function(entry,index) {
-         return '<li><span>' + budgetDates(entry) + ' · ' + num(entry.amount) + ' ₽</span> ' +
-           '<button type="button" data-budget-edit="' + index + '">Изменить сумму</button>' +
-           '<button type="button" data-budget-show="' + index + '">Показать статистику</button></li>';
-       }).join('') + '</ul></section>';
-   }).join('') : '';
+   budgetRecords.innerHTML = groups.length ? '<h3>Сохранённые расходы</h3><ul>' + groups.map(function(link) {
+     return expenseEntries(link.id).map(function(entry,index) {
+       return '<li data-budget-record-link="' + esc(link.id) + '"><strong>' + esc(link.label) +
+         '</strong><span>' + budgetDates(entry) + ' · ' + num(entry.amount) + ' ₽</span>' +
+         '<button type="button" data-budget-edit="' + index + '">Изменить сумму</button></li>';
+     }).join('');
+   }).join('') + '</ul>' : '';
    budgetRecords.onclick = function(event) {
-     var button = event.target.closest('[data-budget-edit], [data-budget-show]');
+     var button = event.target.closest('[data-budget-edit]');
      if (!button || budgetToggle.disabled) return;
      var id = button.closest('[data-budget-record-link]').dataset.budgetRecordLink;
-     var entry = expenseEntries(id)[Number(button.dataset.budgetEdit ?? button.dataset.budgetShow)];
      budgetLink.value = id;
      budgetSplit.checked = false;
      syncBudgetSplit();
-     setBudgetRange(entry);
-     if (button.hasAttribute('data-budget-show')) showBudgetStatistics(entry);
-
+     setBudgetRange(expenseEntries(id)[Number(button.dataset.budgetEdit)]);
    };
  }
  function setBudgetRange(entry) {
