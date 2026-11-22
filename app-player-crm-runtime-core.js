@@ -2303,6 +2303,8 @@
       '<button type="button" data-crm-layout-visibility aria-label="Скрыть: ' + label + '">Скрыть</button></span>';
   }
 
+  var CRM_LINK_PAGE_SIZE = 3;
+  var crmLinkVisibleLimit = CRM_LINK_PAGE_SIZE;
   var crmLinkRefreshes = new Map();
   var crmLinkPreviewQueue = [];
   var crmLinkPreviewWorkers = 0;
@@ -2320,9 +2322,16 @@
     }
   }
 
-  function refreshVisibleCrmLinkPreviews() {
-    crmLinkPreviewQueue = Array.from(document.querySelectorAll("#playerCrmLinksList [data-crm-link-preview]"),
+  function renderedCrmLinkPreviewIds() {
+    return Array.from(document.querySelectorAll("#playerCrmLinksList [data-crm-link-preview]"),
       function (details) { return details.dataset.crmLinkPreview; });
+  }
+
+  function refreshVisibleCrmLinkPreviews(previousIds) {
+    var ids = renderedCrmLinkPreviewIds();
+    crmLinkPreviewQueue = previousIds
+      ? Array.from(new Set(crmLinkPreviewQueue.concat(ids.filter(function (id) { return !previousIds.includes(id); }))))
+      : ids;
     while (state.tab === "links" && crmLinkPreviewWorkers < 3 && crmLinkPreviewQueue.length) {
       runCrmLinkPreviewQueue();
     }
@@ -2417,6 +2426,7 @@
       hiddenToggle.setAttribute("aria-pressed", String(crmShowingHiddenLinks && ownOnly));
       hiddenToggle.onclick = function () {
         crmShowingHiddenLinks = !crmShowingHiddenLinks;
+        crmLinkVisibleLimit = CRM_LINK_PAGE_SIZE;
         renderCrmTrackingLinks();
       };
     }
@@ -2437,6 +2447,11 @@
         : "В этой группе нет видимых ссылок.") + "</div>";
       return;
     }
+    var remaining = links.length - crmLinkVisibleLimit;
+    links = links.slice(0, crmLinkVisibleLimit);
+    var moreButton = remaining > 0
+      ? '<button type="button" class="player-crm__ghost-btn" data-crm-links-more>Ещё</button>'
+      : '';
     el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link, index) {
       var url = crmLinkUrl(link), id = esc(link.id || ""), type = crmLinkParams(link).link_type;
       var channel = type === "website" ? "Сайт" : type ? "Telegram" : "Ссылка";
@@ -2466,7 +2481,7 @@
         (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
         (ownOnly ? '<small role="status" data-crm-link-calculation-status></small><details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
         '<div class="player-crm__link-actions">'+(ownOnly?'':'<button type="button" data-crm-link-details="'+id+'">Отклик</button>')+'<button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
-    }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
+    }).join("") + '</div>' + moreButton + '<details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
     if (ownOnly) {
       bindCrmLinkOrder(el, links.map(function (link) { return String(link.id); }),
         allOrdered.map(function (link) { return String(link.id); }));
@@ -5729,6 +5744,7 @@
       if (tab) {
         var previousTab = state.tab;
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
+        if (state.tab === "links" && previousTab !== "links") crmLinkVisibleLimit = CRM_LINK_PAGE_SIZE;
         renderActiveTab();
         if (state.tab === "players" && state.playersScope !== "players") loadCrmHeavyData("players", { page: 1 });
         if (state.tab === "blocked") loadCrmBlockedData();
@@ -5794,6 +5810,16 @@
       if (inlineMore) { loadCrmInlineLinkPlayers(inlineMore.closest('[data-crm-link-preview]')); return; }
       var preview = e.target.closest('.crm-link-overview summary');
       if (preview) { loadCrmLinkPreview(preview.closest('[data-crm-link-preview]')); return; }
+      if (e.target.closest("[data-crm-links-more]")) {
+        var previousIds = renderedCrmLinkPreviewIds();
+        crmLinkVisibleLimit += CRM_LINK_PAGE_SIZE;
+        renderCrmTrackingLinks();
+        var more = document.querySelector("[data-crm-links-more]");
+        var added = findCrmLinkPreview(renderedCrmLinkPreviewIds()[previousIds.length]);
+        (more || added?.querySelector("summary"))?.focus({ preventScroll: true });
+        refreshVisibleCrmLinkPreviews(previousIds);
+        return;
+      }
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
       if (linksRefresh) {
         if (state.linkDetailsId&&!crmLinkIsBroadcast(findCrmTrackingLink(state.linkDetailsId))) loadCrmLinkSummary();
@@ -5843,6 +5869,7 @@
       if (categorySave) { saveCrmLinkCategory(categorySave); return; }
       var linksTab = e.target.closest("[data-crm-links-tab]");
       if (linksTab) {
+        crmLinkVisibleLimit = CRM_LINK_PAGE_SIZE;
         state.trackingLinksTab = linksTab.getAttribute("data-crm-links-tab") === "broadcasts" ? "broadcasts" : "own";
         renderCrmTrackingLinks();
         return;
@@ -6291,6 +6318,7 @@
     });
     root.addEventListener("change", function (e) {
       if (e.target.id === "playerCrmLinksGroup" || e.target.id === "playerCrmLinksSort" || e.target.id === "playerCrmLinksCategory") {
+        crmLinkVisibleLimit = CRM_LINK_PAGE_SIZE;
         if (e.target.id === "playerCrmLinksGroup") state.trackingLinksGroup = e.target.value;
         else if (e.target.id === "playerCrmLinksCategory") state.trackingLinksCategory = e.target.value;
         else {
