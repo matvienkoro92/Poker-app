@@ -16,3 +16,8 @@
 .link-matrix .link-budget input{width:88px}
 .link-matrix td strong{font-size:16px}
 .link-matrix .metric-cost{display:block;color:#dec38b}
+
+.link-budget label{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px}
+.link-budget input[data-budget-date]{width:auto;max-width:100%}
+.link-matrix .link-budget label{justify-content:center}
+.link-matrix .link-budget label+label{margin-top:5px;font-size:11px;color:#929eae}
