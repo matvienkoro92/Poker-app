@@ -84,16 +84,12 @@
  var budgetToggle = document.getElementById('budget-toggle');
  var budgetForm = document.getElementById('budget-form');
  var budgetLink = document.getElementById('budget-link');
- var budgetMode = document.getElementById('budget-mode');
- var budgetMonth = document.getElementById('budget-month');
- var budgetYear = document.getElementById('budget-year');
  var budgetFrom = document.getElementById('budget-from');
  var budgetTo = document.getElementById('budget-to');
  var budgetAmount = document.getElementById('budget-amount');
  var budgetMessage = document.getElementById('budget-message');
  var budgetGaps = document.getElementById('budget-gaps');
  var budgetRecords = document.getElementById('budget-records');
- budgetMonth.innerHTML = monthInput.innerHTML;
  function monthBounds(month, year) {
    var start = String(year).padStart(4,'0') + '-' + month + '-01';
    return {from:start, to:shiftDate(month === '12'
@@ -107,17 +103,11 @@
    return formatBudgetDate(entry.from) + ' — ' + formatBudgetDate(entry.to);
  }
  function refreshBudgetPanel() {
-   var monthFields = document.getElementById('budget-month-fields');
-   var rangeFields = document.getElementById('budget-range-fields');
-   monthFields.hidden = monthFields.disabled = budgetMode.value !== 'month';
-   rangeFields.hidden = rangeFields.disabled = budgetMode.value !== 'range';
    budgetMessage.textContent = '';
    var entries = expenseEntries(budgetLink.value);
-   var bounds = periodBounds;
-   if (!bounds && budgetMode.value === 'month' && budgetYear.validity.valid) {
-     bounds = monthBounds(budgetMonth.value,budgetYear.valueAsNumber);
-   }
-   if (!bounds) bounds = monthBounds(today.slice(5,7), today.slice(0,4));
+   var datesValid = budgetFrom.value && budgetTo.value && budgetFrom.value <= budgetTo.value;
+   var bounds = periodBounds || (datesValid ? {from:budgetFrom.value,to:budgetTo.value} :
+     monthBounds(today.slice(5,7), today.slice(0,4)));
    var gaps = missingExpensePeriods(bounds, entries);
    budgetGaps.innerHTML = gaps.length ? '<h3>Расходы не указаны</h3>' + gaps.map(function(gap,index) {
      return '<button type="button" data-budget-gap="' + index + '">Заполнить ' + budgetDates(gap) + '</button>';
@@ -136,7 +126,6 @@
    };
  }
  function setBudgetRange(entry) {
-   budgetMode.value = 'range';
    budgetFrom.value = entry.from;
    budgetTo.value = entry.to;
    budgetAmount.value = entry.amount ?? '';
@@ -151,10 +140,6 @@
    budgetLink.replaceChildren(...links.map(function(link) { return new Option(link.label,link.id); }));
    if (links.some(function(link) { return String(link.id) === selected; })) budgetLink.value = selected;
    var bounds = periodBounds || monthBounds(today.slice(5,7), today.slice(0,4));
-   var month = monthBounds(bounds.from.slice(5,7), bounds.from.slice(0,4));
-   budgetMode.value = bounds.from === month.from && bounds.to === month.to ? 'month' : 'range';
-   budgetMonth.value = bounds.from.slice(5,7);
-   budgetYear.value = Number(bounds.from.slice(0,4));
    budgetFrom.value = bounds.from;
    budgetTo.value = bounds.to;
    budgetAmount.value = periodBounds ? (legacyBudget(budgetLink.value) ?? '') : '';
@@ -162,13 +147,11 @@
  }
  budgetToggle.onclick = function() { showBudgetPanel(budgetPanel.hidden); };
  budgetLink.onchange = function() { budgetAmount.value = ''; refreshBudgetPanel(); };
- budgetMode.onchange = refreshBudgetPanel;
- budgetMonth.onchange = refreshBudgetPanel;
- budgetYear.onchange = refreshBudgetPanel;
+ budgetFrom.onchange = refreshBudgetPanel;
+ budgetTo.onchange = refreshBudgetPanel;
  budgetForm.addEventListener('submit', function(event) {
    event.preventDefault();
-   var bounds = budgetMode.value === 'month' ? monthBounds(budgetMonth.value,budgetYear.valueAsNumber) :
-     {from:budgetFrom.value,to:budgetTo.value};
+   var bounds = {from:budgetFrom.value,to:budgetTo.value};
    if (bounds.from > bounds.to) {
      budgetMessage.textContent = 'Дата окончания должна быть не раньше начала.';
      return;
@@ -195,7 +178,6 @@
    ['Активные посетители', 'activeVisitors', 'Цена активного посетителя'],
    ['Всего открытий и нажатий', 'actionEvents', 'Цена действия']
  ];
- var matrix = document.getElementById('matrix');
 
  function linkDetails(id) {
    var suffix = periodStart ? ' · за всё время' : '';
@@ -219,12 +201,12 @@
      '<table>' + columns + '<thead>' + group + '<tr><th scope="col">Ссылка</th>' +
      metrics.concat(extraFields).map(function(metric) { return '<th scope="col">' + metric[0] + '</th>'; }).join('') +
      '</tr></thead><tbody>' + rows.map(function(link) {
-       return '<tr data-link-id="' + esc(link.id) + '"><th scope="row">' + esc(link.label) + '</th>' + metrics.map(function(metric) {
+       return '<tr data-link-id="' + esc(link.id) + '"><th scope="row">' + '<button type="button" class="matrix-link-name" data-link-details>' + esc(link.label) + '</button></th>' + metrics.map(function(metric) {
          return '<td>' + metricCell('', link[metric[1]], metric[2]) + '</td>';
        }).join('') + extraFields.map(function(field) {
          return '<td data-summary-field="' + field[1] + '">…</td>';
        }).join('') + '</tr>';
-     }).join('') + '</tbody></table></div>';
+     }).join('') + '</tbody></table></div><div data-matrix-link-details></div>';
  }
 
  function fetchMatrixSummary(id) {
@@ -272,25 +254,16 @@
 
  function render() {
    var seq = ++matrixRenderSeq;
-   var matrixEnabled = matrix.getAttribute('aria-pressed') === 'true';
-   fullMatrix.hidden = !matrixEnabled;
    fullMatrix.disabled = !links.length;
    var sort = document.getElementById('sort').value;
    var rows = links.slice().sort(function(a, b) {
      return sort === 'label' ? a.label.localeCompare(b.label, 'ru') : (b[sort] ?? -1) - (a[sort] ?? -1);
    });
    if (!rows.length) root.innerHTML = '<p>В этой категории пока нет ссылок.</p>';
-   else if (matrixEnabled) {
+   else {
      root.innerHTML = renderMatrix(rows);
      if (fullMatrix.getAttribute('aria-pressed') === 'true') loadMatrixSummaries(seq);
    }
-   else root.innerHTML = rows.map(function(link) {
-     var id = esc(link.id);
-     return '<article data-link-id="' + id + '"><h2>' + esc(link.label) + '</h2>' +
-       '<div class="metrics">' +
-       metrics.map(function(metric) { return metricCell(metric[0], link[metric[1]], metric[2]); }).join('') +
-       '</div>' + linkDetails(id) + '</article>';
-   }).join('');
    root.querySelectorAll('[data-link-id]').forEach(updateCosts);
  }
  async function load() {
@@ -341,10 +314,23 @@
  function bool(v){return '<span class="'+(v===true?'yes':v===false?'no':'unknown')+'">'+(v===true?'Да':v===false?'Нет':'—')+'</span>';}
  async function players(details,offset,append){var body=details.querySelector('[data-body]'),button=body.querySelector('button');if(button)button.disabled=true;try{var data=await request('id='+encodeURIComponent(details.dataset.players)+'&view=players&offset='+offset);var rows=data.rows.map(function(r){return '<tr><td>'+esc(r.nick)+'</td>'+[r.visitCount,r.activityCount].map(function(v){return '<td>'+num(v)+'</td>';}).join('')+'<td>'+bool(r.registered)+'</td><td>'+num(r.raffleCount)+'</td><td>'+num(r.spinCount)+'</td><td>'+esc(r.pokerId||'—')+'</td><td>'+num(r.heroLevel)+'</td><td>'+bool(r.bot)+'</td><td>'+bool(r.playersChat)+'</td><td>'+num(r.depositCount)+'</td><td>'+num(r.depositAmount)+'</td></tr>';}).join('');if(!append)body.innerHTML='<div class="players" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат','Пополнения','Депозиты CRM, ₽'].map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr></thead><tbody></tbody></table></div>';body.querySelector('tbody').insertAdjacentHTML('beforeend',rows);if(button)button.remove();if(data.nextOffset!=null){var more=document.createElement('button');more.textContent='Ещё игроки';more.onclick=function(){players(details,data.nextOffset,true);};body.appendChild(more);}details.dataset.loaded='1';}catch(error){if(!append)body.textContent=error.message;else{button.disabled=false;status.textContent=error.message;}}}
  root.addEventListener('toggle',async function(event){var details=event.target;if(!details.open||details.dataset.loaded||details.dataset.loading)return;details.dataset.loading='1';var body=details.querySelector('[data-body]');body.textContent='Загрузка…';try{if(details.dataset.players){await players(details,0,false);return;}var data=await request('id='+encodeURIComponent(details.dataset.summary)+'&view=summary');body.innerHTML='<div class="summary-grid">'+fields.map(function(pair){return metricCell(pair[0],data.summary[pair[1]],periodBounds||pair[1]==='depositAmount'?'':pair[1]==='registrations'?'Цена регистрации':'Цена за единицу');}).join('')+'</div>';if(data.summary.coverageUnavailable)body.insertAdjacentHTML('afterbegin','<p class="unknown">Полноту старой истории проверить не удалось.</p>');if(data.summary.registrationUnknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Дата регистрации не установлена: '+num(data.summary.registrationUnknown)+'</p>');if(data.summary.coverage?.visitorsWithoutJourney)body.insertAdjacentHTML('afterbegin','<p class="unknown">Без подробной истории: '+num(data.summary.coverage.visitorsWithoutJourney)+' из '+num(data.summary.coverage.trackedVisitors)+' посетителей.</p>');var unknown=(data.summary.botUnknown||0)+(data.summary.playersChatUnknown||0)+(data.summary.depositUnknown||0);if(unknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Часть подписок или депозитов не проверена и не включена в подтверждённые итоги.</p>');updateCosts(details.closest('article'));details.dataset.loaded='1';}catch(error){body.textContent=error.message;}finally{delete details.dataset.loading;}},true);
- matrix.addEventListener('click', function() {
-   var enabled = matrix.getAttribute('aria-pressed') !== 'true';
-   matrix.setAttribute('aria-pressed', String(enabled));
-   render();
+ root.addEventListener('click', function(event) {
+   var nameButton = event.target.closest('[data-link-details]');
+   var closeButton = event.target.closest('[data-close-link-details]');
+   if (!nameButton && !closeButton) return;
+   var panel = root.querySelector('[data-matrix-link-details]');
+   if (closeButton) {
+     var id = closeButton.closest('[data-link-id]').dataset.linkId;
+     panel.replaceChildren();
+     Array.from(root.querySelectorAll('[data-link-details]')).find(function(button) {
+       return button.closest('[data-link-id]').dataset.linkId === id;
+     })?.focus();
+     return;
+   }
+   var id = nameButton.closest('[data-link-id]').dataset.linkId;
+   panel.innerHTML = '<article data-link-id="' + esc(id) + '"><header><h2>' + esc(nameButton.textContent) +
+     '</h2><button type="button" data-close-link-details>Закрыть</button></header>' + linkDetails(esc(id)) + '</article>';
+   panel.querySelector('summary').focus();
  });
  fullMatrix.addEventListener('click', function() {
    var expanded = fullMatrix.getAttribute('aria-pressed') !== 'true';

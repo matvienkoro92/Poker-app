@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>Статистика ссылок</title><link rel="stylesheet" href="./styles-link-stats.css?v=20261123-compact-matrix"></head><body><main><header><div><small>Статистика категории · только просмотр</small><h1 id="category">Загрузка…</h1><p id="recipient"></p></div><button id="refresh" type="button">Обновить</button></header><p id="status" role="status"></p><div class="toolbar"><label>Период (МСК)<select id="period"><option value="all">За всё время</option><option value="today">Сегодня</option><option value="7">Последние 7 дней</option><option value="30">Последние 30 дней</option><option value="month">Календарный месяц</option><option value="range">Диапазон дат</option></select></label><label>Сортировка<select id="sort"><option value="totalClicks">По переходам</option><option value="uniqueClicks">По посетителям</option><option value="actionEvents">По открытиям</option><option value="label">По названию</option></select></label><button id="matrix" type="button" aria-pressed="false" aria-controls="links">Матрица</button><button id="matrix-full" type="button" aria-pressed="false" aria-controls="links" hidden>Все показатели</button><button id="budget-toggle" type="button" aria-expanded="false" aria-controls="budget-panel" disabled>Бюджет</button></div><form id="period-form" class="period-form" hidden>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>Статистика ссылок</title><link rel="stylesheet" href="./styles-link-stats.css?v=20261123-table-default"></head><body><main><header><div><small>Статистика категории · только просмотр</small><h1 id="category">Загрузка…</h1><p id="recipient"></p></div><button id="refresh" type="button">Обновить</button></header><p id="status" role="status"></p><div class="toolbar"><label>Период (МСК)<select id="period"><option value="all">За всё время</option><option value="today">Сегодня</option><option value="7">Последние 7 дней</option><option value="30">Последние 30 дней</option><option value="month">Календарный месяц</option><option value="range">Диапазон дат</option></select></label><label>Сортировка<select id="sort"><option value="totalClicks">По переходам</option><option value="uniqueClicks">По посетителям</option><option value="actionEvents">По открытиям</option><option value="label">По названию</option></select></label><button id="matrix-full" type="button" aria-pressed="false" aria-controls="links" disabled>Все показатели</button><button id="budget-toggle" type="button" aria-expanded="false" aria-controls="budget-panel" disabled>Бюджет</button></div><form id="period-form" class="period-form" hidden>
   <fieldset id="period-month" hidden disabled>
     <label>Месяц<select id="period-month-number" required></select></label>
     <label>Год<input id="period-year" type="number" min="1" max="9999" step="1" required></label>
@@ -13,15 +13,8 @@
   <h2 id="budget-title">Расходы по ссылкам</h2>
   <form id="budget-form">
     <label>Ссылка<select id="budget-link" required></select></label>
-    <label>Период<select id="budget-mode"><option value="month">Календарный месяц</option><option value="range">Диапазон дат</option></select></label>
-    <fieldset id="budget-month-fields">
-      <label>Месяц<select id="budget-month" required></select></label>
-      <label>Год<input id="budget-year" type="number" min="1" max="9998" required></label>
-    </fieldset>
-    <fieldset id="budget-range-fields" hidden disabled>
-      <label>С<input id="budget-from" type="date" required></label>
-      <label>По<input id="budget-to" type="date" required></label>
-    </fieldset>
+    <label>С<input id="budget-from" type="date" required></label>
+    <label>По<input id="budget-to" type="date" required></label>
     <label>Потрачено, ₽<input id="budget-amount" type="number" min="0" step="0.01" inputmode="decimal" required></label>
     <button type="submit">Сохранить</button>
   </form>
@@ -30,4 +23,4 @@
   <div id="budget-records"></div>
   <small>Записи сохраняются в этом браузере. Если расходов не было, можно записать 0 ₽.</small>
 </section>
-<section id="links"></section></main><script src="./app-link-stats.js?v=20261123-compact-matrix" defer></script></body></html>
+<section id="links"></section></main><script src="./app-link-stats.js?v=20261123-table-default" defer></script></body></html>
