@@ -111,7 +111,7 @@
    links = [];
    refresh.disabled = true;
    try {
-     if (!/^[a-f0-9]{64}$/.test(token)) throw Error('Откройте персональную ссылку, полученную от владельца.');
+     if (!/^[a-f0-9]{64}(?:\.[a-f0-9]{64})?$/.test(token)) throw Error('Откройте персональную ссылку, полученную от владельца.');
      var data = await request('period=' + encodeURIComponent(period));
      if (seq !== loadSeq) return;
      document.getElementById('category').textContent = data.category;

@@ -17,11 +17,11 @@ function fixture(fail = false) {
     throw Error(op);
   }); } };
   const scope = { module: { exports: {} }, process: { env: {} }, require: name => {
-    if (name === '../tracking-link-summary') return { readReport: async (id, from, excluded, fresh) => {
+    if (name === '../tracking-link-summary') return { readCardSummary: async id => {
       assert.equal(id, 'aaaaaaaa');
-      assert.equal(fresh, true);
       calculations++;
-      return { summary: {botSubscribers:7,stepsUnavailable:incomplete}, reportToken:'report-token' };
+      if (incomplete) throw Error('unavailable');
+      return {botSubscribers:7};
     } };
     if (name === '../redis') return redis;
     if (name === '../tracking-read-scope') return { withReadScope: fn => fn() };
@@ -46,7 +46,7 @@ test('manual calculation saves a card report and an incomplete refresh preserves
   const f = fixture();
   assert.equal((await f.call()).data.links[0].cardReport, null);
   assert.equal(f.calculations, 0);
-  const query = {id:'aaaaaaaa',summary:'1',pinReport:'1',saveCard:'1',period:'all'};
+  const query = {id:'aaaaaaaa',summary:'1',saveCard:'1',period:'all'};
   const refresh = await f.call(query);
   assert.equal(refresh.code, 200);
   assert.equal(refresh.data.summary.botSubscribers, 7);

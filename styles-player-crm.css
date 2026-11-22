@@ -4330,3 +4330,5 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
 .crm-category-access__grant .crm-category-access__copy {border-color:#c5a46170}
 
 [data-crm-link-calculation-status]:empty {display:none}
+
+.crm-category-access__grant .crm-category-access__url {flex:2 1 17rem;width:auto}

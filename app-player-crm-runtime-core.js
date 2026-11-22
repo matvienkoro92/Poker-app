@@ -2542,11 +2542,11 @@
       if (seq !== crmAccessListSeq || category !== crmAccessCategory() || panel.hidden) return;
       list.innerHTML = data.grants.map(function (grant) {
         var name = esc(grant.name);
-        var token = savedCrmAccessToken(grant.id);
-        var link = '<small>Ссылка недоступна в этом браузере</small>';
-        if (/^[a-f0-9]{64}$/.test(token || "")) {
+        var token = grant.shareToken || savedCrmAccessToken(grant.id);
+        var link = '<small>Сервер не выдал URL</small>';
+        if (/^[a-f0-9]{64}(?:\.[a-f0-9]{64})?$/.test(token || "")) {
           var url = esc(crmAccessLinkUrl(token));
-          link = '<a href="' + url + '" target="_blank" rel="noopener noreferrer">Открыть ссылку</a>' +
+          link = '<input class="crm-category-access__url" readonly aria-label="Ссылка выдачи доступа" value="' + url + '">' +
             '<button type="button" class="crm-category-access__copy" data-crm-link-copy="' + url + '">Копировать</button>';
         }
         var label = category ? name : name + ' · ' + esc(grant.category);
@@ -2572,7 +2572,7 @@
       var data = await crmCategoryAccessRequest({ action: "create", category: category, name: name });
       storeCrmAccessToken(data.grant.id, data.token);
       if (category !== crmAccessCategory()) return;
-      var url = esc(crmAccessLinkUrl(data.token));
+      var url = esc(crmAccessLinkUrl(data.shareToken || data.token));
       result.innerHTML = '<p>Доступ для ' + esc(name) + ' создан.</p>' +
         '<button type="button" class="player-crm__ghost-btn" data-crm-link-copy="' + url + '">Копировать ссылку</button>';
       renderCrmCategoryAccess();
@@ -2765,17 +2765,14 @@
     if (details.dataset.previewLoaded) return;
     var link = findCrmTrackingLink(details.dataset.crmLinkPreview);
     var report = link?.cardReport;
-    var target = details.querySelector("[data-crm-link-preview-body]");
     var card = details.closest(".player-crm__link-card");
     var summary = report?.summary;
     var updated = summary && report.updatedAt ? new Date(report.updatedAt).toLocaleString("ru-RU") : "";
     var note = updated ? "Обновлено: " + esc(updated) + "." : "Расчёт ещё не сохранён. Нажмите «Обновить расчёт».";
-    details.crmReportToken = report?.reportToken || "";
     details.dataset.previewLoaded = "1";
     var status = card.querySelector("[data-crm-link-calculation-status]");
     var refreshing = crmLinkRefreshes.has(details.dataset.crmLinkPreview);
     status.textContent = refreshing ? "Считаем…" : (updated ? "Обновлено: " + updated : "");
-    details.querySelector("[data-crm-link-report-refresh]").disabled = refreshing;
     if (summary) {
       card.querySelectorAll("[data-crm-link-card-metric]").forEach(function (cell) {
         var key = cell.dataset.crmLinkCardMetric;
@@ -2789,20 +2786,16 @@
       var amount = summary.depositAmount;
       if (deposit) deposit.textContent = amount == null ? "" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(amount) + " ₽";
     }
-    target.innerHTML = (summary ? crmLinkAggregateHtml(summary) : "") +
-      '<p class="crm-link-overview__unknown">' + note + '</p>';
   }
 
   function refreshCrmLinkPreview(details) {
     var id = details.dataset.crmLinkPreview;
     if (crmLinkRefreshes.has(id)) return crmLinkRefreshes.get(id);
-    var button = details.querySelector("[data-crm-link-report-refresh]");
     var status = details.closest(".player-crm__link-card").querySelector("[data-crm-link-calculation-status]");
-    button.disabled = true;
     status.textContent = "Считаем…";
     var q = authQuerySafe();
     var pending = fetch(getApiBaseSafe() + "/api/tracking-links" + q + (q.indexOf("?") >= 0 ? "&" : "?") +
-      "summary=1&pinReport=1&period=all&saveCard=1&id=" + encodeURIComponent(id), {
+      "summary=1&saveCard=1&id=" + encodeURIComponent(id), {
       cache: "no-store", signal: AbortSignal.timeout(45000)
     }).then(async function (response) {
       var data = await response.json();
@@ -2811,15 +2804,9 @@
       if (link) link.cardReport = data;
       var current = findCrmLinkPreview(id);
       if (!current) return;
-      var players = current.querySelector("[data-crm-link-players-body]");
       crmLinkRefreshes.delete(id);
       delete current.dataset.previewLoaded;
-      delete current.dataset.playersComplete;
-      delete current.crmPlayerRows;
-      delete current.crmPlayersNext;
-      players.replaceChildren();
       loadCrmLinkPreview(current);
-      if (!players.hidden) loadCrmInlineLinkPlayers(current);
     }).catch(function (error) {
       var current = findCrmLinkPreview(id);
       if (!current) return;
@@ -2827,15 +2814,51 @@
       current.closest(".player-crm__link-card").querySelector("[data-crm-link-calculation-status]").textContent = "Не удалось обновить. " + message;
     }).finally(function () {
       crmLinkRefreshes.delete(id);
-      var current = findCrmLinkPreview(id);
-      if (current) current.querySelector("[data-crm-link-report-refresh]").disabled = false;
     });
     crmLinkRefreshes.set(id, pending);
     return pending;
   }
 
-  async function loadCrmInlineLinkPlayers(details) {
-    loadCrmLinkPreview(details);
+  function loadCrmLinkDetailsReport(details, fresh) {
+    if (details.crmDetailsRequest) return details.crmDetailsRequest;
+    if (details.crmDetailsLoaded && !fresh) return Promise.resolve(true);
+    var target = details.querySelector("[data-crm-link-preview-body]");
+    var button = details.querySelector("[data-crm-link-report-refresh]");
+    var q = authQuerySafe();
+    button.disabled = true;
+    details.crmDetailsRequest = (async function () {
+      try {
+        var response = await fetch(getApiBaseSafe() + "/api/tracking-links" + q + (q.indexOf("?") >= 0 ? "&" : "?") +
+          "summary=1&pinReport=1&period=all&id=" + encodeURIComponent(details.dataset.crmLinkPreview) + (fresh ? "&fresh=1" : ""),
+          { cache:"no-store", signal:AbortSignal.timeout(60000) });
+        var data = await response.json();
+        if (!response.ok || !data.ok || !data.summary) throw new Error(data.error || "Статистика временно недоступна");
+        details.crmDetailsLoaded = true;
+        details.crmReportToken = data.reportToken || "";
+        delete details.dataset.playersComplete;
+        delete details.crmPlayerRows;
+        delete details.crmPlayersNext;
+        details.querySelector("[data-crm-link-players-body]").replaceChildren();
+        target.innerHTML = crmLinkAggregateHtml(data.summary);
+        return true;
+      } catch (error) {
+        target.innerHTML = '<p role="status">Не удалось загрузить сводку. ' + esc(error.message) + '</p>';
+        return false;
+      } finally {
+        button.disabled = false;
+        details.crmDetailsRequest = null;
+      }
+    })();
+    target.textContent = "Считаем подробную статистику…";
+    return details.crmDetailsRequest;
+  }
+
+  async function loadCrmInlineLinkPlayers(details, fresh) {
+    if (details.dataset.playersLoading) return;
+    if (!details.crmDetailsLoaded || fresh) {
+      details.querySelector("[data-crm-link-players-body]").textContent = "Считаем подробную статистику…";
+      await loadCrmLinkDetailsReport(details, fresh);
+    }
     if (!details.crmReportToken) {
       details.querySelector('[data-crm-link-players-body]').innerHTML = '<p role="status">Для списка игроков нажмите «Обновить расчёт».</p>';
       return;
@@ -2851,7 +2874,13 @@
     render(false);
     var q = authQuerySafe();
     fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'journey=1&participants=1&id=' + encodeURIComponent(details.getAttribute('data-crm-link-preview')) + '&offset=' + (details.crmPlayersNext || 0) + (details.crmReportToken ? '&reportToken=' + encodeURIComponent(details.crmReportToken) : ''))
-      .then(function(r) { return r.json(); }).then(function(data) {
+      .then(function(r) {
+        if (r.status === 409) {
+          details.crmDetailsLoaded = false;
+          details.crmReportToken = "";
+        }
+        return r.json();
+      }).then(function(data) {
         if (!data.ok || !Array.isArray(data.rows)) throw new Error(data.error || 'Участники не загрузились.');
         rows = rows.concat(data.rows);
         details.crmPlayerRows = rows;
@@ -5792,7 +5821,10 @@
       var reportRefresh = e.target.closest('[data-crm-link-report-refresh]');
       if (reportRefresh) {
         var reportDetails = reportRefresh.closest("[data-crm-link-preview]");
-        if (!reportDetails.dataset.playersLoading) refreshCrmLinkPreview(reportDetails);
+        if (!reportDetails.dataset.playersLoading) {
+          if (reportDetails.querySelector("[data-crm-link-players-body]").hidden) loadCrmLinkDetailsReport(reportDetails, true);
+          else loadCrmInlineLinkPlayers(reportDetails, true);
+        }
         return;
       }
       var linkView = e.target.closest('[data-crm-link-view]');
@@ -5803,13 +5835,17 @@
         overview.querySelector('[data-crm-link-players-body]').hidden = !playersView;
         overview.querySelectorAll('[data-crm-link-view]').forEach(function(button) { button.setAttribute('aria-pressed', String(button === linkView)); });
         if (playersView && !overview.crmPlayerRows) loadCrmInlineLinkPlayers(overview);
-        else if (!playersView) loadCrmLinkPreview(overview);
+        else if (!playersView) loadCrmLinkDetailsReport(overview);
         return;
       }
       var inlineMore = e.target.closest('[data-crm-inline-players-more]');
       if (inlineMore) { loadCrmInlineLinkPlayers(inlineMore.closest('[data-crm-link-preview]')); return; }
       var preview = e.target.closest('.crm-link-overview summary');
-      if (preview) { loadCrmLinkPreview(preview.closest('[data-crm-link-preview]')); return; }
+      if (preview) {
+        var details = preview.closest("[data-crm-link-preview]");
+        if (!details.open && details.querySelector("[data-crm-link-players-body]").hidden) loadCrmLinkDetailsReport(details);
+        return;
+      }
       if (e.target.closest("[data-crm-links-more]")) {
         var previousIds = renderedCrmLinkPreviewIds();
         crmLinkVisibleLimit += CRM_LINK_PAGE_SIZE;
