@@ -45,3 +45,10 @@
 
 .matrix-link-name{border:0;padding:0;background:none;color:#eddbb4;text-align:left;overflow-wrap:anywhere}
 .matrix-link-name:hover{text-decoration:underline}
+.link-detail-options{display:flex;flex-wrap:wrap;column-gap:16px}
+.link-detail-options details{min-width:0}
+.link-detail-options details[open]{flex:0 0 100%}
+.matrix-link-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px 6px}
+.matrix-link-hide{padding:1px 5px;font-size:10px}
+#hidden-links-panel{margin-bottom:10px}
+#hidden-links-panel>div{display:flex;align-items:center;gap:10px;margin-bottom:4px}

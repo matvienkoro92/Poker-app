@@ -180,10 +180,54 @@
  ];
 
  function linkDetails(id) {
-   var suffix = periodStart ? ' · за всё время' : '';
-   return '<details data-summary="' + id + '"><summary>Общая статистика' + suffix + '</summary><div data-body></div></details>' +
-     '<details data-players="' + id + '"><summary>По игрокам' + suffix + '</summary><div data-body></div></details>';
+   var note = periodStart ? '<small>Детализация за всё время</small>' : '';
+   return note + '<div class="link-detail-options">' +
+     '<details data-summary="' + id + '"><summary>Общая статистика</summary><div data-body></div></details>' +
+     '<details data-players="' + id + '"><summary>По игрокам</summary><div data-body></div></details></div>';
  }
+
+ var hiddenLinksKey = 'poker.link-stats.hidden-links.v1';
+ var hiddenIds = new Set();
+ try {
+   var storedIds = JSON.parse(localStorage.getItem(hiddenLinksKey) || '[]');
+   if (Array.isArray(storedIds)) hiddenIds = new Set(storedIds);
+ } catch (_) {}
+ var hiddenToggle = document.getElementById('hidden-links');
+ var hiddenPanel = document.getElementById('hidden-links-panel');
+
+ function saveHiddenLinks() {
+   try { localStorage.setItem(hiddenLinksKey, JSON.stringify(Array.from(hiddenIds))); } catch (_) {}
+ }
+
+ function renderHiddenLinks() {
+   var hidden = links.filter(function(link) { return hiddenIds.has(String(link.id)); });
+   hiddenToggle.hidden = !hidden.length;
+   hiddenToggle.textContent = 'Скрытые (' + hidden.length + ')';
+   if (!hidden.length) hiddenPanel.hidden = true;
+   hiddenToggle.setAttribute('aria-expanded', String(!hiddenPanel.hidden));
+   hiddenPanel.innerHTML = hidden.map(function(link) {
+     return '<div><span>' + esc(link.label) + '</span><button type="button" data-restore-link="' +
+       esc(link.id) + '" aria-label="Показать: ' + esc(link.label) + '">Показать</button></div>';
+   }).join('');
+ }
+
+ hiddenToggle.onclick = function() {
+   hiddenPanel.hidden = !hiddenPanel.hidden;
+   renderHiddenLinks();
+ };
+ hiddenPanel.onclick = function(event) {
+   var button = event.target.closest('[data-restore-link]');
+   if (!button) return;
+   var id = button.dataset.restoreLink;
+   hiddenIds.delete(id);
+   saveHiddenLinks();
+   render();
+   if (hiddenPanel.hidden) {
+     Array.from(root.querySelectorAll('tr[data-link-id]')).find(function(row) {
+       return row.dataset.linkId === id;
+     })?.querySelector('[data-link-details]').focus({preventScroll:true});
+   } else hiddenPanel.querySelector('button')?.focus({preventScroll:true});
+ };
 
  var fullMatrix = document.getElementById('matrix-full');
  var matrixSummaries = new Map();
@@ -201,7 +245,11 @@
      '<table>' + columns + '<thead>' + group + '<tr><th scope="col">Ссылка</th>' +
      metrics.concat(extraFields).map(function(metric) { return '<th scope="col">' + metric[0] + '</th>'; }).join('') +
      '</tr></thead><tbody>' + rows.map(function(link) {
-       return '<tr data-link-id="' + esc(link.id) + '"><th scope="row">' + '<button type="button" class="matrix-link-name" data-link-details>' + esc(link.label) + '</button></th>' + metrics.map(function(metric) {
+       var label = esc(link.label);
+       return '<tr data-link-id="' + esc(link.id) + '"' + (hiddenIds.has(String(link.id)) ? ' hidden' : '') +
+         '><th scope="row"><span class="matrix-link-controls"><button type="button" class="matrix-link-name" data-link-details>' +
+         label + '</button><button type="button" class="matrix-link-hide" data-hide-link aria-label="Скрыть: ' +
+         label + '">Скрыть</button></span></th>'  + metrics.map(function(metric) {
          return '<td>' + metricCell('', link[metric[1]], metric[2]) + '</td>';
        }).join('') + extraFields.map(function(field) {
          return '<td data-summary-field="' + field[1] + '">…</td>';
@@ -222,11 +270,12 @@
  }
 
  function loadMatrixSummaries(seq) {
-   var rows = Array.from(root.querySelectorAll('.link-matrix tbody tr'));
+   var rows = Array.from(root.querySelectorAll('.link-matrix tbody tr:not([hidden])'));
    var index = 0;
    async function loadRows() {
      while (index < rows.length && seq === matrixRenderSeq) {
        var row = rows[index++];
+       if (row.hidden) continue;
        try {
          var summary = await fetchMatrixSummary(row.dataset.linkId);
          if (seq !== matrixRenderSeq) return;
@@ -255,6 +304,7 @@
  function render() {
    var seq = ++matrixRenderSeq;
    fullMatrix.disabled = !links.length;
+   renderHiddenLinks();
    var sort = document.getElementById('sort').value;
    var rows = links.slice().sort(function(a, b) {
      return sort === 'label' ? a.label.localeCompare(b.label, 'ru') : (b[sort] ?? -1) - (a[sort] ?? -1);
@@ -277,6 +327,8 @@
    status.textContent = 'Загружаем…';
    root.innerHTML = '';
    links = [];
+   hiddenPanel.hidden = true;
+   renderHiddenLinks();
    refresh.disabled = true;
    budgetToggle.disabled = true;
    showBudgetPanel(false);
@@ -315,6 +367,21 @@
  async function players(details,offset,append){var body=details.querySelector('[data-body]'),button=body.querySelector('button');if(button)button.disabled=true;try{var data=await request('id='+encodeURIComponent(details.dataset.players)+'&view=players&offset='+offset);var rows=data.rows.map(function(r){return '<tr><td>'+esc(r.nick)+'</td>'+[r.visitCount,r.activityCount].map(function(v){return '<td>'+num(v)+'</td>';}).join('')+'<td>'+bool(r.registered)+'</td><td>'+num(r.raffleCount)+'</td><td>'+num(r.spinCount)+'</td><td>'+esc(r.pokerId||'—')+'</td><td>'+num(r.heroLevel)+'</td><td>'+bool(r.bot)+'</td><td>'+bool(r.playersChat)+'</td><td>'+num(r.depositCount)+'</td><td>'+num(r.depositAmount)+'</td></tr>';}).join('');if(!append)body.innerHTML='<div class="players" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат','Пополнения','Депозиты CRM, ₽'].map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr></thead><tbody></tbody></table></div>';body.querySelector('tbody').insertAdjacentHTML('beforeend',rows);if(button)button.remove();if(data.nextOffset!=null){var more=document.createElement('button');more.textContent='Ещё игроки';more.onclick=function(){players(details,data.nextOffset,true);};body.appendChild(more);}details.dataset.loaded='1';}catch(error){if(!append)body.textContent=error.message;else{button.disabled=false;status.textContent=error.message;}}}
  root.addEventListener('toggle',async function(event){var details=event.target;if(!details.open||details.dataset.loaded||details.dataset.loading)return;details.dataset.loading='1';var body=details.querySelector('[data-body]');body.textContent='Загрузка…';try{if(details.dataset.players){await players(details,0,false);return;}var data=await request('id='+encodeURIComponent(details.dataset.summary)+'&view=summary');body.innerHTML='<div class="summary-grid">'+fields.map(function(pair){return metricCell(pair[0],data.summary[pair[1]],periodBounds||pair[1]==='depositAmount'?'':pair[1]==='registrations'?'Цена регистрации':'Цена за единицу');}).join('')+'</div>';if(data.summary.coverageUnavailable)body.insertAdjacentHTML('afterbegin','<p class="unknown">Полноту старой истории проверить не удалось.</p>');if(data.summary.registrationUnknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Дата регистрации не установлена: '+num(data.summary.registrationUnknown)+'</p>');if(data.summary.coverage?.visitorsWithoutJourney)body.insertAdjacentHTML('afterbegin','<p class="unknown">Без подробной истории: '+num(data.summary.coverage.visitorsWithoutJourney)+' из '+num(data.summary.coverage.trackedVisitors)+' посетителей.</p>');var unknown=(data.summary.botUnknown||0)+(data.summary.playersChatUnknown||0)+(data.summary.depositUnknown||0);if(unknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Часть подписок или депозитов не проверена и не включена в подтверждённые итоги.</p>');updateCosts(details.closest('article'));details.dataset.loaded='1';}catch(error){body.textContent=error.message;}finally{delete details.dataset.loading;}},true);
  root.addEventListener('click', function(event) {
+   var hideButton = event.target.closest('[data-hide-link]');
+   if (hideButton) {
+     var row = hideButton.closest('tr[data-link-id]');
+     var visible = Array.from(root.querySelectorAll('tr[data-link-id]:not([hidden])'));
+     var index = visible.indexOf(row);
+     var next = visible[index+1] || visible[index-1];
+     hiddenIds.add(row.dataset.linkId);
+     saveHiddenLinks();
+     row.hidden = true;
+     var openDetails = root.querySelector('[data-matrix-link-details] article');
+     if (openDetails?.dataset.linkId === row.dataset.linkId) openDetails.remove();
+     renderHiddenLinks();
+     (next?.querySelector('[data-hide-link]') || hiddenToggle).focus({preventScroll:true});
+     return;
+   }
    var nameButton = event.target.closest('[data-link-details]');
    var closeButton = event.target.closest('[data-close-link-details]');
    if (!nameButton && !closeButton) return;
