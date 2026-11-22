@@ -2237,68 +2237,66 @@
     });
   }
 
-  function renderCrmLinkLayout(panel, links, ownOnly) {
-    if (!panel) return;
-    panel.hidden = !ownOnly;
-    if (!ownOnly) panel.open = false;
-    var list = panel.querySelector("[data-crm-link-layout-list]");
-    var ordered = crmLinkLayout.manual ? orderCrmLinks(links) : links;
-    var ids = ordered.map(function (link) { return String(link.id); });
-    list.innerHTML = ordered.map(function (link, index) {
-      var id = String(link.id), label = esc(crmLinkTitle(link));
-      return '<li data-crm-layout-id="' + esc(id) + '">' +
-        '<span class="crm-link-layout__handle" title="Перетащить" aria-hidden="true">⠿</span>' +
-        '<label><input type="checkbox"' + (crmLinkLayout.hidden.includes(id) ? '' : ' checked') +
-        '> <span>' + label + '</span></label>' +
-        '<button type="button" class="player-crm__ghost-btn" data-crm-layout-move="-1" aria-label="Выше: ' + label + '"' +
-        (index === 0 ? ' disabled' : '') + '>↑</button>' +
-        '<button type="button" class="player-crm__ghost-btn" data-crm-layout-move="1" aria-label="Ниже: ' + label + '"' +
-        (index === ids.length - 1 ? ' disabled' : '') + '>↓</button></li>';
-    }).join("");
+  var crmShowingHiddenLinks = false;
 
-    function move(id, index, focusDirection) {
-      if (index < 0 || index >= ids.length || ids[index] === id) return;
-      var order = ids.filter(function (entry) { return entry !== id; });
-      order.splice(index, 0, id);
+  function bindCrmLinkOrder(list, ids, order) {
+    function move(id, index) {
+      var targetId = ids[index];
+      if (!targetId || targetId === id) return;
+      var targetIndex = order.indexOf(targetId);
+      order.splice(order.indexOf(id), 1);
+      order.splice(targetIndex, 0, id);
       crmLinkLayout.order = order;
       crmLinkLayout.manual = true;
       saveCrmLinkLayout();
-      if (focusDirection) {
-        var row = list.children[index];
-        var button = row.querySelector('[data-crm-layout-move="' + focusDirection + '"]');
-        (button.disabled ? row.querySelector("input") : button).focus();
-      }
+      return true;
     }
 
-    list.onchange = function (event) {
-      var input = event.target;
-      var id = input.closest("li").dataset.crmLayoutId;
-      crmLinkLayout.hidden = crmLinkLayout.hidden.filter(function (entry) { return entry !== id; });
-      if (!input.checked) crmLinkLayout.hidden.push(id);
-      saveCrmLinkLayout();
-      list.children[ids.indexOf(id)].querySelector("input").focus();
-    };
     list.onclick = function (event) {
-      var button = event.target.closest("[data-crm-layout-move]");
+      var button = event.target.closest("[data-crm-layout-move],[data-crm-layout-visibility]");
       if (!button) return;
-      var id = button.closest("li").dataset.crmLayoutId;
+      var id = button.closest("[data-crm-layout-id]").dataset.crmLayoutId;
       var direction = button.dataset.crmLayoutMove;
-      move(id, ids.indexOf(id) + Number(direction), direction);
+      if (direction) {
+        var index = ids.indexOf(id) + Number(direction);
+        if (!move(id, index)) return;
+        var card = list.querySelectorAll("[data-crm-layout-id]")[index];
+        var next = card.querySelector('[data-crm-layout-move="' + direction + '"]');
+        (next.disabled ? card.querySelector(".player-crm__link-title") : next).focus();
+        return;
+      }
+      var hidden = crmLinkLayout.hidden.includes(id);
+      if (hidden) crmLinkLayout.hidden = crmLinkLayout.hidden.filter(function (entry) { return entry !== id; });
+      else crmLinkLayout.hidden.push(id);
+      if (crmShowingHiddenLinks && !crmLinkLayout.hidden.length) crmShowingHiddenLinks = false;
+      saveCrmLinkLayout();
+      document.getElementById("playerCrmHiddenLinks")?.focus();
     };
+
     list.onpointerdown = function (event) {
       var handle = event.target.closest(".crm-link-layout__handle");
       if (!handle || !event.isPrimary || event.button !== 0) return;
       handle.setPointerCapture(event.pointerId);
-      var row = handle.closest("li");
-      row.classList.add("is-dragging");
-      handle.onlostpointercapture = function () { row.classList.remove("is-dragging"); };
+      var card = handle.closest("[data-crm-layout-id]");
+      card.classList.add("is-dragging");
+      handle.onlostpointercapture = function () { card.classList.remove("is-dragging"); };
       handle.onpointerup = function (end) {
         var target = document.elementFromPoint(end.clientX, end.clientY)?.closest("[data-crm-layout-id]");
-        if (target?.parentElement === list) {
-          move(row.dataset.crmLayoutId, ids.indexOf(target.dataset.crmLayoutId));
+        if (target && list.contains(target)) {
+          move(card.dataset.crmLayoutId, ids.indexOf(target.dataset.crmLayoutId));
         }
       };
     };
+  }
+
+  function crmLinkTitleControls(label, index, length) {
+    return '<span class="crm-link-title-controls">' +
+      '<span class="crm-link-layout__handle" title="Перетащить" aria-hidden="true">⠿</span>' +
+      '<button type="button" data-crm-layout-move="-1" aria-label="Выше: ' + label + '"' +
+      (index === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button type="button" data-crm-layout-move="1" aria-label="Ниже: ' + label + '"' +
+      (index === length - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button type="button" data-crm-layout-visibility aria-label="Скрыть: ' + label + '">Скрыть</button></span>';
   }
 
   var crmLinkSummaryCache = new Map();
@@ -2372,10 +2370,29 @@
       return crmLinkMetric(b, sort) - crmLinkMetric(a, sort) || dates;
     }
     links.sort(compareLinks);
-    renderCrmLinkLayout(document.getElementById("playerCrmLinkLayout"), layoutLinks.sort(compareLinks), ownOnly);
+    var allOrdered = layoutLinks.sort(compareLinks);
+    var hiddenCount = 0;
     if (ownOnly) {
-      if (crmLinkLayout.manual) links = orderCrmLinks(links);
-      links = links.filter(function (link) { return !crmLinkLayout.hidden.includes(String(link.id)); });
+      if (crmLinkLayout.manual) {
+        links = orderCrmLinks(links);
+        allOrdered = orderCrmLinks(allOrdered);
+      }
+      hiddenCount = links.filter(function (link) { return crmLinkLayout.hidden.includes(String(link.id)); }).length;
+      if (!hiddenCount) crmShowingHiddenLinks = false;
+      links = links.filter(function (link) {
+        return crmLinkLayout.hidden.includes(String(link.id)) === crmShowingHiddenLinks;
+      });
+    }
+    var hiddenToggle = document.getElementById("playerCrmHiddenLinks");
+    if (hiddenToggle) {
+      hiddenToggle.hidden = !ownOnly;
+      hiddenToggle.disabled = !hiddenCount;
+      hiddenToggle.textContent = crmShowingHiddenLinks && ownOnly ? "Видимые ссылки" : "Скрытые (" + hiddenCount + ")";
+      hiddenToggle.setAttribute("aria-pressed", String(crmShowingHiddenLinks && ownOnly));
+      hiddenToggle.onclick = function () {
+        crmShowingHiddenLinks = !crmShowingHiddenLinks;
+        renderCrmTrackingLinks();
+      };
     }
     if (summary) summary.textContent = activeTab === "broadcasts"
       ? intFmt(links.length) + " ссылок из рассылок"
@@ -2391,15 +2408,24 @@
     if (!links.length) {
       el.innerHTML = '<div class="player-crm__notice">' + (activeTab === "broadcasts"
         ? "В этой группе нет ссылок из рассылок."
-        : "В этой группе нет видимых ссылок. Проверь фильтры и «Показ и порядок ссылок».") + "</div>";
+        : "В этой группе нет видимых ссылок.") + "</div>";
       return;
     }
-    el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link) {
+    el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link, index) {
       var url = crmLinkUrl(link), id = esc(link.id || ""), type = crmLinkParams(link).link_type;
       var channel = type === "website" ? "Сайт" : type ? "Telegram" : "Ссылка";
       var metrics = [["totalClicks", "Переходы по ссылке", "Включая повторные переходы"], ["uniqueClicks", "Посетители", "По браузерам и устройствам"], ["activeVisitors", "Активные посетители", "Открыли минимум 2 разных раздела"], ["actionEvents", "Всего открытий и нажатий", "Все открытия разделов и нажатия"]];
-      return '<article class="player-crm__link-card" role="listitem">' +
-        '<div class="player-crm__link-identity"><button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + esc(crmLinkTitle(link)) + '</button>' +
+      var label = esc(crmLinkTitle(link));
+      var card = '<article class="player-crm__link-card" role="listitem"' +
+        (ownOnly ? ' data-crm-layout-id="' + id + '"' : '') + '>';
+      if (ownOnly && crmShowingHiddenLinks) {
+        return card + '<div class="crm-link-title-row"><strong>' + label +
+          '</strong><span class="crm-link-title-controls"><button type="button" data-crm-layout-visibility aria-label="Показать: ' +
+          label + '">Показать</button></span></div></article>';
+      }
+      return card + '<div class="player-crm__link-identity"><div class="crm-link-title-row">' +
+        '<button type="button" class="player-crm__link-title" data-crm-link-details="' + id + '">' + label + '</button>' +
+        (ownOnly ? crmLinkTitleControls(label, index, links.length) : '') + '</div>' +
         '<div class="player-crm__link-meta"><span class="player-crm__link-channel' + (type === "website" ? ' player-crm__link-channel--web' : '') + '">' + channel + '</span><span>' + esc(crmLinkTargetLabel(link)) + '</span></div>' +
         (crmLinkParams(link).category ? '<span class="player-crm__link-category">'+esc(crmLinkParams(link).category)+'</span>' : '') + '<span class="player-crm__link-code">ref_' + id + '</span></div>' +
         '<dl class="player-crm__link-metrics' + (ownOnly ? ' player-crm__link-metrics--overview' : '') + '">' + metrics.map(function (metric) { return '<div><dt>' + metric[1] + crmLinkMetricHelp(metric[0],metric[1]) + '</dt><dd>' + esc(intFmt(crmLinkMetric(link, metric[0]))) + '<small class="player-crm__link-metric-hint">' + metric[2] + '</small></dd></div>'; }).join("") + (ownOnly ? [
@@ -2415,7 +2441,14 @@
         (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
         '<div class="player-crm__link-actions">'+(ownOnly?'':'<button type="button" data-crm-link-details="'+id+'">Отклик</button>')+'<button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
-    if (ownOnly) loadVisibleCrmLinkPreviews(el);
+    if (ownOnly) {
+      bindCrmLinkOrder(el, links.map(function (link) { return String(link.id); }),
+        allOrdered.map(function (link) { return String(link.id); }));
+      if (!crmShowingHiddenLinks) loadVisibleCrmLinkPreviews(el);
+    } else {
+      el.onclick = null;
+      el.onpointerdown = null;
+    }
   }
 
   function crmAccessCategory() {
