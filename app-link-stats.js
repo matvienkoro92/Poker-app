@@ -229,6 +229,69 @@
    } else hiddenPanel.querySelector('button')?.focus({preventScroll:true});
  };
 
+ var subgroupsKey = 'poker.link-stats.subgroups.v1';
+ var subgroups = Object.create(null);
+ try { Object.assign(subgroups, JSON.parse(localStorage.getItem(subgroupsKey) || '{}')); } catch (_) {}
+ var subgroupsToggle = document.getElementById('subgroups-toggle');
+ var subgroupsPanel = document.getElementById('subgroups-panel');
+ var subgroupsForm = document.getElementById('subgroups-form');
+ var subgroupName = document.getElementById('subgroup-name');
+ var subgroupsMessage = document.getElementById('subgroups-message');
+
+ function showSubgroups(open) {
+   subgroupsPanel.hidden = !open;
+   subgroupsToggle.setAttribute('aria-expanded', String(open));
+   if (!open) return;
+   var names = new Set();
+   document.getElementById('subgroups-links').innerHTML = '<legend>Выбери ссылки</legend>' +
+     links.map(function(link) {
+       var name = subgroups[link.id];
+       if (name) names.add(name);
+       return '<label><input type="checkbox" name="link" value="' + esc(link.id) + '"><span>' + esc(link.label) +
+         (name ? '<small>' + esc(name) + '</small>' : '') + '</span></label>';
+     }).join('');
+   document.getElementById('subgroup-names').replaceChildren(...Array.from(names,function(name) {
+     return new Option(name,name);
+   }));
+   subgroupName.value = '';
+   subgroupsMessage.textContent = '';
+ }
+
+ subgroupsToggle.onclick = function() { showSubgroups(subgroupsPanel.hidden); };
+ subgroupsForm.addEventListener('submit', function(event) {
+   event.preventDefault();
+   var ids = new FormData(subgroupsForm).getAll('link');
+   var remove = event.submitter?.value === 'remove';
+   var name = subgroupName.value.trim();
+   if (!ids.length || (!remove && !name)) {
+     subgroupsMessage.textContent = !ids.length ? 'Выбери хотя бы одну ссылку.' : 'Укажи название подгруппы.';
+     return;
+   }
+   var updated = {...subgroups};
+   ids.forEach(function(id) {
+     if (remove) delete updated[id];
+     else updated[id] = name;
+   });
+   try { localStorage.setItem(subgroupsKey,JSON.stringify(updated)); }
+   catch (_) { subgroupsMessage.textContent = 'Браузер не смог сохранить подгруппы.'; return; }
+   subgroups = Object.assign(Object.create(null),updated);
+   render();
+   showSubgroups(false);
+   subgroupsToggle.focus({preventScroll:true});
+ });
+
+ function matrixSections(rows) {
+   var groups = new Map();
+   rows.forEach(function(link) {
+     var name = subgroups[link.id] || '';
+     if (!groups.has(name)) groups.set(name,[]);
+     groups.get(name).push(link);
+   });
+   if (groups.size === 1 && groups.has('')) return [{name:null,rows:rows}];
+   return Array.from(groups,function(group) { return {name:group[0],rows:group[1]}; })
+     .sort(function(a,b) { return Number(!a.name)-Number(!b.name) || a.name.localeCompare(b.name,'ru'); });
+ }
+
  var fullMatrix = document.getElementById('matrix-full');
  var matrixSummaries = new Map();
  var matrixRenderSeq = 0;
@@ -241,20 +304,27 @@
      extraFields.length + '">Общая статистика · за всё время</th></tr>' : '';
    var columns = expanded ? '<colgroup><col class="matrix-link-column"><col span="' + metrics.length +
      '"></colgroup><colgroup span="' + extraFields.length + '"></colgroup>' : '';
+   function renderRow(link) {
+     var label = esc(link.label);
+     return '<tr data-link-id="' + esc(link.id) + '"' + (hiddenIds.has(String(link.id)) ? ' hidden' : '') +
+       '><th scope="row"><span class="matrix-link-controls"><button type="button" class="matrix-link-name" data-link-details>' +
+       label + '</button><button type="button" class="matrix-link-hide" data-hide-link aria-label="Скрыть: ' +
+       label + '">Скрыть</button></span></th>'  + metrics.map(function(metric) {
+       return '<td>' + metricCell('', link[metric[1]], metric[2]) + '</td>';
+     }).join('') + extraFields.map(function(field) {
+       return '<td data-summary-field="' + field[1] + '">…</td>';
+     }).join('') + '</tr>';
+   }
+   var sections = matrixSections(rows).map(function(section) {
+     var title = section.name == null ? '' : '<tr class="matrix-subgroup"><th colspan="' +
+       (1 + metrics.length + extraFields.length) + '" scope="rowgroup">' + esc(section.name || 'Без подгруппы') + '</th></tr>';
+     var hidden = section.rows.every(function(link) { return hiddenIds.has(String(link.id)); });
+     return '<tbody' + (hidden ? ' hidden' : '') + '>' + title + section.rows.map(renderRow).join('') + '</tbody>';
+   }).join('');
    return '<div class="link-matrix" tabindex="0" role="region" aria-label="Матрица статистики ссылок">' +
      '<table>' + columns + '<thead>' + group + '<tr><th scope="col">Ссылка</th>' +
      metrics.concat(extraFields).map(function(metric) { return '<th scope="col">' + metric[0] + '</th>'; }).join('') +
-     '</tr></thead><tbody>' + rows.map(function(link) {
-       var label = esc(link.label);
-       return '<tr data-link-id="' + esc(link.id) + '"' + (hiddenIds.has(String(link.id)) ? ' hidden' : '') +
-         '><th scope="row"><span class="matrix-link-controls"><button type="button" class="matrix-link-name" data-link-details>' +
-         label + '</button><button type="button" class="matrix-link-hide" data-hide-link aria-label="Скрыть: ' +
-         label + '">Скрыть</button></span></th>'  + metrics.map(function(metric) {
-         return '<td>' + metricCell('', link[metric[1]], metric[2]) + '</td>';
-       }).join('') + extraFields.map(function(field) {
-         return '<td data-summary-field="' + field[1] + '">…</td>';
-       }).join('') + '</tr>';
-     }).join('') + '</tbody></table></div><div data-matrix-link-details></div>';
+     '</tr></thead>' + sections + '</table></div><div data-matrix-link-details></div>';
  }
 
  function fetchMatrixSummary(id) {
@@ -270,7 +340,7 @@
  }
 
  function loadMatrixSummaries(seq) {
-   var rows = Array.from(root.querySelectorAll('.link-matrix tbody tr:not([hidden])'));
+   var rows = Array.from(root.querySelectorAll('.link-matrix tr[data-link-id]:not([hidden])'));
    var index = 0;
    async function loadRows() {
      while (index < rows.length && seq === matrixRenderSeq) {
@@ -304,6 +374,7 @@
  function render() {
    var seq = ++matrixRenderSeq;
    fullMatrix.disabled = !links.length;
+   subgroupsToggle.disabled = !links.length;
    renderHiddenLinks();
    var sort = document.getElementById('sort').value;
    var rows = links.slice().sort(function(a, b) {
@@ -320,6 +391,8 @@
    var seq = ++loadSeq;
    matrixRenderSeq++;
    fullMatrix.disabled = true;
+   subgroupsToggle.disabled = true;
+   showSubgroups(false);
    var refresh = document.getElementById('refresh');
    var selection = appliedPeriod;
    var period = selection.get('period');
@@ -376,6 +449,7 @@
      hiddenIds.add(row.dataset.linkId);
      saveHiddenLinks();
      row.hidden = true;
+     if (!row.parentElement.querySelector('tr[data-link-id]:not([hidden])')) row.parentElement.hidden = true;
      var openDetails = root.querySelector('[data-matrix-link-details] article');
      if (openDetails?.dataset.linkId === row.dataset.linkId) openDetails.remove();
      renderHiddenLinks();
