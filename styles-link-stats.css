@@ -33,12 +33,14 @@
 #budget-records li{display:flex;align-items:center;gap:8px;margin-bottom:4px;white-space:nowrap}
 
 #matrix-full[aria-pressed="true"]{background:#e6c986;color:#131d29}
-.link-matrix:has(.matrix-groups) table{min-width:920px;table-layout:fixed;font-size:11px}
+.link-matrix:has(.matrix-groups) table{min-width:1040px;table-layout:fixed;font-size:11px}
 .link-matrix:has(.matrix-groups) :is(th,td){padding:5px 3px;overflow-wrap:anywhere}
 .link-matrix:has(.matrix-groups) th[scope="row"]{width:auto;min-width:0}
-.link-matrix .matrix-link-column{width:108px}
+.link-matrix .matrix-link-column{width:85px}
+.link-matrix .matrix-unique-column{width:70px}
+.link-matrix .matrix-repeat-column{width:56px}
 .link-matrix:has(.matrix-groups) th[scope="col"]:first-child{min-width:0}
-.link-matrix:has(.matrix-groups) th[scope="col"]{font-size:10px;line-height:1.2}
+.link-matrix:has(.matrix-groups) th[scope="col"]{font-size:10px;line-height:1.2;overflow-wrap:normal;word-break:normal;text-wrap:balance}
 .link-matrix:has(.matrix-groups) td strong{font-size:12px}
 .link-matrix:has(.matrix-groups) .metric-cost{font-size:9px;line-height:1.2}
 .link-matrix .matrix-groups th{position:static;background:#192635}
@@ -68,3 +70,5 @@
 .budget-panel .budget-split-toggle,#budget-split-links label{display:flex;align-items:center;gap:6px}
 .budget-panel .budget-split-toggle{align-self:center}
 #budget-split-links{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:6px 12px;border:0;padding:0;margin:0;min-width:0}
+
+[data-subgroup-budget]{display:block;margin-top:3px}
