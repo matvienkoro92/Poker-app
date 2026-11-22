@@ -63,3 +63,5 @@
 .budget-record-group+.budget-record-group{margin-top:10px}
 .budget-record-group h4{margin:0 0 4px;color:#eddbb4}
 #subgroup-new[hidden]{display:none}
+.link-matrix .matrix-subgroup-total :is(th,td){background:#1b2b3b;border-top:1px solid #c5a46170}
+.link-matrix .matrix-subgroup-total th{color:#edd59f}

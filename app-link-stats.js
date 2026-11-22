@@ -82,6 +82,32 @@
    });
  }
 
+ function updateSubgroupTotal(section) {
+   var total = section.querySelector('.matrix-subgroup-total');
+   if (!total) return;
+   var rows = Array.from(section.querySelectorAll('tr[data-link-id]:not([hidden])'));
+   var amounts = rows.map(function(row) { return budgetTotal(row.dataset.linkId); });
+   var budget = amounts.every(Number.isFinite) ? amounts.reduce(function(sum, amount) { return sum + amount; },0) : null;
+   Array.from(total.cells).slice(1).forEach(function(cell, index) {
+     var counts = rows.map(function(row) {
+       var source = row.cells[index+1];
+       return source.querySelector('[data-count]')?.dataset.count ?? source.dataset.value;
+     });
+     var sum = counts.length && counts.every(function(value) { return value !== '' && value != null && Number.isFinite(Number(value)); })
+       ? counts.reduce(function(value, count) { return value + Number(count); },0) : null;
+     cell.querySelector('strong').textContent = num(sum);
+     cell.title = sum == null ? 'По части строк нет данных' : '';
+     var cost = cell.querySelector('.metric-cost');
+     if (cost) {
+       cost.textContent = metrics[index][2] + ': ' + (sum > 0 && budget != null ? num(budget / sum) + ' ₽' : '—');
+       cost.title = budget == null ? 'Нужны расходы по всем видимым ссылкам за выбранный период' : '';
+     }
+   });
+ }
+ function updateSubgroupTotals() {
+   root.querySelectorAll('.link-matrix tbody').forEach(updateSubgroupTotal);
+ }
+
  var budgetPanel = document.getElementById('budget-panel');
  var budgetToggle = document.getElementById('budget-toggle');
  var budgetForm = document.getElementById('budget-form');
@@ -188,6 +214,7 @@
      showBudgetStatistics(bounds,savedMessage);
    } else {
      root.querySelectorAll('[data-link-id]').forEach(updateCosts);
+     updateSubgroupTotals();
    }
  });
 
@@ -363,7 +390,10 @@
      var title = section.name == null ? '' : '<tr class="matrix-subgroup"><th colspan="' +
        (1 + metrics.length + extraFields.length) + '" scope="rowgroup">' + esc(section.name || 'Без подгруппы') + '</th></tr>';
      var hidden = section.rows.every(function(link) { return hiddenIds.has(String(link.id)); });
-     return '<tbody' + (hidden ? ' hidden' : '') + '>' + title + section.rows.map(renderRow).join('') + '</tbody>';
+     var total = section.name ? '<tr class="matrix-subgroup-total"><th scope="row" title="Сумма по видимым ссылкам; один посетитель может учитываться в нескольких ссылках">Итого</th>' +
+       metrics.map(function(metric) { return '<td>' + metricCell('',null,metric[2]) + '</td>'; }).join('') +
+       extraFields.map(function() { return '<td><strong>—</strong></td>'; }).join('') + '</tr>' : '';
+     return '<tbody' + (hidden ? ' hidden' : '') + '>' + title + section.rows.map(renderRow).join('') + total + '</tbody>';
    }).join('');
    return '<div class="link-matrix" tabindex="0" role="region" aria-label="Матрица статистики ссылок">' +
      '<table>' + columns + '<thead>' + group + '<tr><th scope="col">Ссылка</th>' +
@@ -402,6 +432,7 @@
              if (!value) value = null;
            }
            cell.textContent = num(value);
+           cell.dataset.value = value ?? '';
          });
        } catch (error) {
          if (seq !== matrixRenderSeq) return;
@@ -410,6 +441,7 @@
            cell.title = error.message;
          });
        }
+       updateSubgroupTotal(row.parentElement);
      }
    }
    for (var worker = 0; worker < Math.min(rows.length, 2); worker++) loadRows();
@@ -430,6 +462,7 @@
      if (fullMatrix.getAttribute('aria-pressed') === 'true') loadMatrixSummaries(seq);
    }
    root.querySelectorAll('[data-link-id]').forEach(updateCosts);
+   updateSubgroupTotals();
  }
  async function load(options = {}) {
    var seq = ++loadSeq;
@@ -503,6 +536,7 @@
      hiddenIds.add(row.dataset.linkId);
      saveHiddenLinks();
      row.hidden = true;
+     updateSubgroupTotal(row.parentElement);
      if (!row.parentElement.querySelector('tr[data-link-id]:not([hidden])')) row.parentElement.hidden = true;
      var openDetails = root.querySelector('[data-matrix-link-details] article');
      if (openDetails?.dataset.linkId === row.dataset.linkId) openDetails.remove();
