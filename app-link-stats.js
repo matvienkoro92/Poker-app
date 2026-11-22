@@ -16,7 +16,18 @@
  var yearInput = document.getElementById('period-year');
  var fromInput = document.getElementById('period-from');
  var toInput = document.getElementById('period-to');
+ var periodParams = new URLSearchParams(location.search);
+ var urlPeriod = periodParams.get('period');
  var appliedPeriod = new URLSearchParams({period:'all'});
+ if (['today','7','30'].includes(urlPeriod)) appliedPeriod.set('period',urlPeriod);
+ if (urlPeriod === 'month' && /^\d{4}-(0[1-9]|1[0-2])$/.test(periodParams.get('month') || '')) {
+   appliedPeriod = new URLSearchParams({period:'month',month:periodParams.get('month')});
+ }
+ if (urlPeriod === 'range' && ['from','to'].every(function(key) {
+   return /^\d{4}-\d{2}-\d{2}$/.test(periodParams.get(key) || '');
+ })) {
+   appliedPeriod = new URLSearchParams({period:'range',from:periodParams.get('from'),to:periodParams.get('to')});
+ }
  var monthFormat = new Intl.DateTimeFormat('ru-RU',{month:'long',timeZone:'UTC'});
  for (var month = 1; month <= 12; month++) {
    monthInput.add(new Option(monthFormat.format(new Date(Date.UTC(2024,month-1,1))),String(month).padStart(2,'0')));
@@ -73,6 +84,17 @@
  }
  function updateCosts(row) {
    var budget = budgetTotal(row.dataset.linkId);
+   var budgetShortcut = row.querySelector('[data-budget-period]');
+   if (budgetShortcut) {
+     var entries = expenseEntries(row.dataset.linkId);
+     budgetShortcut.hidden = Number.isFinite(budget) || !entries.length;
+     if (!budgetShortcut.hidden) {
+       var entry = entries[entries.length-1];
+       budgetShortcut.dataset.from = entry.from;
+       budgetShortcut.dataset.to = entry.to;
+       budgetShortcut.title = 'Последний сохранённый бюджет: ' + budgetDates(entry);
+     }
+   }
    row.querySelectorAll('[data-cost-label]').forEach(function(cell) {
      var count = Number(cell.dataset.count);
      var cost = Number.isFinite(budget) && count > 0 ? num(budget / count) + ' ₽' : '—';
@@ -269,7 +291,7 @@
    toInput.value = bounds.to;
    syncPeriodForm();
    appliedPeriod = new URLSearchParams({period:'range',from:bounds.from,to:bounds.to});
-   load({keepBudget:true,budgetMessage:message});
+   load({keepBudget:!budgetPanel.hidden,budgetMessage:message});
  }
 
  var metrics = [
@@ -425,7 +447,7 @@
      return '<tr data-link-id="' + esc(link.id) + '"' + (hiddenIds.has(String(link.id)) ? ' hidden' : '') +
        '><th scope="row"><span class="matrix-link-controls"><button type="button" class="matrix-link-name" data-link-details>' +
        label + '</button><button type="button" class="matrix-link-hide" data-hide-link aria-label="Скрыть: ' +
-       label + '">Скрыть</button></span></th>'  + metrics.map(function(metric) {
+       label + '">Скрыть</button><button type="button" class="matrix-budget-period" data-budget-period hidden>По датам бюджета</button></span></th>'  + metrics.map(function(metric) {
        return '<td>' + metricCell('', link[metric[1]], metric[2]) + '</td>';
      }).join('') + extraFields.map(function(field) {
        return '<td data-summary-field="' + field[1] + '">…</td>';
@@ -535,6 +557,10 @@
      if (seq !== loadSeq) return;
      document.getElementById('category').textContent = data.category;
      document.getElementById('recipient').textContent = 'Доступ: ' + data.name;
+     var url = new URL(location.href);
+     ['period','month','from','to'].forEach(function(key) { url.searchParams.delete(key); });
+     if (period !== 'all') selection.forEach(function(value,key) { url.searchParams.set(key,value); });
+     if (url.href !== location.href) history.replaceState(history.state,'',url);
      periodStart = data.periodStart;
      periodBounds = periodStart ? {
        from:moscowDate(Date.parse(periodStart)),
@@ -572,6 +598,11 @@
  async function players(details,offset,append){var body=details.querySelector('[data-body]'),button=body.querySelector('button');if(button)button.disabled=true;try{var data=await request('id='+encodeURIComponent(details.dataset.players)+'&view=players&offset='+offset);var rows=data.rows.map(function(r){return '<tr><td>'+esc(r.nick)+'</td>'+[r.visitCount,r.activityCount].map(function(v){return '<td>'+num(v)+'</td>';}).join('')+'<td>'+bool(r.registered)+'</td><td>'+num(r.raffleCount)+'</td><td>'+num(r.spinCount)+'</td><td>'+esc(r.pokerId||'—')+'</td><td>'+num(r.heroLevel)+'</td><td>'+bool(r.bot)+'</td><td>'+bool(r.playersChat)+'</td><td>'+num(r.depositCount)+'</td><td>'+num(r.depositAmount)+'</td></tr>';}).join('');if(!append)body.innerHTML='<div class="players" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат','Пополнения','Депозиты CRM, ₽'].map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr></thead><tbody></tbody></table></div>';body.querySelector('tbody').insertAdjacentHTML('beforeend',rows);if(button)button.remove();if(data.nextOffset!=null){var more=document.createElement('button');more.textContent='Ещё игроки';more.onclick=function(){players(details,data.nextOffset,true);};body.appendChild(more);}details.dataset.loaded='1';}catch(error){if(!append)body.textContent=error.message;else{button.disabled=false;status.textContent=error.message;}}}
  root.addEventListener('toggle',async function(event){var details=event.target;if(!details.open||details.dataset.loaded||details.dataset.loading)return;details.dataset.loading='1';var body=details.querySelector('[data-body]');body.textContent='Загрузка…';try{if(details.dataset.players){await players(details,0,false);return;}var data=await request('id='+encodeURIComponent(details.dataset.summary)+'&view=summary');body.innerHTML='<div class="summary-grid">'+fields.map(function(pair){return metricCell(pair[0],data.summary[pair[1]],periodBounds||pair[1]==='depositAmount'?'':pair[1]==='registrations'?'Цена регистрации':'Цена за единицу');}).join('')+'</div>';if(data.summary.coverageUnavailable)body.insertAdjacentHTML('afterbegin','<p class="unknown">Полноту старой истории проверить не удалось.</p>');if(data.summary.registrationUnknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Дата регистрации не установлена: '+num(data.summary.registrationUnknown)+'</p>');if(data.summary.coverage?.visitorsWithoutJourney)body.insertAdjacentHTML('afterbegin','<p class="unknown">Без подробной истории: '+num(data.summary.coverage.visitorsWithoutJourney)+' из '+num(data.summary.coverage.trackedVisitors)+' посетителей.</p>');var unknown=(data.summary.botUnknown||0)+(data.summary.playersChatUnknown||0)+(data.summary.depositUnknown||0);if(unknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Часть подписок или депозитов не проверена и не включена в подтверждённые итоги.</p>');updateCosts(details.closest('article'));details.dataset.loaded='1';}catch(error){body.textContent=error.message;}finally{delete details.dataset.loading;}},true);
  root.addEventListener('click', function(event) {
+   var budgetShortcut = event.target.closest('[data-budget-period]');
+   if (budgetShortcut) {
+     showBudgetStatistics(budgetShortcut.dataset);
+     return;
+   }
    var hideButton = event.target.closest('[data-hide-link]');
    if (hideButton) {
      var row = hideButton.closest('tr[data-link-id]');
@@ -639,5 +670,15 @@
    load();
  });
  periodForm.addEventListener('input', function() { toInput.setCustomValidity(''); });
+ periodSelect.value = appliedPeriod.get('period');
+ if (periodSelect.value === 'month') {
+   var selectedMonth = appliedPeriod.get('month');
+   yearInput.value = selectedMonth.slice(0,4);
+   monthInput.value = selectedMonth.slice(5,7);
+ } else if (periodSelect.value === 'range') {
+   fromInput.value = appliedPeriod.get('from');
+   toInput.value = appliedPeriod.get('to');
+ }
+ syncPeriodForm();
  document.getElementById('sort').onchange=function(){if(links.length)render();};document.getElementById('refresh').onclick=function(){matrixSummaries.clear();load();};load();
 })();
