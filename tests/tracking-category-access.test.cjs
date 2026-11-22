@@ -47,3 +47,19 @@ test('admin can list grants across categories with signed links for existing gra
   assert.equal((await s.call({token:signed})).code, 403);
   assert.equal((await s.call({token:first.token})).code, 403);
 });
+
+test('calendar months and inclusive ranges use Moscow midnights', async () => {
+  const s = setup();
+  const {token} = await s.access.create('Партнёры', 'Иван', 'admin');
+  const month = await s.call({token, query:{period:'month', month:'2024-02'}});
+  assert.equal(month.code, 200);
+  assert.equal(month.data.periodStart, '2024-01-31T21:00:00.000Z');
+  assert.equal(month.data.periodEnd, '2024-02-29T21:00:00.000Z');
+  const range = await s.call({token, query:{period:'range', from:'2024-02-01', to:'2024-02-29'}});
+  assert.equal(range.code, 200);
+  assert.equal(range.data.periodStart, month.data.periodStart);
+  assert.equal(range.data.periodEnd, month.data.periodEnd);
+  assert.equal((await s.call({token, query:{period:'range', from:'2024-02-30', to:'2024-03-01'}})).code, 400);
+  assert.equal((await s.call({token, query:{period:'range', from:'2024-02-29', to:'2024-02-28'}})).code, 400);
+  assert.equal((await s.call({token, query:{period:'month', month:'2024-13'}})).code, 400);
+});

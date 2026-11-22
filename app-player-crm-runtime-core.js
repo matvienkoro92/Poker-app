@@ -2522,7 +2522,7 @@
   }
 
   function crmAccessLinkUrl(token) {
-    var url = new URL("./link-stats.html", window.location.href);
+    var url = new URL("./link-stats.html?v=20261123-table", window.location.href);
     url.hash = token;
     return url.href;
   }
