@@ -2429,21 +2429,86 @@
     if (!response.ok || !data.ok) throw Error(data.error || 'Не удалось загрузить доступы');
     return data;
   }
-  async function renderCrmCategoryAccess() {
-    var panel=document.getElementById('playerCrmCategoryAccess'),category=crmAccessCategory();
-    if (!panel || panel.hidden) return;
-    panel.querySelector('[data-access-category]').textContent=category || 'не выбрана';
-    panel.querySelector('[data-crm-category-access-create]').disabled=!category;
-    var list=panel.querySelector('[data-access-list]');
-    if (!category) {list.textContent='Выберите конкретную категорию в фильтре выше.';return;}
-    list.textContent='Загрузка доступов…';
-    try {var data=await crmCategoryAccessRequest();if(category!==crmAccessCategory())return;list.innerHTML=data.grants.map(function(grant){return '<div class="crm-category-access__grant"><span>'+esc(grant.name)+'</span><button type="button" data-crm-category-access-revoke="'+esc(grant.id)+'">Отозвать</button></div>';}).join('') || '<p>Выданных доступов пока нет.</p>';}catch(error){list.textContent=error.message;}
+  var crmAccessLinksKey = "poker.crm.category-access-links.v1";
+  var crmAccessLinks = new Map();
+
+  function savedCrmAccessToken(id) {
+    try { return localStorage.getItem(crmAccessLinksKey + "." + id) || crmAccessLinks.get(id); }
+    catch (_) { return crmAccessLinks.get(id); }
   }
+
+  function storeCrmAccessToken(id, token) {
+    var key = crmAccessLinksKey + "." + id;
+    if (token) crmAccessLinks.set(id, token);
+    else crmAccessLinks.delete(id);
+    try {
+      if (token) localStorage.setItem(key, token);
+      else localStorage.removeItem(key);
+    } catch (_) {}
+  }
+
+  function crmAccessLinkUrl(token) {
+    var url = new URL("./link-stats.html", window.location.href);
+    url.hash = token;
+    return url.href;
+  }
+
+  var crmAccessListSeq = 0;
+  async function renderCrmCategoryAccess() {
+    var seq = ++crmAccessListSeq;
+    var panel = document.getElementById("playerCrmCategoryAccess"), category = crmAccessCategory();
+    if (!panel || panel.hidden) return;
+    panel.querySelector("[data-access-category]").textContent = category || "не выбрана";
+    panel.querySelector("[data-crm-category-access-create]").disabled = !category;
+    var list = panel.querySelector("[data-access-list]");
+    if (!category) {
+      list.textContent = "Выберите конкретную категорию в фильтре выше.";
+      return;
+    }
+    list.textContent = "Загрузка доступов…";
+    try {
+      var data = await crmCategoryAccessRequest();
+      if (seq !== crmAccessListSeq || category !== crmAccessCategory() || panel.hidden) return;
+      list.innerHTML = data.grants.map(function (grant) {
+        var name = esc(grant.name);
+        var token = savedCrmAccessToken(grant.id);
+        var link = '<small>Ссылка недоступна в этом браузере</small>';
+        if (/^[a-f0-9]{64}$/.test(token || "")) {
+          var url = esc(crmAccessLinkUrl(token));
+          link = '<a href="' + url + '" target="_blank" rel="noopener noreferrer">Открыть ссылку</a>' +
+            '<button type="button" class="crm-category-access__copy" data-crm-link-copy="' + url + '">Копировать</button>';
+        }
+        return '<div class="crm-category-access__grant"><strong>' + name + '</strong>' + link +
+          '<button type="button" data-crm-category-access-revoke="' + esc(grant.id) + '">Отозвать</button></div>';
+      }).join("") || "<p>Выданных доступов пока нет.</p>";
+    } catch (error) {
+      if (seq === crmAccessListSeq && category === crmAccessCategory()) list.textContent = error.message;
+    }
+  }
+
   async function createCrmCategoryAccess(button) {
-    var panel=button.closest('.crm-category-access'),result=panel.querySelector('[data-access-result]'),category=crmAccessCategory(),name=document.getElementById('playerCrmCategoryAccessName').value.trim();
-    if (!category || !name) {result.textContent='Выберите категорию и укажите получателя.';return;}
-    button.disabled=true;result.textContent='Создаём доступ…';
-    try {var data=await crmCategoryAccessRequest({action:'create',category:category,name:name});var url=new URL('./link-stats.html',window.location.href);url.hash=data.token;result.innerHTML='<p>Скопируйте ссылку для '+esc(name)+'. По ней доступен только просмотр.</p><input readonly aria-label="Персональная ссылка доступа" value="'+esc(url.href)+'"><button type="button" class="player-crm__ghost-btn" data-crm-link-copy="'+esc(url.href)+'">Копировать</button>';renderCrmCategoryAccess();}catch(error){result.textContent=error.message;}finally{button.disabled=false;}
+    var panel = button.closest(".crm-category-access"), result = panel.querySelector("[data-access-result]");
+    var category = crmAccessCategory();
+    var name = document.getElementById("playerCrmCategoryAccessName").value.trim();
+    if (!category || !name) {
+      result.textContent = "Выберите категорию и укажите получателя.";
+      return;
+    }
+    button.disabled = true;
+    result.textContent = "Создаём доступ…";
+    try {
+      var data = await crmCategoryAccessRequest({ action: "create", category: category, name: name });
+      storeCrmAccessToken(data.grant.id, data.token);
+      if (category !== crmAccessCategory()) return;
+      var url = esc(crmAccessLinkUrl(data.token));
+      result.innerHTML = '<p>Доступ для ' + esc(name) + ' создан.</p>' +
+        '<button type="button" class="player-crm__ghost-btn" data-crm-link-copy="' + url + '">Копировать ссылку</button>';
+      renderCrmCategoryAccess();
+    } catch (error) {
+      if (category === crmAccessCategory()) result.textContent = error.message;
+    } finally {
+      button.disabled = !crmAccessCategory();
+    }
   }
 
   function saveCrmLinkCategory(button) {
@@ -5659,7 +5724,20 @@
       var accessCreate=e.target.closest('[data-crm-category-access-create]');
       if (accessCreate) {createCrmCategoryAccess(accessCreate);return;}
       var accessRevoke=e.target.closest('[data-crm-category-access-revoke]');
-      if (accessRevoke) {accessRevoke.disabled=true;crmCategoryAccessRequest({action:'revoke',id:accessRevoke.getAttribute('data-crm-category-access-revoke')}).then(renderCrmCategoryAccess).catch(function(error){accessRevoke.disabled=false;document.querySelector('[data-access-result]').textContent=error.message;});return;}
+      if (accessRevoke) {
+        var grantId = accessRevoke.dataset.crmCategoryAccessRevoke;
+        accessRevoke.disabled = true;
+        crmCategoryAccessRequest({ action: "revoke", id: grantId }).then(function () {
+          storeCrmAccessToken(grantId, null);
+          accessRevoke.closest(".crm-category-access")?.querySelector("[data-access-result]").replaceChildren();
+          renderCrmCategoryAccess();
+        }).catch(function (error) {
+          accessRevoke.disabled = false;
+          var result = accessRevoke.closest(".crm-category-access")?.querySelector("[data-access-result]");
+          if (result) result.textContent = error.message;
+        });
+        return;
+      }
       var categorySave = e.target.closest("[data-crm-link-category-save]");
       if (categorySave) { saveCrmLinkCategory(categorySave); return; }
       var linksTab = e.target.closest("[data-crm-links-tab]");
