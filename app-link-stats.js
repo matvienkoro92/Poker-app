@@ -112,6 +112,16 @@
  var budgetToggle = document.getElementById('budget-toggle');
  var budgetForm = document.getElementById('budget-form');
  var budgetLink = document.getElementById('budget-link');
+ var budgetSingleLink = document.getElementById('budget-single-link');
+ var budgetSplit = document.getElementById('budget-split');
+ var budgetSplitLinks = document.getElementById('budget-split-links');
+
+ function syncBudgetSplit() {
+   budgetSingleLink.hidden = budgetLink.disabled = budgetSplit.checked;
+   budgetSplitLinks.hidden = budgetSplitLinks.disabled = !budgetSplit.checked;
+   budgetGaps.hidden = budgetSplit.checked;
+ }
+
  var budgetFrom = document.getElementById('budget-from');
  var budgetTo = document.getElementById('budget-to');
  var budgetAmount = document.getElementById('budget-amount');
@@ -160,6 +170,8 @@
      var id = button.closest('[data-budget-record-link]').dataset.budgetRecordLink;
      var entry = expenseEntries(id)[Number(button.dataset.budgetEdit ?? button.dataset.budgetShow)];
      budgetLink.value = id;
+     budgetSplit.checked = false;
+     syncBudgetSplit();
      setBudgetRange(entry);
      if (button.hasAttribute('data-budget-show')) showBudgetStatistics(entry);
 
@@ -179,6 +191,11 @@
    var selected = budgetLink.value;
    budgetLink.replaceChildren(...links.map(function(link) { return new Option(link.label,link.id); }));
    if (links.some(function(link) { return String(link.id) === selected; })) budgetLink.value = selected;
+   budgetSplitLinks.innerHTML = '<legend>Выбери ссылки</legend>' + links.map(function(link) {
+     return '<label><input type="checkbox" name="split-link" value="' + esc(link.id) + '">' + esc(link.label) + '</label>';
+   }).join('');
+   budgetSplit.checked = false;
+   syncBudgetSplit();
    var bounds = periodBounds || monthBounds(today.slice(5,7), today.slice(0,4));
    budgetFrom.value = bounds.from;
    budgetTo.value = bounds.to;
@@ -187,6 +204,15 @@
  }
  budgetToggle.onclick = function() { showBudgetPanel(budgetPanel.hidden); };
  budgetLink.onchange = function() { budgetAmount.value = ''; refreshBudgetPanel(); };
+ budgetSplit.onchange = function() {
+   if (budgetSplit.checked && !budgetSplitLinks.querySelector(':checked')) {
+     Array.from(budgetSplitLinks.querySelectorAll('input')).forEach(function(input) {
+       input.checked = input.value === budgetLink.value;
+     });
+   }
+   syncBudgetSplit();
+   refreshBudgetPanel();
+ };
  budgetFrom.onchange = refreshBudgetPanel;
  budgetTo.onchange = refreshBudgetPanel;
  budgetForm.addEventListener('submit', function(event) {
@@ -196,19 +222,38 @@
      budgetMessage.textContent = 'Дата окончания должна быть не раньше начала.';
      return;
    }
-   var id = budgetLink.value;
-   var entries = expenseEntries(id).filter(function(entry) { return entry.from !== bounds.from || entry.to !== bounds.to; });
-   if (entries.some(function(entry) { return entry.from <= bounds.to && entry.to >= bounds.from; })) {
-     budgetMessage.textContent = 'Даты пересекаются с сохранённой записью. Выбери незаполненный диапазон или измени сумму существующей записи.';
+   var ids = budgetSplit.checked ? new FormData(budgetForm).getAll('split-link') : [budgetLink.value];
+   if (budgetSplit.checked && ids.length < 2) {
+     budgetMessage.textContent = 'Для разделения выбери хотя бы две ссылки.';
      return;
    }
-   entries.push({...bounds,amount:budgetAmount.valueAsNumber});
-   entries.sort(function(a,b) { return a.from.localeCompare(b.from); });
-   try { localStorage.setItem(ledgerKey, JSON.stringify({...ledger,[id]:entries})); }
+   var cents = Math.round(budgetAmount.valueAsNumber * 100);
+   if (!Number.isSafeInteger(cents)) {
+     budgetMessage.textContent = 'Укажи корректную сумму.';
+     return;
+   }
+   var share = Math.floor(cents / ids.length);
+   var remainder = cents % ids.length;
+   var updated = {...ledger};
+   for (var index = 0; index < ids.length; index++) {
+     var id = ids[index];
+     var entries = expenseEntries(id).filter(function(entry) { return entry.from !== bounds.from || entry.to !== bounds.to; });
+     if (entries.some(function(entry) { return entry.from <= bounds.to && entry.to >= bounds.from; })) {
+       var label = links.find(function(link) { return String(link.id) === id; })?.label;
+       budgetMessage.textContent = 'Даты пересекаются с сохранённой записью для «' + label +
+         '». Выбери незаполненный диапазон или измени сумму существующей записи.';
+       return;
+     }
+     entries.push({...bounds,amount:(share + (index < remainder ? 1 : 0)) / 100});
+     entries.sort(function(a,b) { return a.from.localeCompare(b.from); });
+     updated[id] = entries;
+   }
+   try { localStorage.setItem(ledgerKey, JSON.stringify(updated)); }
    catch (_) { budgetMessage.textContent = 'Браузер не смог сохранить расходы.'; return; }
-   ledger[id] = entries;
+   ledger = Object.assign(Object.create(null),updated);
    refreshBudgetPanel();
-   var savedMessage = 'Сохранено: ' + num(budgetAmount.valueAsNumber) + ' ₽ за ' + budgetDates(bounds) + '.';
+   var savedMessage = 'Сохранено: ' + num(cents / 100) + ' ₽ за ' + budgetDates(bounds) +
+     (budgetSplit.checked ? ' · ссылки: ' + ids.length : '') + '.';
    budgetMessage.textContent = savedMessage;
    if (!periodBounds || bounds.from < periodBounds.from || bounds.to > periodBounds.to) {
      showBudgetStatistics(bounds,savedMessage);
