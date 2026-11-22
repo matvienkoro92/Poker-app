@@ -62,3 +62,4 @@
 .link-matrix .matrix-subgroup th{position:static;background:#223447;color:#edd59f;text-align:left}
 .budget-record-group+.budget-record-group{margin-top:10px}
 .budget-record-group h4{margin:0 0 4px;color:#eddbb4}
+#subgroup-new[hidden]{display:none}

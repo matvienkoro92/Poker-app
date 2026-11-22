@@ -263,7 +263,18 @@
  var subgroupsToggle = document.getElementById('subgroups-toggle');
  var subgroupsPanel = document.getElementById('subgroups-panel');
  var subgroupsForm = document.getElementById('subgroups-form');
+ var subgroupSelect = document.getElementById('subgroup-select');
+ var subgroupNew = document.getElementById('subgroup-new');
  var subgroupName = document.getElementById('subgroup-name');
+
+ function syncSubgroupName() {
+   subgroupNew.hidden = subgroupSelect.value !== 'new';
+   subgroupName.disabled = subgroupNew.hidden;
+ }
+ subgroupSelect.onchange = function() {
+   syncSubgroupName();
+   if (!subgroupNew.hidden) subgroupName.focus();
+ };
  var subgroupsMessage = document.getElementById('subgroups-message');
 
  function showSubgroups(open) {
@@ -278,10 +289,14 @@
        return '<label><input type="checkbox" name="link" value="' + esc(link.id) + '"><span>' + esc(link.label) +
          (name ? '<small>' + esc(name) + '</small>' : '') + '</span></label>';
      }).join('');
-   document.getElementById('subgroup-names').replaceChildren(...Array.from(names,function(name) {
-     return new Option(name,name);
-   }));
+   var groupOptions = Array.from(names).sort(function(a,b) { return a.localeCompare(b,'ru'); });
+   subgroupSelect.replaceChildren(new Option('Выбери подгруппу',''), ...groupOptions.map(function(name) {
+     return new Option(name,'group:' + name);
+   }), new Option('Новая подгруппа','new'));
+   subgroupSelect.options[0].disabled = true;
+   subgroupSelect.value = groupOptions.length ? '' : 'new';
    subgroupName.value = '';
+   syncSubgroupName();
    subgroupsMessage.textContent = '';
  }
 
@@ -290,9 +305,10 @@
    event.preventDefault();
    var ids = new FormData(subgroupsForm).getAll('link');
    var remove = event.submitter?.value === 'remove';
-   var name = subgroupName.value.trim();
+   var selected = subgroupSelect.value;
+   var name = selected === 'new' ? subgroupName.value.trim() : selected.slice('group:'.length);
    if (!ids.length || (!remove && !name)) {
-     subgroupsMessage.textContent = !ids.length ? 'Выбери хотя бы одну ссылку.' : 'Укажи название подгруппы.';
+     subgroupsMessage.textContent = !ids.length ? 'Выбери хотя бы одну ссылку.' : selected === 'new' ? 'Укажи название подгруппы.' : 'Выбери подгруппу.';
      return;
    }
    var updated = {...subgroups};
