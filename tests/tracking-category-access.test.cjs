@@ -24,3 +24,16 @@ test('shared period counters stay scoped and report missing history as null', as
   assert.equal(link.actionEvents, null);
   assert.equal((await s.call({token, query:{period:'90'}})).code, 400);
 });
+
+test('admin can list grants across all categories without receiving tokens', async () => {
+  const s = setup();
+  const first = await s.access.create('Партнёры', 'Иван', 'admin');
+  const second = await s.access.create('Внутренние', 'Анна', 'admin');
+  const all = await s.call({admin:true});
+  assert.equal(all.code, 200);
+  assert.deepEqual(Array.from(all.data.grants, grant => grant.category).sort(), ['Внутренние', 'Партнёры']);
+  assert(!JSON.stringify(all.data).includes(first.token));
+  assert(!JSON.stringify(all.data).includes(second.token));
+  const filtered = await s.call({admin:true, query:{category:'Партнёры'}});
+  assert.deepEqual(Array.from(filtered.data.grants, grant => grant.name), ['Иван']);
+});

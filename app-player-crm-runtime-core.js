@@ -2270,7 +2270,11 @@
       else crmLinkLayout.hidden.push(id);
       if (crmShowingHiddenLinks && !crmLinkLayout.hidden.length) crmShowingHiddenLinks = false;
       saveCrmLinkLayout();
-      document.getElementById("playerCrmHiddenLinks")?.focus();
+      var remaining = list.querySelectorAll("[data-crm-layout-id]");
+      var nearbyCard = remaining[Math.min(ids.indexOf(id), remaining.length - 1)];
+      var focusTarget = nearbyCard?.querySelector("[data-crm-layout-visibility]") ||
+        document.getElementById("playerCrmHiddenLinks");
+      focusTarget?.focus({ preventScroll: true });
     };
 
     list.onpointerdown = function (event) {
@@ -2301,10 +2305,25 @@
 
   var crmLinkSummaryCache = new Map();
 
-  async function loadVisibleCrmLinkPreviews(list) {
-    for (var details of list.querySelectorAll("[data-crm-link-preview]")) {
-      if (!details.isConnected || state.tab !== "links") break;
-      await loadCrmLinkPreview(details);
+  var crmLinkPreviewQueue = [];
+  var crmLinkPreviewWorkers = 0;
+
+  async function runCrmLinkPreviewQueue() {
+    crmLinkPreviewWorkers++;
+    try {
+      while (state.tab === "links" && crmLinkPreviewQueue.length) {
+        var details = crmLinkPreviewQueue.shift();
+        if (details.isConnected) await loadCrmLinkPreview(details);
+      }
+    } finally {
+      crmLinkPreviewWorkers--;
+    }
+  }
+
+  function loadVisibleCrmLinkPreviews(list) {
+    crmLinkPreviewQueue = Array.from(list.querySelectorAll("[data-crm-link-preview]"));
+    while (state.tab === "links" && crmLinkPreviewWorkers < 3 && crmLinkPreviewQueue.length) {
+      runCrmLinkPreviewQueue();
     }
   }
 
@@ -2434,8 +2453,8 @@
           ['Привязка Poker21', 'poker21Linked'],
           ['Внесли депозит', 'depositors']
         ].map(function (metric) {
-          return '<div><dt>' + metric[0] + '</dt><dd><button type="button" class="crm-link-card-metric" data-crm-link-card-metric="' + metric[1] + '" title="Открыть общую сводку" aria-label="Открыть общую сводку: ' + metric[0] + '">—</button>' +
-            (metric[1] === 'depositors' ? '<small class="player-crm__link-metric-hint" data-crm-link-card-deposit>—</small>' : '') + '</dd></div>';
+          return '<div><dt>' + metric[0] + '</dt><dd><button type="button" class="crm-link-card-metric" data-crm-link-card-metric="' + metric[1] + '" title="Открыть общую сводку" aria-label="Открыть общую сводку: ' + metric[0] + '">Ждём</button>' +
+            (metric[1] === 'depositors' ? '<small class="player-crm__link-metric-hint" data-crm-link-card-deposit></small>' : '') + '</dd></div>';
         }).join('') : '') + '</dl>' +
         (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
         (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
@@ -2491,13 +2510,10 @@
     var seq = ++crmAccessListSeq;
     var panel = document.getElementById("playerCrmCategoryAccess"), category = crmAccessCategory();
     if (!panel || panel.hidden) return;
-    panel.querySelector("[data-access-category]").textContent = category || "не выбрана";
+    panel.querySelector("[data-access-category]").textContent = category ? "Доступ к категории «" + category + "»" : "Выданные доступы";
+    panel.querySelector("[data-access-create-hint]").hidden = Boolean(category);
     panel.querySelector("[data-crm-category-access-create]").disabled = !category;
     var list = panel.querySelector("[data-access-list]");
-    if (!category) {
-      list.textContent = "Выберите конкретную категорию в фильтре выше.";
-      return;
-    }
     list.textContent = "Загрузка доступов…";
     try {
       var data = await crmCategoryAccessRequest();
@@ -2511,7 +2527,8 @@
           link = '<a href="' + url + '" target="_blank" rel="noopener noreferrer">Открыть ссылку</a>' +
             '<button type="button" class="crm-category-access__copy" data-crm-link-copy="' + url + '">Копировать</button>';
         }
-        return '<div class="crm-category-access__grant"><strong>' + name + '</strong>' + link +
+        var label = category ? name : name + ' · ' + esc(grant.category);
+        return '<div class="crm-category-access__grant"><strong>' + label + '</strong>' + link +
           '<button type="button" data-crm-category-access-revoke="' + esc(grant.id) + '">Отозвать</button></div>';
       }).join("") || "<p>Выданных доступов пока нет.</p>";
     } catch (error) {
@@ -2699,10 +2716,21 @@
     return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + crmLinkMetricHelp(item[2],item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + bonusHtml + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
   }
 
+  function setCrmLinkCardPreviewStatus(card, label, title) {
+    var deposit = card?.querySelector("[data-crm-link-card-deposit]");
+    if (deposit) deposit.textContent = "";
+    card?.querySelectorAll("[data-crm-link-card-metric]").forEach(function (cell) {
+      cell.textContent = label;
+      cell.title = title;
+    });
+  }
+
   function loadCrmLinkPreview(details) {
     if (details.dataset.previewLoading || details.dataset.previewLoaded) return details.crmSummaryPromise;
     details.dataset.previewLoading = '1';
     var target = details.querySelector('[data-crm-link-preview-body]'), id = details.getAttribute('data-crm-link-preview'), q = authQuerySafe();
+    var card = details.closest('.player-crm__link-card');
+    setCrmLinkCardPreviewStatus(card, 'Считаем…', 'Загружаем статистику');
     target.innerHTML = '<p role="status">Считаем общую сводку…</p>';
     var freshReport = details.crmFreshReport ? '&fresh=1' : '';
     delete details.crmFreshReport;
@@ -2710,10 +2738,14 @@
     if (freshReport || !cached || Date.now() >= cached.expiresAt) {
       cached = { expiresAt: Infinity };
       crmLinkSummaryCache.set(id, cached);
-      cached.promise = fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&pinReport=1&period=all&id=' + encodeURIComponent(id) + freshReport)
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-          if (!data.ok || !data.summary) throw new Error('summary');
+      cached.promise = fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&pinReport=1&period=all&id=' + encodeURIComponent(id) + freshReport, {
+        cache: 'no-store', signal: AbortSignal.timeout(45000)
+      })
+        .then(async function (response) {
+          var data = await response.json();
+          if (!response.ok || !data.ok || !data.summary) {
+            throw new Error(data.error || 'Ошибка сервера (' + response.status + ')');
+          }
           cached.expiresAt = Date.now() + 60000;
           return data;
         }).catch(function (error) {
@@ -2723,23 +2755,25 @@
     }
     details.crmSummaryPromise = cached.promise.then(function (data) {
       details.crmReportToken = data.reportToken || '';
-      var card = details.closest?.('.player-crm__link-card');
       if (card) {
         card.querySelectorAll('[data-crm-link-card-metric]').forEach(function (cell) {
           var key = cell.dataset.crmLinkCardMetric;
           var count = data.summary[key];
           var unknown = { botSubscribers: 'botUnknown', playersChatSubscribers: 'playersChatUnknown', depositors: 'depositUnknown' }[key];
-          cell.textContent = count == null || (!count && unknown && data.summary[unknown]) ? '—' : intFmt(count);
+          var unavailable = count == null || (!count && unknown && data.summary[unknown]);
+          cell.textContent = unavailable ? 'Нет данных' : intFmt(count);
           if (unknown && data.summary[unknown]) cell.title = 'Не удалось проверить: ' + intFmt(data.summary[unknown]);
           else cell.title = 'Открыть общую сводку';
         });
         var deposit = card.querySelector('[data-crm-link-card-deposit]');
         var amount = data.summary.depositAmount;
-        if (deposit) deposit.textContent = amount == null ? '—' : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount) + ' ₽';
+        if (deposit) deposit.textContent = amount == null ? '' : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount) + ' ₽';
       }
       target.innerHTML = crmLinkAggregateHtml(data.summary) + '<p class="crm-link-overview__unknown">Обе вкладки показывают один расчёт. Для свежих данных нажмите «Обновить расчёт».</p>'; details.dataset.previewLoaded = '1';
-    }).catch(function () {
-      target.innerHTML = '<p role="status">Сводка не загрузилась. Нажмите «Обновить расчёт».</p>';
+    }).catch(function (error) {
+      var message = error.name === 'TimeoutError' ? 'Сервер не ответил вовремя' : error.message;
+      setCrmLinkCardPreviewStatus(card, 'Повторить', message);
+      target.innerHTML = '<p role="status">Сводка не загрузилась. ' + esc(message) + '. Нажмите «Обновить расчёт».</p>';
     }).finally(function () { delete details.dataset.previewLoading; });
     return details.crmSummaryPromise;
   }
