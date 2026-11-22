@@ -2303,8 +2303,7 @@
       '<button type="button" data-crm-layout-visibility aria-label="Скрыть: ' + label + '">Скрыть</button></span>';
   }
 
-  var crmLinkSummaryCache = new Map();
-
+  var crmLinkRefreshes = new Map();
   var crmLinkPreviewQueue = [];
   var crmLinkPreviewWorkers = 0;
 
@@ -2312,19 +2311,27 @@
     crmLinkPreviewWorkers++;
     try {
       while (state.tab === "links" && crmLinkPreviewQueue.length) {
-        var details = crmLinkPreviewQueue.shift();
-        if (details.isConnected) await loadCrmLinkPreview(details);
+        var id = crmLinkPreviewQueue.shift();
+        var details = findCrmLinkPreview(id);
+        if (details) await refreshCrmLinkPreview(details);
       }
     } finally {
       crmLinkPreviewWorkers--;
     }
   }
 
-  function loadVisibleCrmLinkPreviews(list) {
-    crmLinkPreviewQueue = Array.from(list.querySelectorAll("[data-crm-link-preview]"));
+  function refreshVisibleCrmLinkPreviews() {
+    crmLinkPreviewQueue = Array.from(document.querySelectorAll("#playerCrmLinksList [data-crm-link-preview]"),
+      function (details) { return details.dataset.crmLinkPreview; });
     while (state.tab === "links" && crmLinkPreviewWorkers < 3 && crmLinkPreviewQueue.length) {
       runCrmLinkPreviewQueue();
     }
+  }
+
+  function findCrmLinkPreview(id) {
+    return Array.from(document.querySelectorAll("#playerCrmLinksList [data-crm-link-preview]")).find(function (details) {
+      return details.dataset.crmLinkPreview === id;
+    });
   }
 
   function renderCrmTrackingLinks() {
@@ -2453,17 +2460,17 @@
           ['Привязка Poker21', 'poker21Linked'],
           ['Внесли депозит', 'depositors']
         ].map(function (metric) {
-          return '<div><dt>' + metric[0] + '</dt><dd><button type="button" class="crm-link-card-metric" data-crm-link-card-metric="' + metric[1] + '" title="Открыть общую сводку" aria-label="Открыть общую сводку: ' + metric[0] + '">Ждём</button>' +
+          return '<div><dt>' + metric[0] + '</dt><dd><button type="button" class="crm-link-card-metric" data-crm-link-card-metric="' + metric[1] + '" title="Открыть общую сводку" aria-label="Открыть общую сводку: ' + metric[0] + '">Нет расчёта</button>' +
             (metric[1] === 'depositors' ? '<small class="player-crm__link-metric-hint" data-crm-link-card-deposit></small>' : '') + '</dd></div>';
         }).join('') : '') + '</dl>' +
         (ownOnly ? '<details class="crm-link-category-editor"><summary>Категория: ' + esc(crmLinkParams(link).category || 'Без категории') + '</summary><div><input data-crm-link-category-value maxlength="80" list="playerCrmLinkCategories" aria-label="Категория ссылки" placeholder="Новая или существующая категория" value="' + esc(crmLinkParams(link).category || '') + '"><button type="button" data-crm-link-category-save="' + id + '">Сохранить</button></div><span role="status" data-crm-link-category-status></span></details>' : '') +
-        (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
+        (ownOnly ? '<small role="status" data-crm-link-calculation-status></small><details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
         '<div class="player-crm__link-actions">'+(ownOnly?'':'<button type="button" data-crm-link-details="'+id+'">Отклик</button>')+'<button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
     if (ownOnly) {
       bindCrmLinkOrder(el, links.map(function (link) { return String(link.id); }),
         allOrdered.map(function (link) { return String(link.id); }));
-      if (!crmShowingHiddenLinks) loadVisibleCrmLinkPreviews(el);
+      el.querySelectorAll("[data-crm-link-preview]").forEach(loadCrmLinkPreview);
     } else {
       el.onclick = null;
       el.onpointerdown = null;
@@ -2576,7 +2583,20 @@
       .finally(function(){button.disabled=false;input.disabled=false;});
   }
 
-  function loadCrmTrackingLinks() {
+  var crmTrackingLinksRequest;
+  var crmLinkOpeningRefresh;
+
+  function refreshCrmLinksOnOpen() {
+    if (crmLinkOpeningRefresh) return crmLinkOpeningRefresh;
+    var request = crmTrackingLinksRequest || loadCrmTrackingLinks(state.trackingLinksLoaded);
+    if (!request) return;
+    crmLinkOpeningRefresh = request.then(function () {
+      if (state.tab === "links" && !crmLinkPreviewWorkers) refreshVisibleCrmLinkPreviews();
+    }).finally(function () { crmLinkOpeningRefresh = null; });
+    return crmLinkOpeningRefresh;
+  }
+
+  function loadCrmTrackingLinks(keepCards) {
     var base = getApiBaseSafe();
     if (!base || typeof pokerApiHasCredential !== "function" || !pokerApiHasCredential()) {
       state.trackingLinksError = "Нет сессии. Войди по email владельца дашборда.";
@@ -2584,19 +2604,24 @@
       renderCrmTrackingLinks();
       return;
     }
-    state.trackingLinksLoading = true;
+    state.trackingLinksLoading = !keepCards;
     var requestSeq = ++state.trackingLinksRequestSeq;
     state.trackingLinksError = "";
-    renderCrmTrackingLinks();
-    fetch(base + "/api/tracking-links" + authQuerySafe())
+    if (!keepCards) renderCrmTrackingLinks();
+    var request = fetch(base + "/api/tracking-links" + authQuerySafe(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (requestSeq !== state.trackingLinksRequestSeq) return;
         state.trackingLinksLoading = false;
         if (!data || !data.ok || !Array.isArray(data.links)) {
+          if (keepCards) return;
           state.trackingLinks = [];
           state.trackingLinksError = (data && data.error) || "Ссылки не загрузились.";
         } else {
+          if (keepCards) data.links.forEach(function (link) {
+            var current = findCrmTrackingLink(link.id);
+            if ((current?.cardReport?.updatedAt || 0) > (link.cardReport?.updatedAt || 0)) link.cardReport = current.cardReport;
+          });
           state.trackingLinks = data.links;
           state.trackingLinksLoaded = true;
           state.trackingLinksError = "";
@@ -2606,9 +2631,14 @@
       .catch(function () {
         if (requestSeq !== state.trackingLinksRequestSeq) return;
         state.trackingLinksLoading = false;
+        if (keepCards) return;
         state.trackingLinksError = "Ошибка сети при загрузке ссылок.";
         renderCrmTrackingLinks();
+      }).finally(function () {
+        if (crmTrackingLinksRequest === request) crmTrackingLinksRequest = null;
       });
+    crmTrackingLinksRequest = request;
+    return request;
   }
 
   function createCrmTrackingLink() {
@@ -2716,76 +2746,83 @@
     return (notice?'<p class="crm-link-overview__unknown">'+esc(notice)+'</p>':'') + '<div class="crm-link-overview__grid">' + items.map(function (item) { return '<div><small>' + item[0] + crmLinkMetricHelp(item[2],item[0]) + '</small><strong>' + esc(item[1]) + '</strong></div>'; }).join('') + '</div>' + bonusHtml + (unknown.length ? '<p class="crm-link-overview__unknown">Не удалось проверить: ' + esc(unknown.join('; ')) + '. Эти данные не включены в подтверждённые итоги.</p>' : '');
   }
 
-  function setCrmLinkCardPreviewStatus(card, label, title) {
-    var deposit = card?.querySelector("[data-crm-link-card-deposit]");
-    if (deposit) deposit.textContent = "";
-    card?.querySelectorAll("[data-crm-link-card-metric]").forEach(function (cell) {
-      cell.textContent = label;
-      cell.title = title;
-    });
+  function loadCrmLinkPreview(details) {
+    if (details.dataset.previewLoaded) return;
+    var link = findCrmTrackingLink(details.dataset.crmLinkPreview);
+    var report = link?.cardReport;
+    var target = details.querySelector("[data-crm-link-preview-body]");
+    var card = details.closest(".player-crm__link-card");
+    var summary = report?.summary;
+    var updated = summary && report.updatedAt ? new Date(report.updatedAt).toLocaleString("ru-RU") : "";
+    var note = updated ? "Обновлено: " + esc(updated) + "." : "Расчёт ещё не сохранён. Нажмите «Обновить расчёт».";
+    details.crmReportToken = report?.reportToken || "";
+    details.dataset.previewLoaded = "1";
+    var status = card.querySelector("[data-crm-link-calculation-status]");
+    var refreshing = crmLinkRefreshes.has(details.dataset.crmLinkPreview);
+    status.textContent = refreshing ? "Считаем…" : (updated ? "Обновлено: " + updated : "");
+    details.querySelector("[data-crm-link-report-refresh]").disabled = refreshing;
+    if (summary) {
+      card.querySelectorAll("[data-crm-link-card-metric]").forEach(function (cell) {
+        var key = cell.dataset.crmLinkCardMetric;
+        var count = summary[key];
+        var unknown = { botSubscribers: "botUnknown", playersChatSubscribers: "playersChatUnknown", depositors: "depositUnknown" }[key];
+        var unverified = unknown && summary[unknown];
+        cell.textContent = count == null || (!count && unverified) ? "Нет данных" : intFmt(count);
+        cell.title = unverified ? "Не удалось проверить: " + intFmt(unverified) : note;
+      });
+      var deposit = card.querySelector("[data-crm-link-card-deposit]");
+      var amount = summary.depositAmount;
+      if (deposit) deposit.textContent = amount == null ? "" : new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(amount) + " ₽";
+    }
+    target.innerHTML = (summary ? crmLinkAggregateHtml(summary) : "") +
+      '<p class="crm-link-overview__unknown">' + note + '</p>';
   }
 
-  function loadCrmLinkPreview(details) {
-    if (details.dataset.previewLoading || details.dataset.previewLoaded) return details.crmSummaryPromise;
-    details.dataset.previewLoading = '1';
-    var target = details.querySelector('[data-crm-link-preview-body]'), id = details.getAttribute('data-crm-link-preview'), q = authQuerySafe();
-    var card = details.closest('.player-crm__link-card');
-    setCrmLinkCardPreviewStatus(card, 'Считаем…', 'Загружаем статистику');
-    target.innerHTML = '<p role="status">Считаем общую сводку…</p>';
-    var freshReport = details.crmFreshReport ? '&fresh=1' : '';
-    delete details.crmFreshReport;
-    var cached = crmLinkSummaryCache.get(id);
-    if (freshReport || !cached || Date.now() >= cached.expiresAt) {
-      cached = { expiresAt: Infinity };
-      crmLinkSummaryCache.set(id, cached);
-      cached.promise = fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&pinReport=1&period=all&id=' + encodeURIComponent(id) + freshReport, {
-        cache: 'no-store', signal: AbortSignal.timeout(45000)
-      })
-        .then(async function (response) {
-          var data = await response.json();
-          if (!response.ok || !data.ok || !data.summary) {
-            throw new Error(data.error || 'Ошибка сервера (' + response.status + ')');
-          }
-          cached.expiresAt = Date.now() + 60000;
-          return data;
-        }).catch(function (error) {
-          if (crmLinkSummaryCache.get(id) === cached) crmLinkSummaryCache.delete(id);
-          throw error;
-        });
-    }
-    details.crmSummaryPromise = cached.promise.then(function (data) {
-      details.crmReportToken = data.reportToken || '';
-      if (card) {
-        card.querySelectorAll('[data-crm-link-card-metric]').forEach(function (cell) {
-          var key = cell.dataset.crmLinkCardMetric;
-          var count = data.summary[key];
-          var unknown = { botSubscribers: 'botUnknown', playersChatSubscribers: 'playersChatUnknown', depositors: 'depositUnknown' }[key];
-          var unavailable = count == null || (!count && unknown && data.summary[unknown]);
-          cell.textContent = unavailable ? 'Нет данных' : intFmt(count);
-          if (unknown && data.summary[unknown]) cell.title = 'Не удалось проверить: ' + intFmt(data.summary[unknown]);
-          else cell.title = 'Открыть общую сводку';
-        });
-        var deposit = card.querySelector('[data-crm-link-card-deposit]');
-        var amount = data.summary.depositAmount;
-        if (deposit) deposit.textContent = amount == null ? '' : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount) + ' ₽';
-      }
-      target.innerHTML = crmLinkAggregateHtml(data.summary) + '<p class="crm-link-overview__unknown">Обе вкладки показывают один расчёт. Для свежих данных нажмите «Обновить расчёт».</p>'; details.dataset.previewLoaded = '1';
+  function refreshCrmLinkPreview(details) {
+    var id = details.dataset.crmLinkPreview;
+    if (crmLinkRefreshes.has(id)) return crmLinkRefreshes.get(id);
+    var button = details.querySelector("[data-crm-link-report-refresh]");
+    var status = details.closest(".player-crm__link-card").querySelector("[data-crm-link-calculation-status]");
+    button.disabled = true;
+    status.textContent = "Считаем…";
+    var q = authQuerySafe();
+    var pending = fetch(getApiBaseSafe() + "/api/tracking-links" + q + (q.indexOf("?") >= 0 ? "&" : "?") +
+      "summary=1&pinReport=1&period=all&saveCard=1&id=" + encodeURIComponent(id), {
+      cache: "no-store", signal: AbortSignal.timeout(45000)
+    }).then(async function (response) {
+      var data = await response.json();
+      if (!response.ok || !data.ok || !data.summary) throw new Error(data.error || "Статистика временно недоступна");
+      var link = findCrmTrackingLink(id);
+      if (link) link.cardReport = data;
+      var current = findCrmLinkPreview(id);
+      if (!current) return;
+      var players = current.querySelector("[data-crm-link-players-body]");
+      crmLinkRefreshes.delete(id);
+      delete current.dataset.previewLoaded;
+      delete current.dataset.playersComplete;
+      delete current.crmPlayerRows;
+      delete current.crmPlayersNext;
+      players.replaceChildren();
+      loadCrmLinkPreview(current);
+      if (!players.hidden) loadCrmInlineLinkPlayers(current);
     }).catch(function (error) {
-      var message = error.name === 'TimeoutError' ? 'Сервер не ответил вовремя' : error.message;
-      setCrmLinkCardPreviewStatus(card, 'Повторить', message);
-      target.innerHTML = '<p role="status">Сводка не загрузилась. ' + esc(message) + '. Нажмите «Обновить расчёт».</p>';
-    }).finally(function () { delete details.dataset.previewLoading; });
-    return details.crmSummaryPromise;
+      var current = findCrmLinkPreview(id);
+      if (!current) return;
+      var message = error.name === "TimeoutError" ? "Сервер не ответил вовремя" : error.message;
+      current.closest(".player-crm__link-card").querySelector("[data-crm-link-calculation-status]").textContent = "Не удалось обновить. " + message;
+    }).finally(function () {
+      crmLinkRefreshes.delete(id);
+      var current = findCrmLinkPreview(id);
+      if (current) current.querySelector("[data-crm-link-report-refresh]").disabled = false;
+    });
+    crmLinkRefreshes.set(id, pending);
+    return pending;
   }
 
   async function loadCrmInlineLinkPlayers(details) {
-    if (!details.dataset.previewLoaded) {
-      loadCrmLinkPreview(details);
-      details.querySelector('[data-crm-link-players-body]').innerHTML = '<p role="status">Ждём общий расчёт…</p>';
-    }
-    if (details.crmSummaryPromise) await details.crmSummaryPromise;
+    loadCrmLinkPreview(details);
     if (!details.crmReportToken) {
-      details.querySelector('[data-crm-link-players-body]').innerHTML = '<p role="status">Расчёт не удалось сохранить. Нажмите «Обновить расчёт».</p>';
+      details.querySelector('[data-crm-link-players-body]').innerHTML = '<p role="status">Для списка игроков нажмите «Обновить расчёт».</p>';
       return;
     }
     if (details.dataset.playersLoading || details.dataset.playersComplete) return;
@@ -3958,7 +3995,7 @@
       return;
     }
     if (state.tab === "broadcast") loadBroadcastAudience(false);
-    if (state.tab === "links" && !state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
+    if (state.tab === "links" && !state.trackingLinksLoaded) refreshCrmLinksOnOpen();
   }
 
   function expandCrmAudience(data) {
@@ -5690,16 +5727,15 @@
       }
       var tab = e.target.closest("[data-crm-tab]");
       if (tab) {
+        var previousTab = state.tab;
         state.tab = tab.getAttribute("data-crm-tab") || "stats";
         renderActiveTab();
         if (state.tab === "players" && state.playersScope !== "players") loadCrmHeavyData("players", { page: 1 });
         if (state.tab === "blocked") loadCrmBlockedData();
         if (state.tab === "stats") loadStatsAuxiliary(false);
         if (state.tab === "broadcast") loadBroadcastAudience(false);
-        if (state.tab === "links") {
-          renderCrmLinkTargetOptions();
-          if (!state.trackingLinksLoaded && !state.trackingLinksLoading) loadCrmTrackingLinks();
-          else renderCrmTrackingLinks();
+        if (state.tab === "links" && (previousTab !== "links" || !state.trackingLinksLoaded)) {
+          refreshCrmLinksOnOpen();
         }
         if (state.tab === "blocked") renderBlockedList();
         return;
@@ -5739,16 +5775,8 @@
       }
       var reportRefresh = e.target.closest('[data-crm-link-report-refresh]');
       if (reportRefresh) {
-        var reportDetails = reportRefresh.closest('[data-crm-link-preview]');
-        if (reportDetails.dataset.previewLoading || reportDetails.dataset.playersLoading) return;
-        delete reportDetails.dataset.previewLoaded;
-        delete reportDetails.dataset.playersComplete;
-        delete reportDetails.crmPlayerRows;
-        delete reportDetails.crmPlayersNext;
-        delete reportDetails.crmReportToken;
-        reportDetails.crmFreshReport = true;
-        loadCrmLinkPreview(reportDetails);
-        if (!reportDetails.querySelector('[data-crm-link-players-body]').hidden) loadCrmInlineLinkPlayers(reportDetails);
+        var reportDetails = reportRefresh.closest("[data-crm-link-preview]");
+        if (!reportDetails.dataset.playersLoading) refreshCrmLinkPreview(reportDetails);
         return;
       }
       var linkView = e.target.closest('[data-crm-link-view]');
@@ -5769,7 +5797,13 @@
       var linksRefresh = e.target.closest("[data-crm-links-refresh]");
       if (linksRefresh) {
         if (state.linkDetailsId&&!crmLinkIsBroadcast(findCrmTrackingLink(state.linkDetailsId))) loadCrmLinkSummary();
-        loadCrmTrackingLinks();
+        if (state.trackingLinksTab === "own" && !crmShowingHiddenLinks &&
+            document.querySelector("#playerCrmLinksList [data-crm-link-preview]")) {
+          if (!crmLinkPreviewWorkers && !state.trackingLinksLoading) {
+            refreshVisibleCrmLinkPreviews();
+            loadCrmTrackingLinks(true);
+          }
+        } else loadCrmTrackingLinks();
         return;
       }
       if (e.target.closest("[data-crm-links-create-toggle]")) {
