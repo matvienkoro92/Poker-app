@@ -380,7 +380,15 @@
    try { localStorage.setItem(hiddenLinksKey, JSON.stringify(Array.from(hiddenIds))); } catch (_) {}
  }
 
+ function syncSubgroupVisibility() {
+   document.querySelectorAll('#subgroups-links input[name="link"]').forEach(function(input) {
+     var hidden = hiddenIds.has(input.value);
+     input.closest('label').hidden = input.disabled = hidden;
+     if (hidden) input.checked = false;
+   });
+ }
  function renderHiddenLinks() {
+   syncSubgroupVisibility();
    var hidden = links.filter(function(link) { return hiddenIds.has(String(link.id)); });
    hiddenToggle.hidden = !hidden.length;
    hiddenToggle.textContent = 'Скрытые (' + hidden.length + ')';
@@ -442,6 +450,7 @@
        return '<label><input type="checkbox" name="link" value="' + esc(link.id) + '"><span>' + esc(link.label) +
          (name ? '<small>' + esc(name) + '</small>' : '') + '</span></label>';
      }).join('');
+   syncSubgroupVisibility();
    var groupOptions = Array.from(names).sort(function(a,b) { return a.localeCompare(b,'ru'); });
    subgroupSelect.replaceChildren(new Option('Выбери подгруппу',''), ...groupOptions.map(function(name) {
      return new Option(name,'group:' + name);

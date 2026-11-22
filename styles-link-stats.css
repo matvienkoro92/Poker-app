@@ -58,6 +58,7 @@
 #subgroups-form{display:grid;align-items:start}
 #subgroups-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:6px 12px;border:0;padding:0;margin:0;min-width:0}
 #subgroups-links label{display:flex;align-items:start;gap:6px}
+#subgroups-links label[hidden]{display:none}
 #subgroups-links small{display:block}
 .subgroups-actions{display:flex;flex-wrap:wrap;align-items:end;gap:8px 12px}
 #subgroups-message:empty{display:none}
