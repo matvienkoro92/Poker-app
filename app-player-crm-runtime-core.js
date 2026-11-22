@@ -2216,6 +2216,100 @@
     if(!help.open)help.showModal();
   }
 
+  var crmLinkLayoutKey = "poker.crm.link-layout.v1";
+  var crmLinkLayout = { order: [], hidden: [], manual: false };
+  try {
+    var savedLinkLayout = JSON.parse(localStorage.getItem(crmLinkLayoutKey));
+    if (Array.isArray(savedLinkLayout?.order) && Array.isArray(savedLinkLayout.hidden)) {
+      crmLinkLayout = savedLinkLayout;
+    }
+  } catch (_) {}
+
+  function saveCrmLinkLayout() {
+    try { localStorage.setItem(crmLinkLayoutKey, JSON.stringify(crmLinkLayout)); } catch (_) {}
+    renderCrmTrackingLinks();
+  }
+
+  function orderCrmLinks(links) {
+    var ranks = new Map(crmLinkLayout.order.map(function (id, index) { return [id, index]; }));
+    return links.slice().sort(function (a, b) {
+      return (ranks.get(String(a.id)) ?? Infinity) - (ranks.get(String(b.id)) ?? Infinity);
+    });
+  }
+
+  function renderCrmLinkLayout(panel, links, ownOnly) {
+    if (!panel) return;
+    panel.hidden = !ownOnly;
+    if (!ownOnly) panel.open = false;
+    var list = panel.querySelector("[data-crm-link-layout-list]");
+    var ordered = crmLinkLayout.manual ? orderCrmLinks(links) : links;
+    var ids = ordered.map(function (link) { return String(link.id); });
+    list.innerHTML = ordered.map(function (link, index) {
+      var id = String(link.id), label = esc(crmLinkTitle(link));
+      return '<li data-crm-layout-id="' + esc(id) + '">' +
+        '<span class="crm-link-layout__handle" title="Перетащить" aria-hidden="true">⠿</span>' +
+        '<label><input type="checkbox"' + (crmLinkLayout.hidden.includes(id) ? '' : ' checked') +
+        '> <span>' + label + '</span></label>' +
+        '<button type="button" class="player-crm__ghost-btn" data-crm-layout-move="-1" aria-label="Выше: ' + label + '"' +
+        (index === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button type="button" class="player-crm__ghost-btn" data-crm-layout-move="1" aria-label="Ниже: ' + label + '"' +
+        (index === ids.length - 1 ? ' disabled' : '') + '>↓</button></li>';
+    }).join("");
+
+    function move(id, index, focusDirection) {
+      if (index < 0 || index >= ids.length || ids[index] === id) return;
+      var order = ids.filter(function (entry) { return entry !== id; });
+      order.splice(index, 0, id);
+      crmLinkLayout.order = order;
+      crmLinkLayout.manual = true;
+      saveCrmLinkLayout();
+      if (focusDirection) {
+        var row = list.children[index];
+        var button = row.querySelector('[data-crm-layout-move="' + focusDirection + '"]');
+        (button.disabled ? row.querySelector("input") : button).focus();
+      }
+    }
+
+    list.onchange = function (event) {
+      var input = event.target;
+      var id = input.closest("li").dataset.crmLayoutId;
+      crmLinkLayout.hidden = crmLinkLayout.hidden.filter(function (entry) { return entry !== id; });
+      if (!input.checked) crmLinkLayout.hidden.push(id);
+      saveCrmLinkLayout();
+      list.children[ids.indexOf(id)].querySelector("input").focus();
+    };
+    list.onclick = function (event) {
+      var button = event.target.closest("[data-crm-layout-move]");
+      if (!button) return;
+      var id = button.closest("li").dataset.crmLayoutId;
+      var direction = button.dataset.crmLayoutMove;
+      move(id, ids.indexOf(id) + Number(direction), direction);
+    };
+    list.onpointerdown = function (event) {
+      var handle = event.target.closest(".crm-link-layout__handle");
+      if (!handle || !event.isPrimary || event.button !== 0) return;
+      handle.setPointerCapture(event.pointerId);
+      var row = handle.closest("li");
+      row.classList.add("is-dragging");
+      handle.onlostpointercapture = function () { row.classList.remove("is-dragging"); };
+      handle.onpointerup = function (end) {
+        var target = document.elementFromPoint(end.clientX, end.clientY)?.closest("[data-crm-layout-id]");
+        if (target?.parentElement === list) {
+          move(row.dataset.crmLayoutId, ids.indexOf(target.dataset.crmLayoutId));
+        }
+      };
+    };
+  }
+
+  var crmLinkSummaryCache = new Map();
+
+  async function loadVisibleCrmLinkPreviews(list) {
+    for (var details of list.querySelectorAll("[data-crm-link-preview]")) {
+      if (!details.isConnected || state.tab !== "links") break;
+      await loadCrmLinkPreview(details);
+    }
+  }
+
   function renderCrmTrackingLinks() {
     renderCrmLinkTargetOptions();
     renderCrmLinkPreview();
@@ -2240,6 +2334,7 @@
       var isBroadcast = params.created_from === "crm_broadcast" || /^CRM\s+crm_/i.test(String(link && link.label || ""));
       return activeTab === "broadcasts" ? isBroadcast : !isBroadcast;
     });
+    var layoutLinks = links;
     var categories = Array.from(new Set(allLinks.filter(function(link){return !crmLinkIsBroadcast(link);}).map(function(link){return String(crmLinkParams(link).category || "").trim();}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"ru");});
     var categoryChoices = categories.map(function(category){return '<option value="'+esc(category)+'">'+esc(category)+'</option>';}).join("");
     var categoryList = document.getElementById("playerCrmLinkCategories");
@@ -2263,15 +2358,25 @@
       return group === "all" || (group === "none" && !source) || group === "type:" + params.link_type || group === "source:" + source;
     });
     var sortSelect = document.getElementById("playerCrmLinksSort");
-    if (sortSelect) sortSelect.value = state.trackingLinksSort;
-    links.sort(function (a, b) {
+    if (sortSelect) {
+      var manualOption = sortSelect.querySelector('[value="manual"]');
+      if (manualOption) manualOption.hidden = !ownOnly;
+      sortSelect.value = ownOnly && crmLinkLayout.manual ? "manual" : state.trackingLinksSort;
+    }
+    function compareLinks(a, b) {
       var sort = state.trackingLinksSort;
       var dates = (Date.parse(b && b.createdAt || "") || 0) - (Date.parse(a && a.createdAt || "") || 0);
       if (sort === "name") return crmLinkTitle(a).localeCompare(crmLinkTitle(b), "ru") || dates;
       if (sort === "newest") return dates;
       if (sort === "oldest") return -dates;
       return crmLinkMetric(b, sort) - crmLinkMetric(a, sort) || dates;
-    });
+    }
+    links.sort(compareLinks);
+    renderCrmLinkLayout(document.getElementById("playerCrmLinkLayout"), layoutLinks.sort(compareLinks), ownOnly);
+    if (ownOnly) {
+      if (crmLinkLayout.manual) links = orderCrmLinks(links);
+      links = links.filter(function (link) { return !crmLinkLayout.hidden.includes(String(link.id)); });
+    }
     if (summary) summary.textContent = activeTab === "broadcasts"
       ? intFmt(links.length) + " ссылок из рассылок"
       : intFmt(links.length) + " своих ссылок";
@@ -2286,7 +2391,7 @@
     if (!links.length) {
       el.innerHTML = '<div class="player-crm__notice">' + (activeTab === "broadcasts"
         ? "В этой группе нет ссылок из рассылок."
-        : "В этой группе пока нет ссылок. Выбери другую группу или создай ссылку.") + "</div>";
+        : "В этой группе нет видимых ссылок. Проверь фильтры и «Показ и порядок ссылок».") + "</div>";
       return;
     }
     el.innerHTML = '<div class="player-crm__link-list" role="list" aria-label="Отфильтрованные ссылки">' + links.map(function (link) {
@@ -2310,7 +2415,7 @@
         (ownOnly ? '<details class="crm-link-overview" data-crm-link-preview="' + id + '"><summary>Статистика по ссылке</summary><div class="crm-link-view-tabs" role="group" aria-label="Режим статистики"><button type="button" data-crm-link-view="summary" aria-pressed="true">Общая сводка</button><button type="button" data-crm-link-view="players" aria-pressed="false">По игрокам</button><button type="button" class="crm-link-view-tabs__refresh" data-crm-link-report-refresh aria-label="Обновить расчёт" title="Обновить расчёт"><span aria-hidden="true">↻</span></button></div><div data-crm-link-preview-body></div><div data-crm-link-players-body hidden></div></details>' : '') +
         '<div class="player-crm__link-actions">'+(ownOnly?'':'<button type="button" data-crm-link-details="'+id+'">Отклик</button>')+'<button type="button" class="player-crm__link-copy" data-crm-link-copy="' + esc(url) + '">Копировать</button><button type="button" class="player-crm__link-delete" data-crm-link-delete="' + id + '" aria-label="Удалить ссылку ' + esc(crmLinkTitle(link)) + '">Удалить</button></div></article>';
     }).join("") + '</div><details class="player-crm__link-help"><summary>Как считаем статистику</summary><dl><div><dt>Переходы</dt><dd>Все зарегистрированные открытия ссылки, включая повторные.</dd></div><div><dt>Посетители</dt><dd>Уникальные идентификаторы браузеров и устройств, открывших ссылку. Один человек на разных устройствах может считаться несколько раз.</dd></div><div><dt>Активные посетители</dt><dd>Посетители, открывшие минимум 2 разных раздела после перехода по ссылке. Например: Главную и Розыгрыши. Повторные открытия одного раздела не увеличивают число разных разделов; одних нажатий кнопок недостаточно.</dd></div><div><dt>Всего открытий и нажатий</dt><dd>Общее число открытий разделов и нажатий кнопок перехода. Один посетитель может совершить несколько действий: например, 3 посетителя по 2 действия дают 6 действий. Крутки и участия в розыгрышах показаны отдельно в подробной истории.</dd></div></dl></details>';
-
+    if (ownOnly) loadVisibleCrmLinkPreviews(el);
   }
 
   function crmAccessCategory() {
@@ -2497,14 +2602,29 @@
   }
 
   function loadCrmLinkPreview(details) {
-    if (details.dataset.previewLoading || details.dataset.previewLoaded) return;
+    if (details.dataset.previewLoading || details.dataset.previewLoaded) return details.crmSummaryPromise;
     details.dataset.previewLoading = '1';
     var target = details.querySelector('[data-crm-link-preview-body]'), id = details.getAttribute('data-crm-link-preview'), q = authQuerySafe();
     target.innerHTML = '<p role="status">Считаем общую сводку…</p>';
     var freshReport = details.crmFreshReport ? '&fresh=1' : '';
     delete details.crmFreshReport;
-    details.crmSummaryPromise = fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&pinReport=1&period=all&id=' + encodeURIComponent(id) + freshReport).then(function (r) { return r.json(); }).then(function (data) {
-      if (!data.ok || !data.summary) throw new Error('summary');
+    var cached = crmLinkSummaryCache.get(id);
+    if (freshReport || !cached || Date.now() >= cached.expiresAt) {
+      cached = { expiresAt: Infinity };
+      crmLinkSummaryCache.set(id, cached);
+      cached.promise = fetch(getApiBaseSafe() + '/api/tracking-links' + q + (q.indexOf('?') >= 0 ? '&' : '?') + 'summary=1&pinReport=1&period=all&id=' + encodeURIComponent(id) + freshReport)
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (!data.ok || !data.summary) throw new Error('summary');
+          cached.expiresAt = Date.now() + 60000;
+          return data;
+        }).catch(function (error) {
+          if (crmLinkSummaryCache.get(id) === cached) crmLinkSummaryCache.delete(id);
+          throw error;
+        });
+    }
+    details.crmSummaryPromise = cached.promise.then(function (data) {
+      details.crmReportToken = data.reportToken || '';
       var card = details.closest?.('.player-crm__link-card');
       if (card) {
         card.querySelectorAll('[data-crm-link-card-metric]').forEach(function (cell) {
@@ -2519,9 +2639,11 @@
         var amount = data.summary.depositAmount;
         if (deposit) deposit.textContent = amount == null ? '—' : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(amount) + ' ₽';
       }
-      details.crmReportToken = data.reportToken || '';
       target.innerHTML = crmLinkAggregateHtml(data.summary) + '<p class="crm-link-overview__unknown">Обе вкладки показывают один расчёт. Для свежих данных нажмите «Обновить расчёт».</p>'; details.dataset.previewLoaded = '1';
-    }).catch(function () { target.innerHTML = '<p role="status">Сводка не загрузилась. Закройте и откройте её, чтобы повторить.</p>'; }).finally(function () { delete details.dataset.previewLoading; });
+    }).catch(function () {
+      target.innerHTML = '<p role="status">Сводка не загрузилась. Нажмите «Обновить расчёт».</p>';
+    }).finally(function () { delete details.dataset.previewLoading; });
+    return details.crmSummaryPromise;
   }
 
   async function loadCrmInlineLinkPlayers(details) {
@@ -5475,13 +5597,13 @@
       if (sendSection) {
         sendCrmSectionData(sendSection.getAttribute("data-crm-send-section") || state.tab);
         return;
+      }
       var cardMetric = e.target.closest('[data-crm-link-card-metric]');
       if (cardMetric) {
         var cardDetails = cardMetric.closest('.player-crm__link-card').querySelector('[data-crm-link-preview]');
         cardDetails.open = true;
         cardDetails.querySelector('[data-crm-link-view="summary"]').click();
         return;
-      }
       }
       var reportRefresh = e.target.closest('[data-crm-link-report-refresh]');
       if (reportRefresh) {
@@ -5992,7 +6114,13 @@
       if (e.target.id === "playerCrmLinksGroup" || e.target.id === "playerCrmLinksSort" || e.target.id === "playerCrmLinksCategory") {
         if (e.target.id === "playerCrmLinksGroup") state.trackingLinksGroup = e.target.value;
         else if (e.target.id === "playerCrmLinksCategory") state.trackingLinksCategory = e.target.value;
-        else state.trackingLinksSort = e.target.value;
+        else {
+          if (state.trackingLinksTab === "own") {
+            crmLinkLayout.manual = e.target.value === "manual";
+            try { localStorage.setItem(crmLinkLayoutKey, JSON.stringify(crmLinkLayout)); } catch (_) {}
+          }
+          if (e.target.value !== "manual") state.trackingLinksSort = e.target.value;
+        }
         renderCrmTrackingLinks();
         var accessResult=document.querySelector("[data-access-result]");if(accessResult)accessResult.textContent="";
         renderCrmCategoryAccess();

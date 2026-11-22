@@ -4311,3 +4311,20 @@ body > .admin-report-rakeback-totals-modal .admin-report-rakeback-totals-modal__
   font: inherit;
   cursor: pointer;
 }
+
+.crm-link-layout {margin:8px 0 12px}
+.crm-link-layout summary {color:#edd59f;cursor:pointer;width:fit-content;padding:6px 0}
+.crm-link-layout ul {list-style:none;padding:0;margin:6px 0;display:grid;gap:4px}
+.crm-link-layout li {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:6px;
+  padding:4px 6px;
+  border:1px solid #ffffff20;
+  border-radius:8px;
+}
+.crm-link-layout li.is-dragging {outline:1px solid #edd59f;opacity:.65}
+.crm-link-layout label {display:flex;align-items:center;gap:6px;overflow-wrap:anywhere;cursor:pointer}
+.crm-link-layout__handle {padding:6px;cursor:grab;touch-action:none;user-select:none;color:#edd59f}
+.crm-link-layout__handle:active {cursor:grabbing}

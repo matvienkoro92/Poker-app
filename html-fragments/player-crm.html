@@ -310,6 +310,7 @@
                 <option value="newest">Сначала новые</option>
                 <option value="oldest">Сначала старые</option>
                 <option value="name">По названию А–Я</option>
+                <option value="manual">Ручной порядок</option>
               </select></label>
               <button type="button" class="player-crm__ghost-btn" data-crm-category-access-open aria-label="Доступ к категории" title="Доступ к категории">Доступ</button>
             </div>
@@ -320,6 +321,10 @@
               <button type="button" class="player-crm__primary-btn" data-crm-category-access-create>Создать персональную ссылку</button>
               <div data-access-result role="status"></div><div data-access-list></div>
             </section>
+            <details class="crm-link-layout" id="playerCrmLinkLayout">
+              <summary>Показ и порядок ссылок</summary>
+              <ul data-crm-link-layout-list></ul>
+            </details>
             <div class="player-crm__links-list" id="playerCrmLinksList"></div>
           </div>
         </section>
