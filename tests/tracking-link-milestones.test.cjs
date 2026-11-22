@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');const hashes=new Map(),values=new Map(),sets=new Map(),h=k=>{if(!hashes.has(k))hashes.set(k,new Map());return hashes.get(k);};let events=[];
-require.cache[require.resolve('../lib/redis')]={exports:{pipeline:async cmds=>cmds.map(([op,key,...a])=>{if(op==='HGET')return {result:h(key).get(a[0])||null};if(op==='HSET'){h(key).set(a[0],a[1]);return {result:1};}if(op==='GET')return {result:values.get(key)||null};if(op==='SET'){values.set(key,a[0]);return {result:'OK'};}if(op==='SISMEMBER')return {result:sets.get(key)?.has(a[0])?1:0};throw Error(op);}),sscanall:async key=>[...(sets.get(key)||[])]}};
+require.cache[require.resolve('../lib/redis')]={exports:{pipeline:async cmds=>cmds.map(([op,key,...a])=>{if(op==='HGET')return {result:h(key).get(a[0])||null};if(op==='HSET'){h(key).set(a[0],a[1]);return {result:1};}if(op==='GET')return {result:values.get(key)||null};if(op==='SET'){values.set(key,a[0]);return {result:'OK'};}if(op==='SADD'){if(!sets.has(key))sets.set(key,new Set());sets.get(key).add(a[0]);return {result:1};}if(op==='SISMEMBER')return {result:sets.get(key)?.has(a[0])?1:0};throw Error(op);}),sscanall:async key=>[...(sets.get(key)||[])]}};
 require.cache[require.resolve('../lib/tracking-attribution')]={exports:{readTimeline:async()=>({events,cursor:null})}};
 require.cache[require.resolve('../lib/telegram-group-policy')]={exports:{eventChatId:async()=>'-100'}};
 const m=require('../lib/tracking-link-milestones'),row={actor:'ID123456',accountId:'ID123456',pokerId:'7788',level:76,status:'new',registrationAt:1050,context:{first:{at:1000,ref:'aaaaaaaa'}},depositAmount:1500,depositCount:1};
@@ -27,4 +27,13 @@ test('active visitors require two different real sections from this link after a
  const active=m.eventFlags([...one,event('two','rating')],row,'aaaaaaaa');
  assert.equal(active.activeVisitor,true);assert.equal(active.sectionCount,2);
  assert.equal(m.eventFlags([event('a','daily-poker'),event('b','daily_poker')],row,'aaaaaaaa').activeVisitor,false);
+});
+
+test('chat exit and bot block preserve confirmed membership history',async()=>{
+ const id=789012;
+ for(const status of ['member','left']) await m.observeUpdate({chat_member:{chat:{id:-100},new_chat_member:{user:{id},status}}});
+ for(const status of ['member','kicked']) await m.observeUpdate({my_chat_member:{chat:{id,type:'private'},new_chat_member:{status}}});
+ const flags=await m.membershipFlags({accountId:String(id)},'-100',true);
+ assert.equal(flags.bot,false);assert.equal(flags.botEver,true);
+ assert.equal(flags.playersChat,false);assert.equal(flags.playersChatEver,true);
 });

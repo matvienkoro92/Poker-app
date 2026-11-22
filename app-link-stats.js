@@ -52,12 +52,12 @@
    var cost = costLabel ? '<small class="metric-cost" data-count="' + esc(count) + '" data-cost-label="' + esc(costLabel) +
      '"' + (partial ? ' data-partial' : '') + (lifetime ? ' data-lifetime-cost' : '') + '></small>' : '';
    return '<div>' + (label ? '<small>' + esc(label) + '</small>' : '') + '<strong>' +
-     (partial ? '≥ ' : '') + num(count) + '</strong>' + cost + '</div>';
+     num(count) + '</strong>' + cost + '</div>';
  }
  function costValue(budget, count, partial) {
    if (!Number.isFinite(budget) || count == null || count <= 0) return '—';
    var value = budget / count;
-   return (partial ? '≤ ' + num(Math.ceil(value * 100) / 100) : num(value)) + ' ₽';
+   return (partial ? num(Math.ceil(value * 100) / 100) : num(value)) + '\u00a0₽';
  }
  function moscowDate(time = Date.now()) {
    return new Date(time + 3 * 3600000).toISOString().slice(0, 10);
@@ -102,7 +102,7 @@
    var budgetAmountLabel = row.querySelector('[data-budget-amount-label]');
    if (budgetAmountLabel) {
      budgetAmountLabel.hidden = !Number.isFinite(budget);
-     budgetAmountLabel.textContent = budgetAmountLabel.hidden ? '' : 'Бюджет: ' + num(budget) + ' ₽';
+     budgetAmountLabel.textContent = budgetAmountLabel.hidden ? '' : 'Бюджет: ' + num(budget) + '\u00a0₽';
    }
    var lifetimeBudget = periodBounds ? budgetTotal(row.dataset.linkId,true) : budget;
    row.querySelectorAll('[data-cost-label]').forEach(function(cell) {
@@ -128,7 +128,7 @@
    var budget = subgroupBudget(false);
    var lifetimeBudget = periodBounds ? subgroupBudget(true) : budget;
    var budgetLabel = total.querySelector('[data-subgroup-budget]');
-   budgetLabel.textContent = 'Бюджет: ' + (budget == null ? '—' : num(budget) + ' ₽');
+   budgetLabel.textContent = 'Бюджет: ' + (budget == null ? '—' : num(budget) + '\u00a0₽');
    budgetLabel.title = budget == null ? 'Нужны расходы по всем видимым ссылкам за выбранный период' : '';
    Array.from(total.cells).slice(1).forEach(function(cell, index) {
      var counts = rows.map(function(row) {
@@ -138,7 +138,10 @@
      var sum = counts.length && counts.every(function(value) { return value !== '' && value != null && Number.isFinite(Number(value)); })
        ? counts.reduce(function(value, count) { return value + Number(count); },0) : null;
      var partial = rows.some(function(row) { return row.cells[index+1].querySelector('[data-partial]'); });
-     cell.querySelector('strong').textContent = (partial && sum != null ? '≥ ' : '') + num(sum);
+     var ever = rows.map(function(row) { return row.cells[index+1].dataset.ever; });
+     var paired = membershipMetric(rows[0]?.cells[index+1].dataset.summaryField);
+     var totalEver = ever.every(function(v) { return v != null && v !== ''; }) ? ever.reduce(function(n,v) { return n+Number(v); },0) : null;
+     cell.querySelector('strong').textContent = (paired ? num(totalEver) + ' / ' : '') + num(sum);
      cell.title = sum == null ? 'По части строк нет данных' : partial ? 'Минимум по сохранённой истории' : '';
      var cost = cell.querySelector('.metric-cost');
      if (cost) {
@@ -211,13 +214,31 @@
      return expenseEntries(link.id).map(function(entry,index) {
        return '<li data-budget-record-link="' + esc(link.id) + '"><strong>' + esc(link.label) +
          '</strong><span>' + budgetDates(entry) + ' · ' + num(entry.amount) + ' ₽</span>' +
-         '<button type="button" data-budget-edit="' + index + '">Изменить сумму</button></li>';
+         '<button type="button" data-budget-edit="' + index + '">Изменить сумму</button>' +
+         '<button type="button" data-budget-delete="' + index + '">Удалить</button></li>';
      }).join('');
    }).join('') + '</ul>' : '';
    budgetRecords.onclick = function(event) {
-     var button = event.target.closest('[data-budget-edit]');
+     var button = event.target.closest('[data-budget-edit],[data-budget-delete]');
      if (!button || budgetToggle.disabled) return;
      var id = button.closest('[data-budget-record-link]').dataset.budgetRecordLink;
+     if (button.hasAttribute('data-budget-delete')) {
+       var index = Number(button.dataset.budgetDelete);
+       var entries = expenseEntries(id);
+       var record = entries[index];
+       if (!record || !window.confirm('Удалить расход «' + button.closest('li').querySelector('strong').textContent +
+         '» · ' + budgetDates(record) + ' · ' + num(record.amount) + ' ₽?')) return;
+       var updated = {...ledger};
+       updated[id] = entries.filter(function(_,i) { return i !== index; });
+       try { localStorage.setItem(ledgerKey, JSON.stringify(updated)); }
+       catch (_) { budgetMessage.textContent = 'Браузер не смог удалить расход.'; return; }
+       ledger[id] = updated[id];
+       if (budgetLink.value === id) { editingExpense = null; budgetAmount.value = ''; }
+       refreshBudgetPanel();
+       render();
+       budgetMessage.textContent = 'Расход удалён.';
+       return;
+     }
      budgetLink.value = id;
      budgetSplit.checked = false;
      syncBudgetSplit();
@@ -557,7 +578,8 @@
              if (!value) value = null;
            }
            var partial = value != null && unknown && Boolean(summary[unknown]);
-           cell.innerHTML = metricCell('',value,summaryCostLabel(key),partial,true);
+           cell.innerHTML = summaryCell('',summary,key,value,partial);
+           if (membershipMetric(key)) cell.dataset.ever = summary[key+'Ever'] ?? '';
            cell.dataset.value = value ?? '';
          });
        } catch (error) {
@@ -668,7 +690,7 @@
      var incomplete = periodStart && links.some(function(link) {
        return link.partialMetrics?.length || metrics.some(function(metric) { return link[metric[1]] == null; });
      });
-     status.textContent = budgetPeriodError ? 'Не удалось загрузить статистику за даты бюджета. Выбери нужные даты в фильтре «Период».' : incomplete ? '≥ означает минимум по сохранённой истории. ≤ означает верхнюю границу стоимости.' : '';
+     status.textContent = budgetPeriodError ? 'Не удалось загрузить статистику за даты бюджета. Выбери нужные даты в фильтре «Период».' : incomplete ? 'История за выбранный период неполная. Фактическое число событий может быть больше, а цена результата — ниже.' : '';
    } catch (error) {
      if (seq !== loadSeq) return;
      status.textContent = error.name === 'TimeoutError' ? 'Статистика не загрузилась вовремя. Нажми «Обновить», чтобы повторить.' : error.message;
@@ -682,12 +704,17 @@
    }
  }
  var fields=[['С историей','visitors'],['Новые регистрации','registrations'],['Активные посетители','activeVisitors'],['Всего действий','activityCount'],['Участники розыгрышей','raffleParticipants'],['Участий','raffleCount'],['Крутили','spinners'],['Круток','spinCount'],['Poker21 привязан','poker21Linked'],['Подписаны на бота','botSubscribers'],['В чате игроков','playersChatSubscribers'],['Депозиторов','depositors'],['Пополнений','depositCount'],['Депозиты, ₽','depositAmount']];
+ function membershipMetric(key) { return key === 'botSubscribers' || key === 'playersChatSubscribers'; }
+ function summaryCell(label,summary,key,value,partial) {
+   var html = metricCell(label,value,summaryCostLabel(key),partial,true);
+   return membershipMetric(key) ? html.replace('<strong>', '<strong title="Всего подтверждено / осталось">' + num(summary[key+'Ever']) + ' / ') : html;
+ }
  function summaryCostLabel(key) {
    return key === 'depositAmount' ? '' : 'Цена';
  }
  function bool(v){return '<span class="'+(v===true?'yes':v===false?'no':'unknown')+'">'+(v===true?'Да':v===false?'Нет':'—')+'</span>';}
  async function players(details,offset,append){var body=details.querySelector('[data-body]'),button=body.querySelector('button');if(button)button.disabled=true;try{var data=await request('id='+encodeURIComponent(details.dataset.players)+'&view=players&offset='+offset);var rows=data.rows.map(function(r){return '<tr><td>'+esc(r.nick)+'</td>'+[r.visitCount,r.activityCount].map(function(v){return '<td>'+num(v)+'</td>';}).join('')+'<td>'+bool(r.registered)+'</td><td>'+num(r.raffleCount)+'</td><td>'+num(r.spinCount)+'</td><td>'+esc(r.pokerId||'—')+'</td><td>'+num(r.heroLevel)+'</td><td>'+bool(r.bot)+'</td><td>'+bool(r.playersChat)+'</td><td>'+num(r.depositCount)+'</td><td>'+num(r.depositAmount)+'</td></tr>';}).join('');if(!append)body.innerHTML='<div class="players" tabindex="0"><table><thead><tr>'+['Игрок','Переходы','Действия','Регистрация','Розыгрыши','Крутки','Poker21 ID','Уровень','Бот','Чат','Пополнения','Депозиты CRM, ₽'].map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr></thead><tbody></tbody></table></div>';body.querySelector('tbody').insertAdjacentHTML('beforeend',rows);if(button)button.remove();if(data.nextOffset!=null){var more=document.createElement('button');more.textContent='Ещё игроки';more.onclick=function(){players(details,data.nextOffset,true);};body.appendChild(more);}details.dataset.loaded='1';}catch(error){if(!append)body.textContent=error.message;else{button.disabled=false;status.textContent=error.message;}}}
- root.addEventListener('toggle',async function(event){var details=event.target;if(!details.open||details.dataset.loaded||details.dataset.loading)return;details.dataset.loading='1';var body=details.querySelector('[data-body]');body.textContent='Загрузка…';try{if(details.dataset.players){await players(details,0,false);return;}var data=await request('id='+encodeURIComponent(details.dataset.summary)+'&view=summary');body.innerHTML='<div class="summary-grid">'+fields.map(function(pair){return metricCell(pair[0],data.summary[pair[1]],summaryCostLabel(pair[1]),false,true);}).join('')+'</div>';if(data.summary.coverageUnavailable)body.insertAdjacentHTML('afterbegin','<p class="unknown">Полноту старой истории проверить не удалось.</p>');if(data.summary.registrationUnknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Дата регистрации не установлена: '+num(data.summary.registrationUnknown)+'</p>');if(data.summary.coverage?.visitorsWithoutJourney)body.insertAdjacentHTML('afterbegin','<p class="unknown">Без подробной истории: '+num(data.summary.coverage.visitorsWithoutJourney)+' из '+num(data.summary.coverage.trackedVisitors)+' посетителей.</p>');var unknown=(data.summary.botUnknown||0)+(data.summary.playersChatUnknown||0)+(data.summary.depositUnknown||0);if(unknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Часть подписок или депозитов не проверена и не включена в подтверждённые итоги.</p>');updateCosts(details.closest('article'));details.dataset.loaded='1';}catch(error){body.textContent=error.message;}finally{delete details.dataset.loading;}},true);
+ root.addEventListener('toggle',async function(event){var details=event.target;if(!details.open||details.dataset.loaded||details.dataset.loading)return;details.dataset.loading='1';var body=details.querySelector('[data-body]');body.textContent='Загрузка…';try{if(details.dataset.players){await players(details,0,false);return;}var data=await request('id='+encodeURIComponent(details.dataset.summary)+'&view=summary');body.innerHTML='<div class="summary-grid">'+fields.map(function(pair){return summaryCell(pair[0],data.summary,pair[1],data.summary[pair[1]],false);}).join('')+'</div>';if(data.summary.coverageUnavailable)body.insertAdjacentHTML('afterbegin','<p class="unknown">Полноту старой истории проверить не удалось.</p>');if(data.summary.registrationUnknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Дата регистрации не установлена: '+num(data.summary.registrationUnknown)+'</p>');if(data.summary.coverage?.visitorsWithoutJourney)body.insertAdjacentHTML('afterbegin','<p class="unknown">Без подробной истории: '+num(data.summary.coverage.visitorsWithoutJourney)+' из '+num(data.summary.coverage.trackedVisitors)+' посетителей.</p>');var unknown=(data.summary.botUnknown||0)+(data.summary.playersChatUnknown||0)+(data.summary.depositUnknown||0);if(unknown)body.insertAdjacentHTML('beforeend','<p class="unknown">Часть подписок или депозитов не проверена и не включена в подтверждённые итоги.</p>');updateCosts(details.closest('article'));details.dataset.loaded='1';}catch(error){body.textContent=error.message;}finally{delete details.dataset.loading;}},true);
  root.addEventListener('click', function(event) {
    var hideButton = event.target.closest('[data-hide-link]');
    if (hideButton) {

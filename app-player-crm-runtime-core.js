@@ -2738,8 +2738,13 @@
     return null;
   }
 
+  function crmSubscriptionPair(data,key,count) {
+    if (key !== 'botSubscribers' && key !== 'playersChatSubscribers') return count;
+    var ever = data[key+'Ever'];
+    return (ever == null ? '—' : intFmt(ever)) + ' / ' + count;
+  }
   function crmLinkAggregateHtml(data) {
-    function value(key) { return data[key] == null ? '—' : intFmt(data[key]); }
+    function value(key) { var count = data[key] == null ? '—' : intFmt(data[key]); return crmSubscriptionPair(data,key,count); }
     var items = [['С историей', value('visitors'), 'visitors'], ['Новые регистрации', value('registrations'), 'registrations'], ['Активные посетители', value('activeVisitors'), 'activeVisitors'], ['Всего действий', value('activityCount'), 'activityCount'], ['Участники розыгрышей', value('raffleParticipants'), 'raffleParticipants'], ['Участий в розыгрышах', value('raffleCount'), 'raffleCount'], ['Крутили покер дня', value('spinners'), 'spinners'], ['Всего круток', value('spinCount'), 'spinCount'], ['С привязкой Poker21', value('poker21Linked'), 'poker21Linked'], ['Подписаны на бота', value('botSubscribers'), 'botSubscribers'], ['В Telegram-чате', value('playersChatSubscribers'), 'playersChatSubscribers'], ['Вносили депозит', value('depositors'), 'depositors'], ['Число пополнений', value('depositCount'), 'depositCount'], ['Подтверждённые депозиты', (data.depositAmount == null ? '—' : new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2}).format(data.depositAmount)) + ' ₽', 'depositAmount']];
     var unknown = []; if(data.depositUnknown)unknown.push('депозиты — '+intFmt(data.depositUnknown)); if(data.registrationUnknown)unknown.push('дата регистрации — '+intFmt(data.registrationUnknown)); if (data.botUnknown) unknown.push('бот — ' + intFmt(data.botUnknown)); if (data.playersChatUnknown) unknown.push('чат — ' + intFmt(data.playersChatUnknown)); if (data.spinUnknown) unknown.push('крутки — ' + intFmt(data.spinUnknown)); if (data.raffleUnknown) unknown.push('розыгрыши — ' + intFmt(data.raffleUnknown));
     if(data.depositHistoryLimited)unknown.push('полная история депозитов CRM');
@@ -2780,6 +2785,7 @@
         var unknown = { botSubscribers: "botUnknown", playersChatSubscribers: "playersChatUnknown", depositors: "depositUnknown" }[key];
         var unverified = unknown && summary[unknown];
         cell.textContent = count == null || (!count && unverified) ? "Нет данных" : intFmt(count);
+        cell.textContent = crmSubscriptionPair(summary,key,cell.textContent);
         cell.title = unverified ? "Не удалось проверить: " + intFmt(unverified) : note;
       });
       var deposit = card.querySelector("[data-crm-link-card-deposit]");
