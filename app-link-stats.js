@@ -532,9 +532,9 @@
      var title = section.name == null ? '' : '<tr class="matrix-subgroup"><th colspan="' +
        (1 + metrics.length + extraFields.length) + '" scope="rowgroup">' + esc(section.name || 'Без подгруппы') + '</th></tr>';
      var hidden = section.rows.every(function(link) { return hiddenIds.has(String(link.id)); });
-     var total = section.name ? '<tr class="matrix-subgroup-total"><th scope="row" title="Сумма по видимым ссылкам; один посетитель может учитываться в нескольких ссылках">Итого<small data-subgroup-budget></small></th>' +
+     var total = '<tr class="matrix-subgroup-total"><th scope="row" title="Сумма по видимым ссылкам; один посетитель может учитываться в нескольких ссылках">Итого<small data-subgroup-budget></small></th>' +
        metrics.map(function(metric) { return '<td>' + metricCell('',null,metric[2]) + '</td>'; }).join('') +
-       extraFields.map(function(field) { return '<td>' + metricCell('',null,summaryCostLabel(field[1]),false,true) + '</td>'; }).join('') + '</tr>' : '';
+       extraFields.map(function(field) { return '<td>' + metricCell('',null,summaryCostLabel(field[1]),false,true) + '</td>'; }).join('') + '</tr>';
      return '<tbody' + (hidden ? ' hidden' : '') + '>' + title + section.rows.map(renderRow).join('') + total + '</tbody>';
    }).join('');
    return '<div class="link-matrix" tabindex="0" role="region" aria-label="Матрица статистики ссылок">' +
