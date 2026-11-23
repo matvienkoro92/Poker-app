@@ -15,6 +15,10 @@ redis={call=function(cmd,k,...)
  elseif cmd=='SISMEMBER' then return sets[k] and sets[k][a[1]] and 1 or 0
  elseif cmd=='SCARD' then local n=0;for _ in pairs(sets[k] or {}) do n=n+1 end return n
  elseif cmd=='SINTER' then local out={};for id in pairs(sets[k] or {}) do if sets[a[1]] and sets[a[1]][id] then table.insert(out,id) end end return out
+ elseif cmd=='SMEMBERS' then local out={} for id in pairs(sets[k] or {}) do table.insert(out,id) end return out
+ elseif cmd=='LRANGE' then return lists[k] or {}
+ elseif cmd=='ZADD' then sets[k]=sets[k] or {};sets[k][a[2]]=true;return 1
+ elseif cmd=='ZREM' then sets[k][a[1]]=nil;return 1
  elseif cmd=='LPUSH' then lists[k]=lists[k] or {};table.insert(lists[k],1,a[1]);return #lists[k]
  elseif cmd=='LTRIM' then local out={};for i=a[1]+1,math.min(a[2]+1,#(lists[k] or {})) do table.insert(out,lists[k][i]) end lists[k]=out;return 'OK'
  elseif cmd=='INCR' then ints[k]=(ints[k] or 0)+1;return ints[k]
@@ -82,3 +86,25 @@ execute(EVENT,eventKeys,{'abc','u2','view:profile','now',''})
 s=execute(SUMMARY,summaryKeys,{})
 assert(s[2]==2 and s[3]==11)
 `));
+
+test('a visitor who returns via another link adds a click but no second unique',()=> {
+ const script=require('../lib/tracking-first-visits').hitCommand('abc','guest','','')[1];
+ run(`
+ local script=${JSON.stringify(script)}
+ local first='2026-11-01T10:00:00.000Z'
+ local later='2026-11-23T10:00:00.000Z'
+ hashes.meta.def='metadata'
+ sets.oldusers={guest=true}
+ lists.oldlog={cjson.encode({visitorId='guest',t=first})}
+ local function hit(slug,users,log,t)
+   execute(script,{'owners','indexed',users,log,'meta','totals','unique'},
+     {slug,'bucket:', 'guest',t,cjson.encode({visitorId='guest',t=t})})
+ end
+ hit('def','newusers','newlog',later)
+ hit('abc','oldusers','oldlog',later)
+ hit('def','newusers','newlog',later)
+ assert(hashes.owners.guest==first..'abc')
+ assert(redis.call('SCARD','bucket:abc')==1 and redis.call('SCARD','bucket:def')==0)
+ assert(hashes.totals.def==2)
+ `);
+});

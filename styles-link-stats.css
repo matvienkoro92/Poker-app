@@ -75,3 +75,7 @@
 [data-subgroup-budget]{display:block;margin-top:3px}
 
 [data-budget-amount-label],[data-subgroup-budget]{color:#78d5a5}
+
+.matrix-grip{cursor:grab;touch-action:none;padding:2px 5px;line-height:1.2}
+.matrix-grip:active{cursor:grabbing}
+.matrix-drop>th,.matrix-drop>td{box-shadow:inset 0 0 0 1px #dec38b}

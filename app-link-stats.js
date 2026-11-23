@@ -529,7 +529,7 @@
    function renderRow(link) {
      var label = esc(link.label);
      return '<tr data-link-id="' + esc(link.id) + '"' + (hiddenIds.has(String(link.id)) ? ' hidden' : '') +
-       '><th scope="row"><span class="matrix-link-controls"><button type="button" class="matrix-link-name" data-link-details>' +
+       '><th scope="row"><span class="matrix-link-controls"><button type="button" class="matrix-grip" aria-label="Переместить: ' + label + '" title="Перетащи или используй стрелки вверх и вниз">⠿</button><button type="button" class="matrix-link-name" data-link-details>' +
        label + '</button><button type="button" class="matrix-link-hide" data-hide-link aria-label="Скрыть: ' +
        label + '">Скрыть</button><small data-budget-amount-label hidden></small></span></th>'  + metrics.map(function(metric) {
        return '<td>' + metricCell('', link[metric[1]], metric[2], link.partialMetrics?.includes(metric[1])) + '</td>';
@@ -541,7 +541,7 @@
      var title = section.name == null ? '' : '<tr class="matrix-subgroup"><th colspan="' +
        (1 + metrics.length + extraFields.length) + '" scope="rowgroup">' + esc(section.name || 'Без подгруппы') + '</th></tr>';
      var hidden = section.rows.every(function(link) { return hiddenIds.has(String(link.id)); });
-     var total = '<tr class="matrix-subgroup-total"><th scope="row" title="Сумма по видимым ссылкам; один посетитель может учитываться в нескольких ссылках">Итого<small data-subgroup-budget></small></th>' +
+     var total = '<tr class="matrix-subgroup-total"><th scope="row" title="Сумма по видимым ссылкам. Уникальный посетитель относится к первой известной ссылке.">Итого<small data-subgroup-budget></small></th>' +
        metrics.map(function(metric) { return '<td>' + metricCell('',null,metric[2]) + '</td>'; }).join('') +
        extraFields.map(function(field) { return '<td>' + metricCell('',null,summaryCostLabel(field[1]),false,true) + '</td>'; }).join('') + '</tr>';
      return '<tbody' + (hidden ? ' hidden' : '') + '>' + title + section.rows.map(renderRow).join('') + total + '</tbody>';
@@ -605,13 +605,61 @@
    for (var worker = 0; worker < Math.min(rows.length, 2); worker++) loadRows();
  }
 
+ var sortSelect = document.getElementById('sort');
+ var orderKey, manualOrder = [], drag;
+ function saveOrder() {
+   try { localStorage.setItem(orderKey,JSON.stringify({ids:manualOrder,sort:sortSelect.value})); }
+   catch (_) { status.textContent = 'Не удалось сохранить порядок в браузере.'; }
+ }
+ function moveRow(row,target) {
+   if (!target || row === target || row.parentElement !== target.parentElement) return;
+   var ids = Array.from(root.querySelectorAll('tr[data-link-id]'), function(item){return item.dataset.linkId;});
+   var to = ids.indexOf(target.dataset.linkId);
+   ids.splice(ids.indexOf(row.dataset.linkId),1);
+   ids.splice(to,0,row.dataset.linkId);
+   manualOrder = ids;
+   sortSelect.value = 'manual';
+   saveOrder();
+   render();
+   Array.from(root.querySelectorAll('tr[data-link-id]')).find(item=>item.dataset.linkId===row.dataset.linkId)?.querySelector('.matrix-grip').focus({preventScroll:true});
+ }
+ root.addEventListener('pointerdown',function(e) {
+   var grip=e.target.closest('.matrix-grip');
+   if (!grip || e.button!==0 || !e.isPrimary) return;
+   grip.setPointerCapture(e.pointerId);
+   drag={row:grip.closest('tr'),id:e.pointerId};
+ });
+ function dragTarget(e) {
+   var target=document.elementFromPoint(e.clientX,e.clientY)?.closest('tr[data-link-id]');
+   return target && target.parentElement===drag.row.parentElement && target!==drag.row ? target : null;
+ }
+ root.addEventListener('pointermove',function(e) {
+   if (drag?.id!==e.pointerId) return;
+   root.querySelector('.matrix-drop')?.classList.remove('matrix-drop');
+   dragTarget(e)?.classList.add('matrix-drop');
+ });
+ root.addEventListener('pointerup',function(e) {
+   if (drag?.id===e.pointerId) moveRow(drag.row,dragTarget(e));
+ });
+ root.addEventListener('lostpointercapture',function() {
+   drag=null;
+   root.querySelector('.matrix-drop')?.classList.remove('matrix-drop');
+ });
+ root.addEventListener('keydown',function(e) {
+   if (!e.target.matches('.matrix-grip') || !['ArrowUp','ArrowDown'].includes(e.key)) return;
+   e.preventDefault();
+   var row=e.target.closest('tr'), rows=Array.from(row.parentElement.querySelectorAll('tr[data-link-id]:not([hidden])'));
+   moveRow(row,rows[rows.indexOf(row)+(e.key==='ArrowUp'?-1:1)]);
+ });
  function render() {
    var seq = ++matrixRenderSeq;
    fullMatrix.disabled = !links.length;
    subgroupsToggle.disabled = !links.length;
    renderHiddenLinks();
    var sort = document.getElementById('sort').value;
+   var ranks = new Map(manualOrder.map((id,i)=>[id,i]));
    var rows = links.slice().sort(function(a, b) {
+     if (sort === 'manual') return (ranks.get(String(a.id)) ?? ranks.size) - (ranks.get(String(b.id)) ?? ranks.size);
      return sort === 'label' ? a.label.localeCompare(b.label, 'ru') : (b[sort] ?? -1) - (a[sort] ?? -1);
    });
    if (!rows.length) root.innerHTML = '<p>В этой категории пока нет ссылок.</p>';
@@ -689,6 +737,16 @@
        periodStart ? '.' + period + '.' + periodStart : '';
      budgetKey = 'poker.link-stats.budget.v1' + budgetScope;
      loadBudgets();
+     if (!orderKey) {
+       orderKey='poker.link-stats.order.v1.'+data.category;
+       try {
+         var saved=JSON.parse(localStorage.getItem(orderKey));
+         if (Array.isArray(saved?.ids)) {
+           manualOrder=saved.ids;
+           if (['manual','label','uniqueClicks'].includes(saved.sort)) sortSelect.value=saved.sort;
+         }
+       } catch (_) {}
+     }
      links = data.links;
      budgetToggle.disabled = !links.length;
      if (options.keepBudget) {
@@ -803,5 +861,5 @@
    toInput.value = appliedPeriod.get('to');
  }
  syncPeriodForm();
- document.getElementById('sort').onchange=function(){if(links.length)render();};document.getElementById('refresh').onclick=function(){matrixSummaries.clear();load();};load();
+ sortSelect.onchange=function(){if(links.length){saveOrder();render();}};document.getElementById('refresh').onclick=function(){matrixSummaries.clear();load();};load();
 })();
