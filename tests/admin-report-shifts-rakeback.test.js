@@ -193,3 +193,26 @@ test("permanently deleted templates cannot return from last week's paid rows", (
   assert.ok(!reloaded.rows.some(row => row.playerId === deleted.playerId && row.carryForward));
   assert.deepEqual(reloaded.deletedTemplates, [deleted]);
 });
+
+test("weekly carry-forward corrects an automatic rate and preserves an explicitly saved template", () => {
+  const current = _test.currentReportWeekStartMs() + 60_000;
+  const previous = current - 7 * 24 * 60 * 60 * 1000;
+  const template = (playerId, percent, stamp, groupId = "") => ({
+    room: "P21", playerId, groupId, percent, carryForward: true, saved: true, entryAddedAt: stamp,
+  });
+  const corrected = {
+    room: "P21", playerId: "735493", groupId: "weekly-entry",
+    percent: 40, rake: 1000, amount: 400, saved: true, entryAddedAt: previous,
+  };
+  const draft = _test.ensureCurrentWeekRakebackCarryForwardRows({ rows: [
+    corrected,
+    template("735493", 30, previous + 60_000),
+    template("735493", 30, current),
+    template("123456", 45, current, "explicit-template"),
+  ] });
+  assert.equal(draft.carryForwardTemplateRowsChanged, true);
+  assert.deepEqual(draft.carryForwardTemplateRows.map(row => [row.playerId, row.percent]), [
+    ["735493", 40], ["123456", 45],
+  ]);
+  assert.equal(_test.ensureCurrentWeekRakebackCarryForwardRows(draft).carryForwardTemplateRowsChanged, false);
+});
