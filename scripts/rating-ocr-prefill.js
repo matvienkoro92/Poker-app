@@ -65,8 +65,13 @@ function isDateTime(text) {
 }
 
 function normalizeName(raw) {
+  if (/400K/i.test(raw) && /\[H\]eadshot/i.test(raw)) return "[H]eadshot 400K";
+  if (/1\.5M/i.test(raw) && /\[K\]nock/i.test(raw)) return "[K]nock 1.5M";
   if (/Black\s+Friday/i.test(raw) && /340K/i.test(raw)) return "Black Friday 340K";
-  if (/^Турбина\s+500.*ПКО\s+2\/3/i.test(raw)) return "Турбина 500с ПКО 2/3";
+  const turbine = raw.match(/^Турбина\s+(200|500).*ПКО\s+2\/3/i);
+  if (turbine) return `Турбина ${turbine[1]}с ПКО 2/3`;
+  if (/1M/i.test(raw) && /\[La\]b/i.test(raw)) return "[La]b 1M";
+  if (/250K/i.test(raw) && /\[Re\]action/i.test(raw)) return "[Re]action 250K";
   if (/PLO4/i.test(raw) && /20K/i.test(raw) && !/Bounty/i.test(raw)) return "PLO4 🃏🃏🃏 20K 🏆";
   if (/Prime\s+PKO/i.test(raw) && /200K/i.test(raw)) return "Prime PKO 200K";
   if (/PLO6\s+Bounty/i.test(raw) && /12K/i.test(raw)) return "PLO6 Bounty 12K";
@@ -545,6 +550,15 @@ async function parseOcrFile(file) {
   if (blue && date === "07.11.2026" && time === "19:00" && /300K.*Triple Chance/i.test(title)) { title = "Triple Chance 300K"; buyin = 3000; }
   if (blue && date === "10.11.2026" && time === "18:00" && /200K.*Deep Freeze/i.test(title)) { title = "Deep Freeze 200K"; buyin = 4000; }
   if (blue && date === "20.11.2026" && time === "18:00" && title === "Black Friday 340K") buyin = 100;
+  // Entry fees confirmed by the owner for the November 22 cards.
+  if (blue && date === "22.11.2026") {
+    if (time === "14:00" && title === "[H]eadshot 400K") buyin = 1200;
+    if (time === "18:00" && title === "[K]nock 1.5M") buyin = 2500;
+    if (time === "21:59" && title === "Black Magic 120K") buyin = 500;
+  }
+  // Entry fees confirmed by the owner for the November 21 cards.
+  if (blue && date === "21.11.2026" && time === "17:00" && title === "[La]b 1M") buyin = 2000;
+  if (blue && date === "21.11.2026" && time === "19:00" && title === "[Re]action 250K") buyin = 3000;
   // Entry fees confirmed by the owner for the November 13–15 screenshots.
   if (blue && date === "15.11.2026") {
     if (time === "13:00" && title === "Black Magic 60K") buyin = 500;

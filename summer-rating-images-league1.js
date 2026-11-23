@@ -1540,4 +1540,29 @@ var SUMMER_RATING_IMAGES_LEAGUE1 = {
     "rating-compressed-preview/rating-20-11-2026-league1-dv-bounty-100k-13h.jpg",
     "rating-compressed-preview/rating-20-11-2026-league1-blackout-70k-15h.jpg"
   ]
+,
+  "21.11.2026": [
+    "rating-compressed-preview/rating-21-11-2026-league1-dv-turbo-500-50k-10h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-dv-bounty-100k-13h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-blackout-70k-15h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-la-b-1m-17h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-fast-trek-18h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-re-action-250k-19h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-prime-pko-300k-21h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-blackout-220k-21h.jpg",
+    "rating-compressed-preview/rating-21-11-2026-league1-turbina-500s-pko-2-3-22h.jpg"
+  ]
+,
+  "22.11.2026": [
+    "rating-compressed-preview/rating-22-11-2026-league1-black-magic-50k-11h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-dv-rebuy-12h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-h-eadshot-400k-14h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-volshebnyj-pyatak-18h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-k-nock-1-5m-18h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-super-pyatihatka-20h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-blackout-220k-21h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-black-magic-120k-2159h.jpg",
+    "rating-compressed-preview/rating-22-11-2026-league1-turbina-500s-pko-2-3-22h.jpg"
+  ]
 };
