@@ -3104,12 +3104,12 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
   font-family:Arial,Helvetica,sans-serif!important;font-weight:800!important;font-size:24px!important;line-height:1.12!important;letter-spacing:-.025em;
   color:#18382b!important;-webkit-text-fill-color:#18382b!important;background:none!important;text-shadow:none!important;opacity:1!important;
 }
-#homePlayerMonth .home-reward-table .reward-ace{min-height:230px;padding:18px 10px 20px;border-radius:11px;box-shadow:0 6px 10px #0004,inset 0 0 0 3px #fff8,inset 0 0 0 4px #bba57b66}
+#homePlayerMonth .home-reward-table .reward-ace{min-height:0;padding:16px 10px 20px;border-radius:11px;box-shadow:0 6px 10px #0004,inset 0 0 0 3px #fff8,inset 0 0 0 4px #bba57b66}
 #homePlayerMonth .reward-ace__corner{left:7px;top:8px;font-size:16px;gap:2px}
 #homePlayerMonth .reward-ace__corner b{font-size:12px}
 #homePlayerMonth .reward-ace__corner--bottom{left:auto;top:auto;right:7px;bottom:8px}
 #homePlayerMonth .reward-ace__number{font-size:6px;letter-spacing:.1em}
-#homePlayerMonth .home-reward-table .reward-ace h3{min-height:43px;margin:6px 0;font-size:14px!important;line-height:1.08!important}
+#homePlayerMonth .home-reward-table .reward-ace h3{min-height:43px;margin:3px 12px 6px;font-size:14px!important;line-height:1.08!important}
 #homePlayerMonth .reward-ace__bonus{gap:1px}
 #homePlayerMonth .reward-ace__bonus small{font-size:8px}
 #homePlayerMonth .reward-ace__bonus strong{font-size:20px}
@@ -3126,22 +3126,19 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 #homePlayerMonth .reward-ace__action{font-size:8px;padding-top:7px;gap:5px}
 @media(max-width:650px){#homePlayerMonth .home-reward-table__cards{gap:10px;padding-inline:6px;scroll-padding-inline:6px}#homePlayerMonth .home-reward-table .reward-ace{flex:0 0 calc((100% - 20px)/2.5);max-width:none}#homePlayerMonth .home-reward-table__heading small{font-size:8px}}
 
-@media(max-width:650px){#homePlayerMonth .home-reward-table .reward-ace{padding:16px 8px 18px;min-height:220px}#homePlayerMonth .home-reward-table .reward-ace h3{font-size:12px!important}#homePlayerMonth .reward-ace__hologram,#homePlayerMonth .reward-ace__symbol{height:68px}#homePlayerMonth .reward-ace__hologram img{height:66px}#homePlayerMonth .reward-ace__action{font-size:7px}#homePlayerMonth .reward-ace__bonus strong{font-size:18px}}
+@media(max-width:650px){#homePlayerMonth .home-reward-table .reward-ace{padding-inline:8px;padding-bottom:18px}#homePlayerMonth .home-reward-table .reward-ace h3{font-size:12px!important}#homePlayerMonth .reward-ace__hologram,#homePlayerMonth .reward-ace__symbol{height:68px}#homePlayerMonth .reward-ace__hologram img{height:66px}#homePlayerMonth .reward-ace__action{font-size:7px}#homePlayerMonth .reward-ace__bonus strong{font-size:18px}}
 
 #homePlayerMonth .reward-ace__bonus small{font-size:10px;font-weight:750;color:#4e3918}
 #homePlayerMonth .reward-ace__bonus strong{font-size:25px;color:#a96808;line-height:1.12;letter-spacing:-.045em;text-shadow:0 1px 0 #fff9}
 #homePlayerMonth .reward-ace__bonus strong>span{font-size:17px}
 @media(max-width:650px){#homePlayerMonth .home-reward-table .reward-ace h3{font-size:13px!important}#homePlayerMonth .reward-ace__bonus strong{font-size:23px}#homePlayerMonth .reward-ace__bonus strong>span{font-size:16px}}
 
-#homePlayerMonth .home-reward-table .reward-ace{padding-top:10px}
-#homePlayerMonth .home-reward-table .reward-ace h3{margin-top:3px}
 #homePlayerMonth .reward-ace__hologram{height:88px}
 #homePlayerMonth .reward-ace__hologram img{height:86px}
 #homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}
 @media(max-width:650px){#homePlayerMonth .reward-ace__hologram{height:82px}#homePlayerMonth .reward-ace__hologram img{height:80px}#homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}}
 
 .home-reward-table__cards {grid-template-columns:repeat(4,minmax(0,1fr))}
-#homePlayerMonth .home-reward-table .reward-ace {padding-top:37px}
 .reward-ace__knockout-art {
   display:block;
   flex:none;
