@@ -1416,6 +1416,7 @@
     var archiveWeekRoomActive = {};
     var sharedUpdatedAt = "";
     var sharedCurrentSnapshotLoaded = false;
+    var activePlayerKeys = null;
     var sharedSaveQueue = Promise.resolve();
     var sharedAutoLoadStarted = false;
     var sharedAutoLoadRetryCount = 0;
@@ -1434,19 +1435,18 @@
       var carriedIds = [];
       sharedRows.forEach(function (row) {
         if (!isCarryForwardTemplateRow(row) || normalizeRoom(row.room) !== room) return;
+        if (!activePlayerKeys && rowWeekStart(row) !== getCurrentRakebackWeekStart()) return;
         var playerId = String(row.playerId || row.id || "").trim();
         if (playerId) carriedIds.push(playerId);
       });
-      // The current week's server-generated list is ranked by the previous
-      // week's rake and already excludes templates inactive for four weeks.
-      // Static IDs are only a legacy fallback before that list exists.
-      var ids = carriedIds.length ? carriedIds : (templates[room] || []).slice();
+      var ids = carriedIds.length || (sharedCurrentSnapshotLoaded && !activePlayerKeys) ? carriedIds : (templates[room] || []);
       var seen = {};
       return (Array.isArray(ids) ? ids : []).map(function (id) {
         return String(id || "").trim();
       }).filter(function (id) {
         var deletedKey = getTemplateDefaultKey(room, id);
         if (!id || seen[id] || permanentlyDeletedTemplates[deletedKey]) return false;
+        if (activePlayerKeys && !activePlayerKeys.has(room + ":" + id)) return false;
         seen[id] = true;
         return true;
       });
@@ -1469,9 +1469,11 @@
       room = normalizeRoom(room);
       playerId = String(playerId || "").trim().toLowerCase();
       if (!playerId) return null;
+      var currentWeekStart = getCurrentRakebackWeekStart();
       for (var i = 0; i < sharedRows.length; i += 1) {
         var row = sharedRows[i];
         if (!isCarryForwardTemplateRow(row)) continue;
+        if (rowWeekStart(row) !== currentWeekStart) continue;
         if (normalizeRoom(row.room) !== room) continue;
         if (String(row.playerId || row.id || "").trim().toLowerCase() === playerId) return row;
       }
@@ -2891,6 +2893,7 @@
             // redraw it from an earlier snapshot.
             sharedRows = mergeLoadedRowsIntoExisting(serverRows, currentLocalRows);
             sharedArchiveAvailable = data.rakebackDraft.hasArchive === true || sharedArchiveAvailable;
+            activePlayerKeys = Array.isArray(data.rakebackDraft.activePlayerKeys) ? new Set(data.rakebackDraft.activePlayerKeys) : null;
           }
           sharedUpdatedAt = data.rakebackDraft.updatedAt || sharedUpdatedAt;
           sharedCurrentSnapshotLoaded = true;
@@ -2987,6 +2990,7 @@
           sharedArchiveLoaded = true;
         } else {
           sharedRows = mergeRowsWithLocalUnsaved(serverRows, localRows);
+          activePlayerKeys = Array.isArray(draft.activePlayerKeys) ? new Set(draft.activePlayerKeys) : null;
           sharedArchiveAvailable = draft && draft.hasArchive === true;
           sharedCurrentSnapshotLoaded = true;
         }
@@ -3359,6 +3363,7 @@
       if (Array.isArray(rows)) {
         sharedRows = normalizeDraftRows(rows);
         sharedCurrentSnapshotLoaded = false;
+        activePlayerKeys = null;
         sharedAutoLoadStarted = false;
         if (!sharedRows.length && legacyRakeback != null && legacyRakeback !== "" && parseNumber(legacyRakeback) !== 0) {
           sharedRows = normalizeDraftRows([{

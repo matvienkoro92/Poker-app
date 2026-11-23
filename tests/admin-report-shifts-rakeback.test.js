@@ -216,3 +216,22 @@ test("weekly carry-forward corrects an automatic rate and preserves an explicitl
   ]);
   assert.equal(_test.ensureCurrentWeekRakebackCarryForwardRows(draft).carryForwardTemplateRowsChanged, false);
 });
+
+test("weekly template visibility uses four completed weeks of saved nonzero rake per room", () => {
+  const current = _test.currentReportWeekStartMs();
+  const week = 7 * 24 * 60 * 60 * 1000;
+  const entry = (room, playerId, weeksAgo, rake, saved = true) => ({
+    room, playerId, rake, saved, rakeZero: rake === 0, percent: 40,
+    entryAddedAt: current - weeksAgo * week + 60_000,
+  });
+  const rows = [
+    entry("P21", "1", 4, 100),
+    entry("X", "1", 1, 0),
+    entry("PP", "2", 5, 100),
+    entry("Supr", "3", 1, 100, false),
+    entry("X", "4", 0, 100),
+  ];
+  const draft = _test.scopeRakebackDraft({ rows }, "currentWeek");
+  assert.deepEqual(draft.activePlayerKeys, ["P21:1", "X:4"]);
+  assert.ok(_test.scopeRakebackDraft({ rows }, "archive").rows.some(row => row.playerId === "2"));
+});
