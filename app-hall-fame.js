@@ -1618,6 +1618,7 @@ function hallFishAggregateTournamentAchievements(levelRows) {
     });
   }
   return {
+    weekdayEveningLeaders: hallFishWeekdayEveningLeaders(allRows, metaByNick),
     topWin: hallFishRowsWithRank(list.map(function(row){return Object.assign({},row,{value:row.topWin,tie:0,valueText:hallFishFormatRub(row.topWin),extraText:"Самый крупный разовый выигрыш",detailRows:tournamentDetails(row.topWinRows)});}),0),
     big50: hallFishRowsWithRank(list.map(function (row) {
       return Object.assign({}, row, { value: row.big50, tie: row.big50Best, valueText: row.big50 + " зан.", extraText: row.big50Best ? "лучший выигрыш " + hallFishFormatRub(row.big50Best) : "", detailRows: tournamentDetails(row.big50Rows) });
@@ -1934,6 +1935,46 @@ function hallFishPlayerMonthSpec(data,monthKey) {
   return {key:'playerMonth',title:'Игрок месяца',sectionTitle:'Игрок месяца',description:'Одна итоговая награда за первое место в каждой категории ниже. Число побед внутри категории не увеличивает этот счёт. При равенстве количества наград выше игрок с большей суммой призовых за месяц. При равенстве обеих величин — совместное лидерство.',rows:rows};
 }
 
+function hallFishWeekdayEveningLeaders(rows, metaByNick) {
+  // Rating reports use the room's tournament names, which differ from the schedule labels.
+  var days = [
+    {label:'Пн',dow:1,name:/турнир понедельника/i},
+    {label:'Вт',dow:2,name:/турнир (?:тракториста|вторника)/i},
+    {label:'Ср',dow:3,name:/счастливый косарь|турнир среды/i},
+    {label:'Чт',dow:4,name:/магия тракториста/i},
+    {label:'Пт',dow:5,name:/пятница прогрессив/i},
+    {label:'Сб',dow:6,name:/фаст[-–\s]трек/i},
+    {label:'Вс',dow:0,name:/волшебный пятак/i}
+  ];
+  var firstPlaces = (Array.isArray(rows) ? rows : []).filter(function(row) {
+    return row && Number(row.place) === 1 && String(row.time).trim() === '18:00' &&
+      hallFishDateStamp(row.date) >= 20261101;
+  }).sort(function(a,b) { return hallFishDateStamp(a.date) - hallFishDateStamp(b.date); });
+  return days.map(function(day) {
+    var players = new Map();
+    firstPlaces.forEach(function(row) {
+      var parts = row.date.split('.').map(Number);
+      if (new Date(Date.UTC(parts[2],parts[1]-1,parts[0])).getUTCDay() !== day.dow ||
+          !day.name.test(row.tournamentLabel)) return;
+      var key = hallFishNormalizeNick(row.nick);
+      if (!key) return;
+      if (!players.has(key)) {
+        var meta = hallFishPlayerMetaByNick(row.nick, metaByNick);
+        players.set(key,{nick:meta.nick || row.nick,dates:new Set()});
+      }
+      players.get(key).dates.add(hallFishDateStamp(row.date));
+    });
+    var leaders = Array.from(players.values()).map(function(player) {
+      var dates = Array.from(player.dates);
+      return {nick:player.nick,wins:dates.length,fifth:dates[4] || Infinity,last:dates[dates.length-1]};
+    }).sort(function(a,b) {
+      return (a.fifth === b.fifth ? 0 : a.fifth - b.fifth) ||
+        b.wins - a.wins || a.last - b.last;
+    });
+    return {label:day.label,leader:leaders[0]};
+  });
+}
+
 function hallFishRenderHomePlayerMonth(data) {
   var root = document.getElementById('homePlayerMonth');
   if (!root || !data) return;
@@ -1947,17 +1988,22 @@ function hallFishRenderHomePlayerMonth(data) {
     {key:'dayHero',title:'Герой дня',bonus:'30 000',suit:'♥',leader:hero,description:'Больше всего званий «Герой дня» за месяц.'},
     {key:'threeRebuys',title:'Выиграть 3 турнира DV-ребай подряд',bonus:'25 000',suit:'♣',condition:'Три победы. Одна серия.',description:'Выиграть 3 турнира DV-ребай подряд. Бонус — 25 000 ₽.'},
     {key:'pokermankiKnockout',title:'Выбить ПокерМанки',bonus:'5 000',suit:'♦',description:'Выбей ПокерМанки после окончания регистрации в турнире вечера в понедельник, среду, пятницу или субботу. Награда — билет за 5 000 ₽.'},
-    {key:'fiveWeekdayEvenings',title:'Выиграть 5 турниров вечера одного дня недели',bonus:'25 000',suit:'♠',condition:'Первым набери пять побед. Например, по понедельникам.',description:'Бонус 25 000 ₽ получит игрок, который первым займёт первое место в пяти вечерних турнирах одного и того же дня недели. Например, первым выиграет пять вечерних турниров понедельника.'}
+    {key:'fiveWeekdayEvenings',title:'Выиграть 5 турниров вечера одного дня недели',bonus:'25 000',suit:'♠',standings:data.weekdayEveningLeaders || [],description:'Бонус 25 000 ₽ получит игрок, который первым займёт первое место в пяти главных турнирах вечера одного и того же дня недели. Например, первым выиграет пять вечерних турниров понедельника. Зачёт по сохранённым результатам с 1 ноября 2026 года.'}
   ];
   root.innerHTML = '<section class="home-reward-table" aria-label="Награды клуба в ноябре"><header class="home-reward-table__heading"><span>НАГРАДЫ КЛУБА В НОЯБРЕ</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
     var knockout = reward.key === 'pokermankiKnockout';
-    var hasConditions = knockout || Boolean(reward.condition);
+    var hasConditions = knockout || Boolean(reward.condition || reward.standings);
     var image = reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
     var art = knockout ? '<span class="reward-ace__knockout-art"><img src="./assets/home-reward-pokermanki-boxing-v1.webp" width="720" height="480" alt="ПокерМанки уворачивается от боксёрской перчатки" decoding="async"></span>' : image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
+    if (reward.standings) {
+      art = '<span class="reward-ace__standings"><small>Лидеры · победы</small>'+reward.standings.map(function(day) {
+        return '<span><span>'+day.label+'</span><strong>'+(day.leader?hallFishEsc(day.leader.nick):'—')+'</strong><span>'+(day.leader?day.leader.wins:0)+'</span></span>';
+      }).join('')+'</span>';
+    }
     return '<button type="button" class="reward-ace'+(/[♥♦]/.test(reward.suit)?' reward-ace--red':'')+'" '+(hasConditions?'data-home-month-achievement="'+reward.key+'"':'data-home-reward-tab="'+reward.key+'"')+' title="'+hallFishEsc(reward.title)+'" data-description="'+hallFishEsc(reward.description)+'" aria-haspopup="dialog">'+
       '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><h3>'+reward.title+'</h3>'+
       '<span class="reward-ace__bonus"><small>'+(knockout?'Билет':'Бонус')+'</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
-      (knockout?'<span class="reward-ace__condition reward-ace__condition--knockout">После конца регистрации<br>Пн, ср, пт, сб · турнир вечера</span>':reward.condition?'<span class="reward-ace__condition">'+hallFishEsc(reward.condition)+'</span>':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
+      (knockout?'<span class="reward-ace__condition reward-ace__condition--knockout">После конца регистрации<br>Пн, ср, пт, сб · турнир вечера</span>':reward.condition?'<span class="reward-ace__condition">'+hallFishEsc(reward.condition)+'</span>':reward.standings?'':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
       '<span class="reward-ace__action">'+(hasConditions?'Условия':'Смотреть')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
   }).join('')+'</div></section>'+
     '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';

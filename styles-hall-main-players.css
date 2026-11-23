@@ -3139,6 +3139,10 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 @media(max-width:650px){#homePlayerMonth .reward-ace__hologram{height:82px}#homePlayerMonth .reward-ace__hologram img{height:80px}#homePlayerMonth .reward-ace__hologram--avatar img{width:68px;height:68px}}
 
 .home-reward-table__cards {grid-template-columns:repeat(5,minmax(0,1fr))}
+.reward-ace__standings {display:grid;gap:3px;width:100%;margin:6px 0 8px;font-size:clamp(9px,1.3vw,12px);line-height:1.2}
+.reward-ace__standings>span {display:grid;grid-template-columns:1.7em minmax(0,1fr) 2ch;gap:4px;text-align:left}
+.reward-ace__standings strong {overflow-wrap:anywhere}
+.reward-ace__standings>span>span:last-child {text-align:right;font-variant-numeric:tabular-nums}
 .reward-ace__knockout-art {
   display:block;
   flex:none;
