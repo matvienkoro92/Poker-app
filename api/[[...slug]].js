@@ -83,6 +83,7 @@ const handlers = {
   "cron-deposit-notifications": () => require(path.join(handlersDir, "cron-deposit-notifications.js")),
   "cron-prodamus-shifts": () => require(path.join(handlersDir, "cron-prodamus-shifts.js")),
   "cron-mandarin": () => require(path.join(handlersDir, "cron-mandarin.js")),
+  "cashera-webhook": () => require(path.join(handlersDir, "cashera-webhook.js")),
   "mandarin-webhook": () => require(path.join(handlersDir, "mandarin-webhook.js")),
   "robokassa-webhook": () => require(path.join(handlersDir, "robokassa-webhook.js")),
   "cron-robokassa": () => require(path.join(handlersDir, "cron-robokassa.js")),
