@@ -5434,4 +5434,313 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "23.11.2026": [
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Deni0214",
+          "place": 2,
+          "reward": 1736.67,
+          "points": 110
+        },
+        {
+          "nick": "VRay",
+          "place": 9,
+          "reward": 224.97,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "09:00",
+      "name": "PLO6 Bounty 12K",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "♠UnLucky'(♣",
+          "place": 2,
+          "reward": 2311,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "fomichga",
+          "place": 1,
+          "reward": 4865.64,
+          "points": 135
+        },
+        {
+          "nick": "Надзор",
+          "place": 3,
+          "reward": 2144.37,
+          "points": 90
+        },
+        {
+          "nick": "Deni0214",
+          "place": 4,
+          "reward": 360,
+          "points": 70
+        },
+        {
+          "nick": "Monfokon",
+          "place": 13,
+          "reward": 16.25,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaar",
+          "place": 1,
+          "reward": 15700,
+          "points": 135
+        },
+        {
+          "nick": "myhomor4ik",
+          "place": 2,
+          "reward": 7200,
+          "points": 110
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 2400,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "13:00",
+      "name": "DV 🏃 Bounty 🥊 100k",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "PapaRabotaet",
+          "place": 5,
+          "reward": 8527,
+          "points": 60
+        },
+        {
+          "nick": "Freedom",
+          "place": 9,
+          "reward": 2738,
+          "points": 0
+        },
+        {
+          "nick": "AlenaSt",
+          "place": 8,
+          "reward": 1927,
+          "points": 30
+        },
+        {
+          "nick": "Suprimalor",
+          "place": 15,
+          "reward": 519,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Boba7575",
+          "place": 1,
+          "reward": 3930,
+          "points": 135
+        },
+        {
+          "nick": "tatarin_1",
+          "place": 3,
+          "reward": 1230,
+          "points": 90
+        },
+        {
+          "nick": "MaxVerstappen",
+          "place": 4,
+          "reward": 900,
+          "points": 70
+        },
+        {
+          "nick": "Monfokon",
+          "place": 5,
+          "reward": 790,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "LuckyBoom",
+          "place": 6,
+          "reward": 930,
+          "points": 50
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 4,
+          "reward": 797.5,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Понедельника",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 37210,
+          "points": 135
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 4,
+          "reward": 28430,
+          "points": 70
+        },
+        {
+          "nick": "EvgenDerby",
+          "place": 3,
+          "reward": 24680,
+          "points": 90
+        },
+        {
+          "nick": "Waaar",
+          "place": 5,
+          "reward": 7980,
+          "points": 60
+        },
+        {
+          "nick": "fomichga",
+          "place": 6,
+          "reward": 7390,
+          "points": 50
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Phoenix 300K",
+      "buyin": 2500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Suprimalor",
+          "place": 4,
+          "reward": 19825,
+          "points": 70
+        },
+        {
+          "nick": "Waaarr",
+          "place": 12,
+          "reward": 1825,
+          "points": 0
+        },
+        {
+          "nick": "Бардюр",
+          "place": 15,
+          "reward": 1825,
+          "points": 0
+        },
+        {
+          "nick": "PapaRabotaet",
+          "place": 30,
+          "reward": 160,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 17200,
+          "points": 135
+        },
+        {
+          "nick": "Proxor",
+          "place": 5,
+          "reward": 3500,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 150K",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Waaarr",
+          "place": 8,
+          "reward": 3272.9999999999995,
+          "points": 30
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "kriak",
+          "place": 4,
+          "reward": 4410.41,
+          "points": 70
+        },
+        {
+          "nick": "WiNifly",
+          "place": 2,
+          "reward": 3515.83,
+          "points": 110
+        },
+        {
+          "nick": "Porquinho",
+          "place": 3,
+          "reward": 2191.23,
+          "points": 90
+        }
+      ]
+    }
+  ]
 };

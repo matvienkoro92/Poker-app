@@ -551,6 +551,16 @@ async function parseOcrFile(file) {
   if (blue && date === "10.11.2026" && time === "18:00" && /200K.*Deep Freeze/i.test(title)) { title = "Deep Freeze 200K"; buyin = 4000; }
   if (blue && date === "20.11.2026" && time === "18:00" && title === "Black Friday 340K") buyin = 100;
   // Entry fees confirmed by the owner for the November 22 cards.
+  if (blue && date === "23.11.2026") {
+    if (time === "18:00" && /300K.*\[P\]hoenix/i.test(title)) {
+      title = "Phoenix 300K";
+      buyin = 2500;
+    }
+    if (time === "20:00" && /150K.*Lucky Slot/i.test(title)) {
+      title = "Lucky Slot 150K";
+      buyin = 2000;
+    }
+  }
   if (blue && date === "22.11.2026") {
     if (time === "14:00" && title === "[H]eadshot 400K") buyin = 1200;
     if (time === "18:00" && title === "[K]nock 1.5M") buyin = 2500;

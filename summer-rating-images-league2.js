@@ -1151,4 +1151,12 @@ var SUMMER_RATING_IMAGES_LEAGUE2 = {
     "rating-compressed-preview/rating-22-11-2026-league2-tournament-rebuy-14h.jpg",
     "rating-compressed-preview/rating-22-11-2026-league2-mok-17h.jpg"
   ]
+,
+  "23.11.2026": [
+    "rating-compressed-preview/rating-23-11-2026-league2-turbina-200s-pko-2-3-08h.jpg",
+    "rating-compressed-preview/rating-23-11-2026-league2-plo6-bounty-12k-09h.jpg",
+    "rating-compressed-preview/rating-23-11-2026-league2-ok-10h.jpg",
+    "rating-compressed-preview/rating-23-11-2026-league2-tournament-rebuy-14h.jpg",
+    "rating-compressed-preview/rating-23-11-2026-league2-mok-17h.jpg"
+  ]
 };
