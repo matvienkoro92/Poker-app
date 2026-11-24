@@ -3,8 +3,8 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const {applyOperation,view}=require('../lib/admin-deposits');
 const {providerDisplayAmount}=require('../lib/deposit-payment-forms');
 const mapping=[[110000,100000],[165000,150000],[218000,200000]];
-test('all three payment providers display and record nominal credit while retaining gross receipt and audit amount',()=>{
- for(const provider of ['prodamus','robokassa','mandarin'])for(const [gross,credit]of mapping){
+test('payment providers display and record nominal credit while retaining gross receipt and audit amount',()=>{
+ for(const provider of ['prodamus','robokassa','mandarin','cashera'])for(const [gross,credit]of (provider==='cashera'?[[107000,100000],[160000,150000],[213000,200000],[319000,300000]]:mapping)){
   const id=provider==='mandarin'?'11111111-2222-4333-8444-555555555555':'123',now=Date.now(),receipt={providerId:provider,id,status:'confirmed',amount:gross,confirmedAt:now};
   const base={revision:0,entries:[],requests:[],paymentFormPayments:[receipt]};
   const field=provider+'PaymentId',pending='pending'+provider[0].toUpperCase()+provider.slice(1)+'Payments';
