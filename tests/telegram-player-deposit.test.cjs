@@ -334,3 +334,12 @@ test('paid message offers both rooms with known player IDs',async()=>{
  assert.equal(edit.body.reply_markup.inline_keyboard[0][0].text,'Poker21 · ID 123456');
  assert.equal(edit.body.reply_markup.inline_keyboard[0][1].text,'X-Poker · ID 987654');
 });
+
+test('Cashera test command is private to the intended Telegram account',()=>{
+ const command=(id,username,chatType='private')=>commandModule.command({message:{
+   text:'/cashera_test',chat:{id,type:chatType},from:{id,username}
+ }});
+ assert.equal(command(5053253480,'Roman1787443'),true);
+ assert.equal(command(388008256,'Roman1787443'),false);
+ assert.equal(command(5053253480,'Roman1787443','supergroup'),false);
+});
