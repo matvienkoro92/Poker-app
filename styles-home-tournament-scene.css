@@ -1747,3 +1747,39 @@ body[data-view="download"] #app.app .home-tractor-raffle span { position: static
 
 
 body[data-view="download"] #app.app .play-tournament-scene { position: relative; width: 100%; margin: 16px auto 32px; overflow: visible; }
+
+.home-tournament-history-dialog__navigation {
+  width: min(100%, 760px);
+  margin: 0 auto 16px;
+  padding-right: 46px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #ffcf79;
+  font: 700 14px/1.2 Arial, sans-serif;
+}
+.home-tournament-history-dialog__navigation button {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 1px solid #98723b;
+  border-radius: 10px;
+  background: #212019;
+  color: inherit;
+  font-size: 22px;
+  cursor: pointer;
+}
+.home-tournament-history-dialog__navigation button:focus-visible { outline: 2px solid #ffcf79; outline-offset: 2px; }
+
+.home-tournament-history-dialog__navigation select {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid #98723b;
+  border-radius: 10px;
+  background: #212019;
+  color: inherit;
+  font: inherit;
+}
+.home-tournament-history-dialog__navigation button:disabled { opacity: .4; }

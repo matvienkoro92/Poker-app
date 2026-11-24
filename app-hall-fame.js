@@ -1938,7 +1938,8 @@ function hallFishWeekdayEveningLeaders() {
   var history = typeof HOME_TOURNAMENT_HISTORY_BY_WEEKDAY !== 'undefined' ? HOME_TOURNAMENT_HISTORY_BY_WEEKDAY : {};
   var options = typeof window.pokerGetEveningTournamentOptions === 'function' ? window.pokerGetEveningTournamentOptions() : [];
   return options.map(function(tournament) {
-    var source = history[tournament.historyKey];
+    var scheduled = typeof pokerGetHomeTournamentItem === 'function' && pokerGetHomeTournamentItem(tournament.weekday);
+    var source = history[tournament.historyKey || scheduled?.historyKey || tournament.weekday];
     var buyin = Number(String(tournament.buyin || '').replace(/\D/g,''));
     var results = source?.buyin === buyin && Array.isArray(source.results) ? source.results : [];
     var players = new Map();

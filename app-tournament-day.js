@@ -521,6 +521,7 @@ function pokerGetEveningTournamentOptions(now) {
       id: "weekly-" + dow,
       time: item.time || (scheduled ? String(scheduled.hour).padStart(2, "0") + ":" + String(scheduled.minute || 0).padStart(2, "0") + " МСК" : ""),
       weekday: dow,
+      historyKey: item.historyKey || String(dow),
       day: HOME_TOURNAMENT_WEEK_DAY_LABELS[dow],
       name: item.name || "Турнир вечера",
       buyin: item.buyin || "",
