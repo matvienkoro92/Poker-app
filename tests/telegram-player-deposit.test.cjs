@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const commandModule=require('../lib/telegram-player-deposit');
-function fixture({beforeSupport=async()=>{}}={}){
+function fixture({beforeSupport=async()=>{},casheraConfigured=false}={}){
  const store=new Map(),sent=[],mirrored=[],botMirrored=[],cleared=[];let seq=100,failMirror=false,redisBatches=0;
  const redis={isConfigured:()=>true,pipeline:async commands=>(redisBatches++,commands.map(([cmd,...a])=>{
   if(cmd==='GET')return {result:store.get(a[0])||null};
@@ -10,7 +10,7 @@ function fixture({beforeSupport=async()=>{}}={}){
   if(cmd==='EVAL'){const key=a[2];if((store.get(key)||'')!==a[3])return {result:0};if(a.length===4)store.delete(key);else store.set(key,a[4]);return {result:1};}
   throw Error(cmd);
  }))};
- const ctx={module:{exports:{}},require:id=>id==='./cashera-payments'?{configured:()=>false}:id==='./telegram-download'?require('../lib/telegram-download'):id==='./telegram-rakeback'?require('../lib/telegram-rakeback'):id==='./telegram-deposit-room'?require('../lib/telegram-deposit-room'):id==='./telegram-support-player'?{readPlayerIdentity:async()=>({poker21Id:'123456',xpokerIds:['987654']})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
+ const ctx={module:{exports:{}},require:id=>id==='./cashera-payments'?{configured:()=>casheraConfigured}:id==='./telegram-download'?require('../lib/telegram-download'):id==='./telegram-rakeback'?require('../lib/telegram-rakeback'):id==='./telegram-deposit-room'?require('../lib/telegram-deposit-room'):id==='./telegram-support-player'?{readPlayerIdentity:async()=>({poker21Id:'123456',xpokerIds:['987654']})}:id==='./telegram-player-chat'?require('../lib/telegram-player-chat'):id==='./telegram-player-bonus-balance'?require('../lib/telegram-player-bonus-balance'):id==='./telegram-player-spin'?require('../lib/telegram-player-spin'):id==='./redis'?redis:id==='./telegram-group-policy'?{guardedFetch:async(url,o)=>{const body=JSON.parse(o.body);sent.push({method:url.split('/').at(-1),body,redisBatches});return {ok:true,json:async()=>({ok:true,result:{message_id:++seq}})};}}:id==='./telegram-support'?{clearAwaitingAmountNotice:async(...args)=>{await beforeSupport('clear');cleared.push(args);return true;},mirrorBotMessage:async(...args)=>{botMirrored.push(args);if(failMirror){failMirror=false;throw Error('mirror unavailable');}return true;},handle:async(...args)=>{await beforeSupport('handle');mirrored.push(args);return {handled:true};}}:id==='./telegram-deposit-withdrawals'?{STORE_KEY:'ledger'}:id==='./telegram-player-statistics'?require('../lib/telegram-player-statistics'):id==='./deposit-link-routing'?require('../lib/deposit-link-routing'):require(id),Date,AbortSignal};
  vm.runInNewContext(fs.readFileSync('lib/telegram-player-deposit.js','utf8'),ctx);
  const message=(text,message_id=1)=>({message:{text,message_id,chat:{id:777,type:'private'},from:{id:777}}});
  const handle=u=>ctx.module.exports.handle(u,'fixture-token');
@@ -329,6 +329,8 @@ test('starting a deposit cancels an older subscription input prompt',async()=>{
 test('paid message offers both rooms with known player IDs',async()=>{
  const f=fixture();await f.handle(f.message('/деп 1000'));
  await f.handle({callback_query:{id:'room-options',data:'club:player-deposit:paid',from:{id:777},message:{message_id:101,chat:{id:777,type:'private'}}}});
+ const notices=f.botMirrored.filter(args=>args[4]?.reportedPayment);
+ assert.equal(notices.length,1);assert.equal(notices[0][4].chargeAmount,110000);
  const edit=f.sent.find(s=>s.method==='editMessageText'&&s.body.text.includes('куда пополнить'));
  assert.ok(edit);assert.equal(edit.body.reply_markup.inline_keyboard[0].length,2);
  assert.equal(edit.body.reply_markup.inline_keyboard[0][0].text,'Poker21 · ID 123456');
@@ -342,4 +344,13 @@ test('Cashera test command is private to the intended Telegram account',()=>{
  assert.equal(command(5053253480,'Roman1787443'),true);
  assert.equal(command(388008256,'Roman1787443'),false);
  assert.equal(command(5053253480,'Roman1787443','supergroup'),false);
+});
+
+test('owner test requests a manager choice before issuing a checkout',async()=>{
+ const f=fixture({casheraConfigured:true}),id=5053253480;
+ await f.handle({message:{text:'/cashera_test',message_id:1,chat:{id,type:'private'},from:{id}}});
+ assert.equal(f.botMirrored[0][4].choiceAmount,30000);
+ assert.equal(f.botMirrored[0][4].casheraChoice,true);
+ assert.equal(JSON.parse(f.store.get('poker_app:player-deposit:v1:waiting:'+id)).choiceAmount,30000);
+ assert.ok(!f.sent.some(s=>s.body.reply_markup?.inline_keyboard));
 });
