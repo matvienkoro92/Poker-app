@@ -6,7 +6,7 @@ const redis=require('../lib/redis');
 const {applyOperation,summary}=require('../lib/admin-deposits');
 const handle=require('../lib/api-handlers/poker21-withdrawals');
 
-test('only published withdrawals enter the cabinet and share the admin reservation balance',async t=>{
+test('non-USDT withdrawals automatically enter the cabinet and share the admin reservation balance',async t=>{
   const entryId=randomUUID();
   let offerId=randomUUID();
   const entry={room:'P21',playerId:'123456',recipient:'Тест',bank:'Тест',phone:'+79990000000',total:900000};
@@ -27,8 +27,20 @@ test('only published withdrawals enter the cabinet and share the admin reservati
     await handle({method:'POST',headers:{authorization:'Bearer test-connection'},body:{action,item,clubId,userId:'42',receipt}},res);
     return res;
   }
-  assert.deepEqual((await call('list')).data.items,[]);
-  state=applyOperation(state,{action:'poker21-publish',entryId,requestId:offerId,amount:900000},'admin').state;
+  state.entries.push({...state.entries[0],id:randomUUID(),paymentType:'usdt',bank:'USDT'});
+  const legacyOfferId=randomUUID();
+  state.entries[0].poker21Offer={id:legacyOfferId,amount:100000};
+  const beforePayment=(await call('list')).data.items[0];
+  assert.equal(beforePayment.amount,9000);
+  const paymentId=randomUUID();
+  state=applyOperation(state,{action:'payment',entryId,requestId:paymentId,amount:500000},'admin').state;
+  assert.equal((await call('list')).data.items[0].amount,4000);
+  assert.equal((await call('take',beforePayment.id.slice('withdrawal:'.length))).code,409);
+  assert.equal((await call('take',legacyOfferId)).code,409);
+  state=applyOperation(state,{action:'void',entryId,requestId:randomUUID(),paymentId},'admin').state;
+  const items=(await call('list')).data.items;
+  assert.equal(items.length,1);
+  offerId=items[0].id.slice('withdrawal:'.length);
   assert.equal(summary(state.entries[0]).available,900000);
   assert.equal((await call('list')).data.items[0].amount,9000);
   assert.equal((await call('remove',offerId,'321')).code,403);
