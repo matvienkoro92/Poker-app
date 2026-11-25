@@ -22,9 +22,9 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
     if(command[2]===2)files.set(command[4],command[pos+2]);
     state=JSON.parse(command[pos+1]);return [{result:1}];
   });
-  async function call(action,item,clubId='123',receipt){
+  async function call(action,item,clubId='123',receipt,userId='42'){
     const res={code:200,setHeader(){},status(n){this.code=n;return this;},json(data){this.data=data;},end(){}};
-    await handle({method:'POST',headers:{authorization:'Bearer test-connection'},body:{action,item,clubId,userId:'42',receipt}},res);
+    await handle({method:'POST',headers:{authorization:'Bearer test-connection'},body:{action,item,clubId,userId,receipt}},res);
     return res;
   }
   state.entries.push({...state.entries[0],id:randomUUID(),paymentType:'usdt',bank:'USDT'});
@@ -44,6 +44,15 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal(summary(state.entries[0]).available,900000);
   assert.equal((await call('list')).data.items[0].amount,9000);
   assert.equal((await call('remove',offerId,'321')).code,403);
+  for(const admin of ['388008256','5053253480']){
+    const previous=structuredClone(state);
+    assert.equal((await call('remove',offerId,'321',undefined,admin)).code,200);
+    assert.deepEqual((await call('list')).data.items,[]);
+    state=applyOperation(state,{action:'payment',entryId,requestId:randomUUID(),amount:10000},'admin').state;
+    assert.deepEqual((await call('list')).data.items,[]);
+    assert.equal(summary(state.entries[0]).available,890000);
+    state=previous;
+  }
   assert.equal((await call('remove',offerId,'758417')).code,200);
   assert.deepEqual((await call('list')).data.items,[]);
   state=applyOperation(state,{action:'poker21-publish',entryId,requestId:randomUUID(),amount:900000},'admin').state;
