@@ -77,6 +77,10 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal(state.entries[0].reservations[1].hasPoker21Receipt,true);
   assert.equal((await call('list')).data.items[0].status,'Ожидает подтверждения');
   assert.equal((await call('paid',second,'123',receipt)).code,409);
+  assert.equal((await call('remove',second,'123')).code,403);
+  assert.equal((await call('remove',second,'123',undefined,'5053253480')).code,200);
+  assert.deepEqual((await call('list')).data.items,[]);
+  assert.equal(summary(state.entries[0]).reserved,900000);
   state=applyOperation(state,{action:'confirm-reservation',entryId,requestId:randomUUID(),reservationId:second,amount:900000},'admin').state;
   assert.equal(summary(state.entries[0]).paid,900000);
   assert.deepEqual((await call('list')).data.items,[]);
