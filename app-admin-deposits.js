@@ -104,11 +104,23 @@
     catch(e){if(stamp===generation){handleError(e);if(!loaded)host.innerHTML='<div class="deposits__empty"><h3>Не удалось загрузить реквизиты</h3><p>Проверьте соединение и повторите загрузку.</p><button type="button" data-dep="refresh">Повторить</button></div>';}}
     finally{setBusy(false);}
   }
+  var poker21ButtonPosition=null;
+  function restorePoker21Button(operation){
+    var position=poker21ButtonPosition;
+    if(!position||position.entryId!==operation.entryId||position.action!==operation.action)return;
+    poker21ButtonPosition=null;
+    var card=host.querySelector('article[data-entry="'+CSS.escape(position.entryId)+'"]');
+    var button=card&&card.querySelector('[data-dep="poker21-publish"],[data-dep="poker21-unpublish"]');
+    if(button){
+      button.focus({preventScroll:true});
+      dialog.scrollTop+=button.getBoundingClientRect().top-position.top;
+    }
+  }
   async function save(operation) {
     if(busy)return;
     if(pending && operation!==pending){tell('Сначала проверьте предыдущую операцию.',true);return;}
     operation.requestId=operation.requestId || uid(); pending=operation;setBusy(true);tell('Сохраняем…');
-    try {data=await api(operation);loaded=true;pending=null;closeEditor();render();if(['tip','void-tip','tip-cashout','void-tip-cashout'].includes(operation.action))openTips();if(operation.action==='transfer')openChannel('transfer');if(operation.action==='channel-operation'||operation.action==='void-channel-operation'||operation.action==='edit-channel-operation')openChannel(operation.channelId);if(operation.action==='reserve'&&operation.reservationChannel!=='exchip'){var reservedEntry=data.entries.find(function(e){return e.id===operation.entryId;});showPopup('Реквизит зарезервирован','<div data-entry="'+esc(operation.entryId)+'"><p class="deposits__intro">'+money(operation.amount)+' заморожено до подтверждения оплаты менеджером.</p><div class="deposits__recipient-preview"><h4>'+esc(reservedEntry.recipient)+'</h4><p>'+esc([reservedEntry.bank,reservedEntry.wallet,reservedEntry.network,reservedEntry.card,reservedEntry.phone].filter(Boolean).join(' · '))+'</p></div><button type="button" class="deposits__primary deposits__wide" data-dep="copy-reserved" data-reservation="'+esc(operation.requestId)+'">Скопировать реквизиты</button><button type="button" class="deposits__text-button" data-dep="editor-close">Вернуться к карточкам</button></div>');}tell(operation.action==='payment'?'Депозит проведён. Остаток обновлён.':operation.action==='void'?'Операция отменена. Сумма возвращена в остаток.':'Сохранено в общем журнале.');}
+    try {data=await api(operation);loaded=true;pending=null;if(editing)closeEditor();render();restorePoker21Button(operation);if(['tip','void-tip','tip-cashout','void-tip-cashout'].includes(operation.action))openTips();if(operation.action==='transfer')openChannel('transfer');if(operation.action==='channel-operation'||operation.action==='void-channel-operation'||operation.action==='edit-channel-operation')openChannel(operation.channelId);if(operation.action==='reserve'&&operation.reservationChannel!=='exchip'){var reservedEntry=data.entries.find(function(e){return e.id===operation.entryId;});showPopup('Реквизит зарезервирован','<div data-entry="'+esc(operation.entryId)+'"><p class="deposits__intro">'+money(operation.amount)+' заморожено до подтверждения оплаты менеджером.</p><div class="deposits__recipient-preview"><h4>'+esc(reservedEntry.recipient)+'</h4><p>'+esc([reservedEntry.bank,reservedEntry.wallet,reservedEntry.network,reservedEntry.card,reservedEntry.phone].filter(Boolean).join(' · '))+'</p></div><button type="button" class="deposits__primary deposits__wide" data-dep="copy-reserved" data-reservation="'+esc(operation.requestId)+'">Скопировать реквизиты</button><button type="button" class="deposits__text-button" data-dep="editor-close">Вернуться к карточкам</button></div>');}tell(operation.action==='payment'?'Депозит проведён. Остаток обновлён.':operation.action==='void'?'Операция отменена. Сумма возвращена в остаток.':'Сохранено в общем журнале.');}
     catch(e){if(e.status && e.status<500)pending=null;handleError(e);}
     finally{setBusy(false);}
   }
@@ -399,7 +411,7 @@
   }
   function poker21OfferButton(e){
     if(e.poker21Offer)return '<button type="button" class="deposits__secondary deposits__wide" data-dep="poker21-unpublish">Выставлен в Poker21 · '+money(e.poker21Offer.amount)+' · Снять</button>';
-    return !e.archived&&e.available>0&&(e.paymentType||'bank')==='bank'&&(e.phone||e.card)&&e.bank?'<button type="button" class="deposits__secondary deposits__wide" data-dep="poker21-publish">Выставить в Poker21</button>':'';
+    return !e.archived&&e.available>=100000&&(e.paymentType||'bank')==='bank'&&(e.phone||e.card)&&e.bank?'<button type="button" class="deposits__secondary deposits__wide" data-dep="poker21-publish">Выставить в Poker21</button>':'';
   }
   function readPaymentAllocations(form,total){var rows=form.querySelectorAll('[data-allocation]');if(rows.length<2)return undefined;var parts=Array.from(rows).map(function(row){return {amount:parser.money(row.querySelector('[name^="allocationAmount"]').value),depositorId:row.querySelector('[name^="depositorId"],[name^="playerId"]').value.trim(),depositorRoom:(row.querySelector('input[type="radio"]:checked')||{}).value};});if(parts.some(function(r){return !r.amount;})||parts.reduce(function(sum,r){return sum+r.amount;},0)!==total){tell('Сумма частей должна совпадать с суммой оплаты.',true);return null;}return parts;}
   function playerChoices(query,roomFilter){
@@ -438,7 +450,7 @@
   function depositorLabel(record){if(record.allocations)return record.allocations.map(function(r){return depositorLabel(r)+' · '+money(r.amount);}).join(' / ');var room=depositRooms.find(function(r){return r[0]===record.depositorRoom;});return (room?room[1]+' · ':'')+'ID кто депает: '+record.depositorId;}
   function ownerPaymentFields(reservation){return '<label class="deposits__field">Источник оплаты<select name="paymentSource"><option value="player">Депозит игрока</option><option value="owner">Выплачено владельцем</option><option value="allfriends">Вывели в Олфрендс</option><option value="sergeyMarina">Сергей/Марина</option><option value="romaPpc">Рома PPC</option></select></label><fieldset data-owner-player-fields style="border:0;padding:0;margin:0">'+allocationEditor(reservation)+'</fieldset>';}
   function syncOwnerPaymentSource(form){var allfriends=form.elements.paymentSource.value==='allfriends',external=['sergeyMarina','romaPpc'].includes(form.elements.paymentSource.value),owner=allfriends||external||form.elements.paymentSource.value==='owner',fields=form.querySelector('[data-owner-player-fields]');fields.hidden=owner;fields.disabled=owner;var hint=form.querySelector('[data-owner-payment-hint]');if(hint)hint.textContent=external?'Выплата через '+counterpartyLabel(form.elements.paymentSource.value)+'. Остаток вывода уменьшится; депозит игрока не создаётся.':allfriends?'Вывод проведён в Олфрендс. Остаток уменьшится; депозит игрока не создаётся.':owner?'Владелец уже выплатил деньги получателю. Остаток вывода уменьшится; депозит игрока не создаётся.':'Подтверждайте только после фактического поступления денег. Сумма перейдёт из резерва в проведённые депозиты.';form.querySelector('[type="submit"]').textContent=external?'Подтвердить выплату':allfriends?'Подтвердить вывод в Олфрендс':owner?'Подтвердить выплату владельцем':'Оплата получена';}
-  function reservationRows(e){return (e.reservations||[]).filter(function(r){return !r.confirmedAt&&!r.releasedAt;}).map(function(r){return '<div class="deposits__reservation"><strong>'+(r.channelId==='exchip'?'Эксчип · ':'')+money(r.amount)+'</strong><small>'+esc(r.createdByName||'Администратор')+' · '+date(r.createdAt)+(r.poker21Paid?' · Плательщик отметил оплату':'')+'</small>'+(r.depositorId?'<small>'+esc(depositorLabel(r))+'</small>':'')+'<div class="deposits__reservation-actions"><button type="button" class="deposits__confirm" data-dep="confirm-reservation" data-reservation="'+esc(r.id)+'">'+(r.channelId==='exchip'?'Подтвердить выплату':'Подтвердить оплату')+'</button><button type="button" class="deposits__cancel" data-dep="release-reservation" data-reservation="'+esc(r.id)+'">Отменить резерв</button></div></div>';}).join('');}
+  function reservationRows(e){return (e.reservations||[]).filter(function(r){return !r.confirmedAt&&!r.releasedAt;}).map(function(r){return '<div class="deposits__reservation"><strong>'+(r.channelId==='exchip'?'Эксчип · ':'')+money(r.amount)+'</strong><small>'+esc(r.createdByName||'Администратор')+' · '+date(r.createdAt)+(r.poker21Paid?' · Плательщик отметил оплату':'')+'</small>'+(r.depositorId?'<small>'+esc(depositorLabel(r))+'</small>':'')+(r.hasPoker21Receipt?'<button type="button" data-dep="withdrawal-receipt" data-reservation="'+esc(r.id)+'">Открыть чек</button>':'')+'<div class="deposits__reservation-actions"><button type="button" class="deposits__confirm" data-dep="confirm-reservation" data-reservation="'+esc(r.id)+'">'+(r.channelId==='exchip'?'Подтвердить выплату':'Подтвердить оплату')+'</button><button type="button" class="deposits__cancel" data-dep="release-reservation" data-reservation="'+esc(r.id)+'">Отменить резерв</button></div></div>';}).join('');}
   function reserveEditor(e,exchip){showPopup(exchip?'Бронь в Эксчип':'На какую сумму?','<form data-form="reserve"'+(exchip?' data-reservation-channel="exchip"':'')+' data-entry="'+esc(e.id)+'"><p class="deposits__intro">'+esc(e.recipient)+' · '+esc(e.bank)+'<br>Доступно '+money(e.available)+'</p>'+field('Сумма брони, ₽','amount','','required inputmode="decimal" placeholder="0"')+'<p class="deposits__hint">'+(exchip?'Укажите часть вывода, размещённую в Эксчип. Она будет заморожена до подтверждения выплаты или отмены брони.':'Сумма будет заморожена в общем журнале. После фактической оплаты менеджер подтвердит её в карточке. Если платёж не состоялся, резерв можно снять.')+'</p><button type="submit" class="deposits__primary deposits__wide">'+(exchip?'Забронировать в Эксчип':'Взять реквизит')+'</button></form>');editor.querySelector('[name="amount"]').focus();}
   function setStatisticsPeriod(period){statisticsPeriod=period;rafflePrizes=null;spinReturns=null;popupVersion++;}
   function popupRequestCurrent(version,stamp){return version===popupVersion&&stamp===generation&&dialog.open&&editorPopup&&editorPopup.open;}
@@ -511,6 +523,9 @@
     var action=b.dataset.dep, cardNode=b.closest('[data-entry]');
     if(pending&&!['retry','close','editor-close','unlock'].includes(action)){tell('Сначала проверьте результат предыдущей операции кнопкой «Проверить и повторить». Другую оплату пока открыть нельзя.',true);return;}
     var e=cardNode?data.entries.find(function(e){return e.id===cardNode.dataset.entry;}):null;
+    if(e&&(action==='poker21-publish'||action==='poker21-unpublish')){
+      poker21ButtonPosition={entryId:e.id,action:action,top:b.getBoundingClientRect().top};
+    }
     if(action==='game-statistics-open'){if(gameStatisticsContainer){gameStatisticsContainer.textContent='Загрузка статистики игр…';await loadGameStatistics(gameStatisticsContainer);}return;}
     if(action==='statistics-open'){if(data.permissions&&data.permissions.canDelete){statisticsOpen=true;await refresh(false);}return;}
     if(action==='statistics-close'){statisticsOpen=false;gameStatisticsContainer=null;render();refreshPendingProdamus();return;}
@@ -546,6 +561,13 @@
     else if(action==='prodamus-history')showPopup('Продамус · Журнал операций',channelHistoryHtml('prodamus'));
     else if(action==='day-player-search')openDayPlayerSearch();
     else if(action==='tips')openTips();
+    else if(e&&action==='withdrawal-receipt'){
+      try{
+        var file=await api({action:action,entryId:e.id,reservationId:b.dataset.reservation});
+        if(file.receipt.startsWith('data:image/'))showPopup('Чек по брони','<img alt="Чек по брони" style="max-width:100%" src="'+esc(file.receipt)+'">');
+        else showPopup('Чек по брони','<a download="receipt.pdf" href="'+esc(file.receipt)+'">Скачать чек PDF</a>');
+      }catch(error){handleError(error);}
+    }
     else if(action==='tip-new')newTip();
     else if(action==='tip-cashout-new')newTip(true);
     else if(action==='tip-cashout-void')showPopup('Отменить обналичивание','<form data-form="void-tip-cashout" data-operation="'+esc(b.dataset.operation)+'"><p>Депозит будет отменён в учёте, фишки вернутся в остаток чаевых менеджера. Подтверждайте после фактической отмены передачи.</p><button type="submit" class="deposits__primary">Отменить обналичивание</button></form>');
@@ -575,7 +597,7 @@
     else if(action==='filter'){closedVisibleCount=10;filter=b.dataset.filter;render();refreshPendingProdamus();}
     else if(action==='manual')review(parser.parse(''));
     else if(action==='back-parse'){var raw=editor.querySelector('[name="rawText"]').value;newEntry();editor.querySelector('[name="raw"]').value=raw;}
-    else if(e&&action==='poker21-publish')showPopup('Выставить в Poker21','<form data-form="poker21-publish" data-entry="'+esc(e.id)+'">'+field('Сумма, ₽','amount',inputMoney(Math.min(e.available,1000000)),'required inputmode="decimal"')+'<p class="deposits__hint">До 10 000 ₽. Сумма останется доступна администратору до взятия заявки.</p><button class="deposits__primary deposits__wide">Выставить</button></form>');
+    else if(e&&action==='poker21-publish')showPopup('Выставить в Poker21','<form data-form="poker21-publish" data-entry="'+esc(e.id)+'">'+field('Сумма, ₽','amount',inputMoney(Math.min(e.available,1000000)),'required inputmode="decimal"')+'<p class="deposits__hint">От 1 000 до 10 000 ₽. Сумма останется доступна администратору до взятия заявки.</p><button class="deposits__primary deposits__wide">Выставить</button></form>');
     else if(e&&action==='poker21-unpublish')await save({action:action,entryId:e.id,offerId:e.poker21Offer.id});
     else if(e&&action==='reserve-exchip')reserveEditor(e,true);
     else if(e&&action==='reserve')reserveEditor(e);
