@@ -3253,12 +3253,15 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-
 }
 body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-reward-actions) {
   .home-news-reward-actions > .home-friend-news-modal__title-amount { font-weight: 900; }
-  .home-friend-news-modal__day-hero--inline {
-    position: absolute !important;
-    inset: auto auto 6px 2px !important;
-    margin: 0 !important;
-    width: calc(var(--portrait-width, 33%) - 6px) !important;
-    box-sizing: border-box;
+  .home-news-hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 6px; }
+  .home-news-hero-meta .home-friend-news-modal__player-meta { width: auto; margin: 0; }
+  .home-news-hero-tag {
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #ffdb84;
+    background: #382c19;
+    font: 750 10px/1.2 system-ui;
+    white-space: nowrap;
   }
   .home-week-cup { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   .home-week-cup img { min-height: 0; min-width: 0; }

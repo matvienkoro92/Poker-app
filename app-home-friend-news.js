@@ -2730,8 +2730,9 @@
         poker21LinkedHtml + (heroHeader ? "</span>" : "") + (rewardTools ? "" : !ticker && isDayHero && !isLastLonger
           ? '<span class="home-friend-news-modal__hero-reward">' + titleAmountHtml + '<span class="home-friend-news-modal__day-hero home-friend-news-modal__day-hero--inline">ГЕРОЙ ДНЯ</span></span>'
           : titleAmountHtml) + '</span>' +
-        (row.type === "birthday" ? "" : profileMetaHtml) +
-        (rewardTools && heroHeader ? '<span class="home-friend-news-modal__day-hero home-friend-news-modal__day-hero--inline">ГЕРОЙ ДНЯ</span>' : "") +
+        (rewardTools && heroHeader
+          ? '<span class="home-news-hero-meta">' + profileMetaHtml + '<span class="home-news-hero-tag">Герой дня</span></span>'
+          : row.type === "birthday" ? "" : profileMetaHtml) +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line, index) {
           if (titleAmountHtml && row.tournamentName && index === 0 && row.tournamentPlace > 0) {
             line = row.tournamentPlace + "-е место · " + row.tournamentName;
