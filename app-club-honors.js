@@ -102,6 +102,25 @@
    awardMini.addEventListener('close',()=>{awardRequest++;if(awardOpener?.isConnected)awardOpener.focus({preventScroll:true});});
   }
   const close='<button type="button" class="honors-award-mini__close" data-award-mini-close aria-label="Закрыть">×</button>';
+  const cupDay=button.dataset.weekCup;
+  awardMini.setAttribute('aria-label',cupDay===undefined?'О перстне игрока месяца':'Кубок турнира');
+  if(cupDay!==undefined){
+   const info=window.HOME_TOURNAMENT_HISTORY_BY_WEEKDAY[cupDay];
+   const name=weeklyCups.find(([day])=>String(day)===cupDay)[1];
+   const nick=button.closest('[data-club-honors-nick]').dataset.clubHonorsNick;
+   const wins=info.results.flatMap(([date,podium])=>podium
+    .filter(([place,player])=>place===1&&nickKey(player)===nickKey(nick))
+    .map(([, , prize])=>({date,prize}))).reverse();
+   const rub=value=>value.toLocaleString('ru-RU')+' ₽';
+   const days=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+   const header='<header><img src="'+esc(button.querySelector('img').src)+'" alt=""><div><small>'+ (wins.length?'КУБОК ВЫИГРАН':'КУБОК ЗАКРЫТ')+'</small><h2>'+esc(name)+'</h2><p>'+esc(nick)+'</p></div></header>';
+   const details=wins.length
+    ? '<p class="honors-award-mini__summary">Победы <strong>'+wins.length+'</strong> · Призовые <strong>'+rub(wins.reduce((sum,w)=>sum+w.prize,0))+'</strong></p><table><thead><tr><th>Дата победы</th><th>Выигрыш</th></tr></thead><tbody>'+wins.map(w=>'<tr><td>'+esc(w.date)+'</td><td>'+rub(w.prize)+'</td></tr>').join('')+'</tbody></table>'
+    : '<dl><div><dt>Игровые дни</dt><dd>'+esc(info.historyDays||days[cupDay])+'</dd></div><div><dt>Начало</dt><dd>18:00 МСК</dd></div><div><dt>Бай-ин</dt><dd>'+rub(info.buyin)+'</dd></div></dl><p class="honors-award-mini__summary">Чтобы открыть кубок, займите первое место в этом турнире.</p>';
+   awardMini.innerHTML=close+header+details;
+   if(!awardMini.open)awardMini.showModal();
+   return;
+  }
   awardMini.innerHTML=close+'<p role="status">Загружаем награду…</p>';if(!awardMini.open)awardMini.showModal();
   try{
    const d=await loadPublic();if(requestId!==awardRequest||!awardMini.open)return;
@@ -115,23 +134,50 @@
     (rows.length?'<dl>'+rows.map(a=>'<div><dt>'+esc(a.title)+'</dt><dd>'+esc(a.valueText)+'</dd></div>').join('')+'</dl>':'');
   }catch(_){if(requestId===awardRequest&&awardMini.open)awardMini.innerHTML=close+'<p>Не удалось загрузить награду. Попробуйте ещё раз.</p>';}
  }
- document.addEventListener('click',e=>{const button=e.target.closest('[data-honors-award-month]');if(button){e.preventDefault();openAwardMini(button);}});
+ document.addEventListener('click',e=>{const button=e.target.closest('[data-honors-award-month],[data-week-cup]');if(button){e.preventDefault();openAwardMini(button);}});
  document.addEventListener('click',e=>{const button=e.target.closest('[data-club-honors-open]');if(button){e.preventDefault();open({month:button.dataset.honorsIssue,tab:button.dataset.honorsSection});}});
  let publicData,publicAt=0,publicPending;
  function loadPublic(){if(publicData&&Date.now()-publicAt<60000)return Promise.resolve(publicData);if(publicPending)return publicPending;publicPending=window.pokerSocialRequest('club-honors',{action:'get'}).then(d=>{if(!d.ok)throw Error(d.error);publicData=d;publicAt=Date.now();return d;}).finally(()=>{publicPending=null;});return publicPending;}
  const nickKey=v=>String(typeof window.normalizeWinterNick==='function'?window.normalizeWinterNick(v):v||'').trim().toLowerCase();
- window.pokerHydrateClubHonorsBadges=function(root){
-  const slots=[...root.querySelectorAll('[data-club-honors-nick]')];if(!slots.length||typeof window.pokerSocialRequest!=='function')return Promise.resolve();
-  return loadPublic().then(d=>slots.forEach(slot=>{
-   if(!slot.isConnected)return;
-   const nick=nickKey(slot.dataset.clubHonorsNick);
-   const wins=d.issues.filter(issue=>issue.final&&issue.winners.some(w=>nickKey(w.nick)===nick));
-   const html=nick?wins.map(issue=>{
-    const winner=issue.winners.find(w=>nickKey(w.nick)===nick),title='Перстень «Игрок месяца» · '+label(issue.month)+' · '+winner.nick;
-    return '<button type="button" class="home-news-honor" data-honors-award-month="'+esc(issue.month)+'" data-honors-award-nick="'+esc(winner.nick)+'" aria-label="'+esc(title)+'" title="'+esc(title)+'"><img src="'+esc(ringArt(winner,issue.month))+'" alt="" loading="lazy"></button>';
-   }).join(''):'';
-   if(slot.innerHTML!==html)slot.innerHTML=html;
-  })).catch(()=>{});
+ const weeklyCups=[
+  [1,'Турнир Понедельника'],[2,'Турнир Вторника'],[3,'Счастливый Косарь'],
+  [4,'Турнир Четверга'],[5,'Пятница Прогрессив'],[6,'Big Boss'],[0,'Воскресный турнир']
+ ];
+ function multiplier(count){return count>1?'<b class="home-award-count">×'+count+'</b>':'';}
+ window.pokerHydrateClubHonorsBadges=async function(root){
+  const slots=[...root.querySelectorAll('[data-club-honors-nick]')];
+  if(!slots.length)return;
+  const history=window.HOME_TOURNAMENT_HISTORY_BY_WEEKDAY,catalog=window.PokerHallTrophies;
+  const cups=history&&catalog?weeklyCups.map(([day,name])=>{
+   const wins=new Map();
+   for(const [,podium] of history[day]?.results||[]){
+    for(const [place,nick] of podium)if(place===1){
+     const key=nickKey(nick);wins.set(key,(wins.get(key)||0)+1);
+    }
+   }
+   return {day,name,wins,art:catalog.assets[catalog.family(name)]};
+  }):[];
+  function render(issues){
+   for(const slot of slots){
+    if(!slot.isConnected)continue;
+    const nick=nickKey(slot.dataset.clubHonorsNick);
+    if(!nick)continue;
+    const wins=issues.filter(i=>i.final&&i.winners.some(w=>nickKey(w.nick)===nick));
+    let html='';
+    if(wins.length){
+     const issue=wins[wins.length-1],winner=issue.winners.find(w=>nickKey(w.nick)===nick);
+     const title='Перстень «Игрок месяца» · '+winner.nick+' · '+wins.length;
+     html='<button type="button" class="home-news-honor" data-honors-award-month="'+esc(issue.month)+'" data-honors-award-nick="'+esc(winner.nick)+'" aria-label="'+esc(title)+'" title="'+esc(title)+'"><img src="'+esc(ringArt(winner,issue.month))+'" alt="">'+multiplier(wins.length)+'</button>';
+    }
+    html+=cups.map(({day,name,wins,art})=>{
+     const count=wins.get(nick)||0,title=name+' · побед: '+count;
+     return '<button type="button" data-week-cup="'+day+'" class="home-week-cup'+(count?'':' is-unearned')+'" aria-label="'+esc(title)+'" title="'+esc(title)+'"><img loading="lazy" src="'+esc(art.replace('.webp','-thumb-v2.webp'))+'" alt="">'+multiplier(count)+'</button>';
+    }).join('');
+    if(slot.innerHTML!==html)slot.innerHTML=html;
+   }
+  }
+  render(publicData?.issues||[]);
+  if(typeof window.pokerSocialRequest==='function')try{render((await loadPublic()).issues);}catch{}
  };
  window.pokerHydrateLevelHonors=function(root){
   const slots=[...root.querySelectorAll('[data-level-honors-nick]')];if(!slots.length||typeof window.pokerSocialRequest!=='function')return Promise.resolve();

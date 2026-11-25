@@ -2574,7 +2574,16 @@
     var emojiPicker = '<span class="home-news-emoji-picker" hidden>' + HOME_COMMENT_EMOJIS.map(function (emoji) {
       return '<button type="button" data-home-comment-emoji="' + esc(emoji) + '" aria-label="Вставить ' + esc(emoji) + '">' + esc(emoji) + "</button>";
     }).join("") + "</span>";
+    var toolsHtml = (newsModalMode === "club" && shareToken
+          ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-copy-event="' + esc(shareToken) +
+            '" aria-label="Скопировать ссылку на новость" title="Скопировать ссылку">' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
+            '</button>'
+          : "") +
+        (shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3.5 10 16-6.2c.6-.2 1.1.3.9.9l-4.5 15c-.2.7-1 .8-1.4.3l-4.1-5-6.8-3.5c-.7-.3-.7-1.2-.1-1.5Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m10.4 15 5.7-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>' : "");
+    var portraitTools = newsModalMode === "club" && row.newsTitle && row.newsLines && row.newsLines.length && row.type !== "birthday";
     return {
+      portraitTools: portraitTools && toolsHtml ? '<span class="home-news-portrait-tools">' + toolsHtml + '</span>' : "",
       actions: '<span class="home-friend-news-modal__action-row">' +
         (reactionButtons ? '<span class="chat-user-modal__news-actions">' + reactionButtons + '</span>' : '') +
         '<span class="home-friend-news-modal__action-controls">' +
@@ -2586,13 +2595,7 @@
           (feedback.commentCount ? "<span>" + Number(feedback.commentCount) + "</span>" : "") +
         "</button>" +
         '<span class="home-friend-news-modal__action-meta">' + (profileCueHtml || "") + "</span>") +
-        (newsModalMode === "club" && shareToken
-          ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-copy-event="' + esc(shareToken) +
-            '" aria-label="Скопировать ссылку на новость" title="Скопировать ссылку">' +
-            '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>' +
-            '</button>'
-          : "") +
-        (shareToken ? '<button type="button" class="home-friend-news-modal__event-copy" data-home-news-share-image aria-label="Поделиться карточкой" title="Поделиться"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3.5 10 16-6.2c.6-.2 1.1.3.9.9l-4.5 15c-.2.7-1 .8-1.4.3l-4.1-5-6.8-3.5c-.7-.3-.7-1.2-.1-1.5Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m10.4 15 5.7-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>' : "") + "</span></span>",
+        (portraitTools ? "" : toolsHtml) + "</span></span>",
       comments: '<span class="chat-user-modal__news-comments"' + (eventCommentsOpen[rowId] ? "" : " hidden") + ">" +
         '<span class="chat-user-modal__news-comments-list">' + commentsHtml + "</span>" +
         '<form class="chat-user-modal__news-comment-form" data-home-news-comment-form>' +
@@ -2724,19 +2727,24 @@
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
         ' role="button" tabindex="0"'
       : "";
+    var heroHeader = !ticker && isDayHero && !isLastLonger && newsModalMode === "club";
     var structuredText = isLastLonger && !ticker
       ? '<span class="home-friend-news-modal__last-longer-line"><b>Ластлонгер</b> · ' + esc(row.newsTitle || row.actorNick || "Игрок") +
         ' · ' + esc(row.lastLongerTitle || "Турнир") + ' · ' + esc(formatRub(row.lastLongerStake)) +
         ' → ' + esc(formatRub(row.lastLongerPayout)) + ' · ' + esc(String(row.lastLongerParticipants)) + ' уч.</span>'
       : row && row.newsTitle && Array.isArray(row.newsLines) && row.newsLines.length
-      ? '<span class="home-friend-news-modal__player-title"><span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
+      ? '<span class="home-friend-news-modal__player-title">' + (heroHeader ? '<span class="home-news-hero-identity">' : "") + '<span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
         (row.type === "birthday" ? profileMetaHtml : "") +
         (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
-        poker21LinkedHtml + (!ticker && isDayHero && !isLastLonger
+        poker21LinkedHtml + (heroHeader ? "</span>" : "") + (!ticker && isDayHero && !isLastLonger
           ? '<span class="home-friend-news-modal__hero-reward">' + titleAmountHtml + '<span class="home-friend-news-modal__day-hero home-friend-news-modal__day-hero--inline">ГЕРОЙ ДНЯ</span></span>'
           : titleAmountHtml) + '</span>' +
         (row.type === "birthday" ? "" : profileMetaHtml) +
-        '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line) {
+        '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line, index) {
+          if (titleAmountHtml && row.tournamentName && index === 0 && row.tournamentPlace > 0) {
+            line = row.tournamentPlace + "-е место · " + row.tournamentName;
+          }
+          if (titleAmountHtml) line = line.replace(/^\+1 ачивка «([^»]+)»:/, "$1 ·");
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"
       : "<strong>" + eventTextHtml(row.text) + "</strong>";
@@ -2764,7 +2772,7 @@
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
-      "</span>" + feedbackParts.comments + (isDisqualified ? '<span class="home-news-disqualified-stamp">Дисквалифицирован</span>' : "") + "</span>";
+      "</span>" + (feedbackParts.portraitTools || "") + feedbackParts.comments + (isDisqualified ? '<span class="home-news-disqualified-stamp">Дисквалифицирован</span>' : "") + "</span>";
   }
 
   function modalEventsHtml(rows) {
@@ -4197,7 +4205,7 @@
           return;
         }
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
-        if(event.target.closest("[data-club-honors-open],[data-honors-award-month]"))return;
+        if(event.target.closest("[data-club-honors-open],[data-honors-award-month],[data-week-cup]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         var playerId = playerCard && playerCard.getAttribute("data-home-news-player-id");
         if (playerCard) {
@@ -4324,7 +4332,7 @@
       modal.addEventListener("keydown", function (event) {
         if (event.key !== "Enter" && event.key !== " ") return;
         if (event.target.closest(".chat-user-modal__news-actions, .chat-user-modal__news-comments, .garage-showcase")) return;
-        if(event.target.closest("[data-club-honors-open],[data-honors-award-month]"))return;
+        if(event.target.closest("[data-club-honors-open],[data-honors-award-month],[data-week-cup]"))return;
         var playerCard = event.target.closest("[data-home-news-player-id]");
         if (!playerCard) return;
         event.preventDefault();
