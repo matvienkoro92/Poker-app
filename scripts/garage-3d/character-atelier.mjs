@@ -1,3 +1,4 @@
+import {softenStreetGarment} from './street-mesh.mjs';
 import {addSculptedHeadwear} from './character-headwear.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 import {createCharacterRig} from './character-rig.mjs';
@@ -15,7 +16,7 @@ async function sculptGeometry(name){
 const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
 const noise=n=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
 
-export async function buildSculptedCharacter(G,look){
+export async function buildSculptedCharacter(G,look,{streetFinish=false,streetSilhouette=false}={}){
  const root=new T.Group(),rig=createCharacterRig(root),geometries=[],materials=[],textures=[],shape=characterShape(look.body),shorts=G.wardrobeSubcategory('pants',look.pants)==='shorts',tee=look.suit?.endsWith('Tee'),tank=look.suit?.endsWith('Tank'),helmet=look.helmet&&look.helmet!=='none';
  const showFace=!helmet||look.visor==='open';
  const sculptPending=Promise.all(['head','face-v2','hand-left','hand-right','shirt-'+(tank?'tank':tee?'tee':'jacket'),shorts?'shorts':'pants',...(helmet?['helmet-shell']:[])].map(sculptGeometry));
@@ -41,7 +42,7 @@ export async function buildSculptedCharacter(G,look){
  function add(geo,mat,surface,name,sculpt=true){
   const p=geo.getAttribute('position'),uv=[],surfaces=[];
   for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);const region=typeof surface==='function'?surface(x,y,z):surface;if(sculpt){let q=shape(x,.5-y/3.825,z,region);if(name==='shirt-body'){const torso=shape(x,.5-y/3.825,z,1),arm=shape(x,.5-y/3.825,z,2),blend=smooth(.45,.60,Math.abs(x));q=torso.map((v,n)=>v+(arm[n]-v)*blend);}x=q[0];y=(.5-q[1])*3.825;z=q[2];p.setXYZ(i,x,y,z);}uv.push(.5+x/2.55,.5-y/3.825);surfaces.push(region);}
-  geo.setAttribute('bodyUv',new T.Float32BufferAttribute(uv,2));geo.setAttribute('surface',new T.Float32BufferAttribute(surfaces,1));if(!geo.getAttribute('uv'))geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));if(!geo.getAttribute('normal')||(sculpt&&look.body&&look.body!=='bodyNormal'))geo.computeVertexNormals();geometries.push(geo);const mesh=rig.mesh(geo,mat);mesh.name=name||'';mesh.castShadow=mesh.receiveShadow=true;return mesh;
+  geo.setAttribute('bodyUv',new T.Float32BufferAttribute(uv,2));geo.setAttribute('surface',new T.Float32BufferAttribute(surfaces,1));if(!geo.getAttribute('uv'))geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));if(!geo.getAttribute('normal')||(sculpt&&look.body&&look.body!=='bodyNormal'))geo.computeVertexNormals();geometries.push(geo);const mesh=rig.mesh(geo,mat,streetSilhouette&&name==='shirt-body');mesh.name=name||'';mesh.castShadow=mesh.receiveShadow=true;return mesh;
  }
  function ell(mat,c,r,surface,name){const geo=new T.SphereGeometry(1,40,28);geo.scale(...r);geo.translate(...c);return add(geo,mat,surface,name);}
  function line(points,r,mat,surface,name,closed=false){return add(new T.TubeGeometry(new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)),closed),Math.max(24,points.length*5),r,8,closed),mat,surface,name);}
@@ -178,7 +179,19 @@ export async function buildSculptedCharacter(G,look){
  // Authored cloth uses one consistent material around the complete garment.
  // The sewn bands replace the raw isosurface endings. Clip color and shadow
  // passes identically so the original thin edge cannot show through the hem.
- const seamRegion=[],shirtPoints=sourceMeshes[4].getAttribute('position');for(let i=0;i<shirtPoints.count;i++)seamRegion.push(Math.abs(shirtPoints.getX(i))>.49?1:0);sourceMeshes[4].setAttribute('seamRegion',new T.Float32BufferAttribute(seamRegion,1));
+ const seamRegion=[],shirtPoints=sourceMeshes[4].getAttribute('position');
+ if(streetSilhouette){
+  for(let i=0;i<shirtPoints.count;i++){
+   const x=shirtPoints.getX(i),y=shirtPoints.getY(i),z=shirtPoints.getZ(i);
+   const shoulder=smooth(.25,.54,Math.abs(x))*smooth(.63,.97,y);
+   const cuff=smooth(.48,.72,Math.abs(x))*(1-smooth(.04,.42,y));
+   const sleeve=smooth(.50,.71,Math.abs(x))*smooth(.14,.38,y)*(1-smooth(.82,1.03,y));
+   shirtPoints.setXYZ(i,x*(1-.14*shoulder-.042*cuff-.045*sleeve),y-.105*shoulder,z*(1-.11*shoulder-.09*sleeve));
+  }
+  softenStreetGarment(sourceMeshes[4],(x,y)=>smooth(.105,.25,y)*(.46+.54*smooth(.24,.58,Math.abs(x))));
+  softenStreetGarment(sourceMeshes[5],(x,y)=>smooth(-1.56,-1.34,y)*(1-smooth(-.22,-.03,y)));
+ }
+for(let i=0;i<shirtPoints.count;i++)seamRegion.push(Math.abs(shirtPoints.getX(i))>.49?1:0);sourceMeshes[4].setAttribute('seamRegion',new T.Float32BufferAttribute(seamRegion,1));
  const sewnCloth=cloth.clone(),sewnDepth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking});materials.push(sewnCloth,sewnDepth);
  const hemClip=shader=>{shader.vertexShader='attribute float seamRegion;varying vec2 garmentHemCoords;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ngarmentHemCoords=vec2(seamRegion,position.y);');shader.fragmentShader='varying vec2 garmentHemCoords;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nif((garmentHemCoords.x<.5&&garmentHemCoords.y<.118)||(garmentHemCoords.x>=.5&&garmentHemCoords.y<'+(tee?.798:.033).toFixed(3)+'))discard;');};
  sewnCloth.onBeforeCompile=hemClip;sewnDepth.onBeforeCompile=hemClip;sewnCloth.customProgramCacheKey=()=> 'sculpt-sewn-hem-'+(tee?'tee':tank?'tank':'jacket');sewnDepth.customProgramCacheKey=()=> 'sculpt-sewn-depth-'+(tee?'tee':tank?'tank':'jacket');
@@ -278,10 +291,42 @@ export async function buildSculptedCharacter(G,look){
   const vertices=[],uv=[],faces=[],cols=12,rows=6;for(let j=0;j<=rows;j++)for(let i=0;i<=cols;i++){const x=-.285+i/cols*.235,y=.91-j/rows*.088;vertices.push(x,y,clothZ(x,y,true)+.004);uv.push(i/cols,1-j/rows);if(i<cols&&j<rows){const k=j*(cols+1)+i;faces.push(k,k+cols+1,k+1,k+1,k+cols+1,k+cols+2);}}
   const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geo.setIndex(faces);geo.computeVertexNormals();add(geo,mat,1,'sewn-word-patch',false);
  }
+ if(streetFinish&&!tank){
+  const top=.975,bottom=.64,halfWidth=.242;
+  const canvas=document.createElement('canvas');
+  canvas.width=256;canvas.height=192;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#f8db92';ctx.strokeStyle='#f8db92';ctx.lineWidth=6;
+  ctx.font='bold 104px Georgia';ctx.textAlign='center';ctx.fillText('♠',128,126);
+  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;textures.push(map);
+  const fabric=material('#ffffff',.91);
+  fabric.map=map;fabric.alphaTest=.45;fabric.side=T.DoubleSide;
+  const vertices=[],uv=[],indices=[],cols=14,rows=10;
+  for(let row=0;row<=rows;row++)for(let col=0;col<=cols;col++){
+   const u=col/cols,v=row/rows,x=(u*2-1)*halfWidth,y=top+(bottom-top)*v;
+   vertices.push(x,y,clothZ(x,y,false)-.039);
+   uv.push(1-u,1-v);
+   if(col<cols&&row<rows){
+    const i=row*(cols+1)+col;
+    indices.push(i,i+1,i+cols+1,i+1,i+cols+2,i+cols+1);
+   }
+  }
+  const mark=new T.BufferGeometry();
+  mark.setAttribute('position',new T.Float32BufferAttribute(vertices,3));
+  mark.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
+  mark.setIndex(indices);mark.computeVertexNormals();
+  const embroidery=add(mark,fabric,1,'embroidered-city-back',false);
+  embroidery.castShadow=embroidery.receiveShadow=false;
+ }
  // Longitudinal shoe lasts, layered rubber, stitched leather panels and eyelets.
  for(const s of [-1,1]){
   const boot=/Chelsea|combat|desert|hiking|canvasHigh/i.test(look.shoes),formal=/Oxford|Loafer|Brogue/i.test(look.shoes),slipOn=/Chelsea|Loafer/i.test(look.shoes);
   const x=s*.41,sections=[[-.115,.060,-1.80,-1.61],[-.09,.112,-1.815,-1.54],[-.035,.132,-1.815,-1.53],[.04,.138,-1.815,-1.56],[.115,.145,-1.815,-1.615],[.20,.152,-1.815,-1.665],[.28,.156,-1.815,-1.686],[.36,.149,-1.815,-1.699],[.415,.115,-1.81,-1.72],[.443,.058,-1.80,-1.755],[.448,.004,-1.785,-1.780]];
+  if(streetSilhouette)for(const section of sections){
+   const atEnds=smooth(.25,.445,section[0])+1-smooth(-.115,-.05,section[0]);
+   section[1]*=1-.18*atEnds;
+  }
   if(boot)for(const section of sections)if(section[0]<.06)section[3]+= .19*(1-Math.max(0,section[0])/.12);
   if(formal){rubber.color.set('#302923');outsole.color.set('#1b1918');}
   function shoe(sec,mat,name){const p=[],uv=[],idx=[],sides=48;for(let j=0;j<sec.length;j++){const [z,w,b,t]=sec[j];for(let n=0;n<=sides;n++){const a=n/sides*Math.PI*2;p.push(x+w*Math.cos(a),name==='leather-sneaker'?b+(t-b)*Math.max(0,Math.sin(a)):(b+t)/2+(t-b)/2*Math.sin(a),z);uv.push(n/sides,j/(sec.length-1));if(j<sec.length-1&&n<sides){const k=j*(sides+1)+n;idx.push(k,k+1,k+sides+1,k+1,k+sides+2,k+sides+1);}}}for(const j of [0,sec.length-1]){const [z,,b,t]=sec[j],base=j*(sides+1),c=p.length/3;p.push(x,(b+t)/2,z);uv.push(.5,j/(sec.length-1));for(let n=0;n<sides;n++)idx.push(c,base+(j===0?n+1:n),base+(j===0?n:n+1));}const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(p,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();return add(geo,mat,5,name,false);}
@@ -331,9 +376,39 @@ export async function buildSculptedCharacter(G,look){
   for(const sign of [-1,1]){const pivot=new T.CylinderGeometry(.027,.027,.012,32);pivot.rotateZ(Math.PI/2);pivot.translate(sign*.327,1.73,.035);add(pivot,gold,6,'visor-hinge',false);for(let n=0;n<4;n++)ell(nose,[sign*.322,1.48+n*.022,-.02],[.007,.006,.036],6,'helmet-vent');}
   line([[0,1.90,-.20],[0,2.007,-.05],[0,1.995,.15],[0,1.91,.245]],.015,gold,6,'helmet-racing-stripe');
  }
+ if(streetSilhouette&&showFace){
+  for(const mesh of root.children){
+   const vertices=mesh.geometry?.getAttribute('position');
+   const regions=mesh.geometry?.getAttribute('surface');
+   if(!vertices||!regions)continue;
+   const ear=mesh.name.startsWith('ear-');
+   let changed=false;
+   for(let i=0;i<vertices.count;i++){
+    const region=regions.getX(i);
+    if(region!==6&&region!==10)continue;
+    let x=vertices.getX(i),y=vertices.getY(i),z=vertices.getZ(i);
+    if(ear){
+     const side=Math.sign(x);
+     x=side*(.254+(Math.abs(x)-.295)*.68);
+     y=1.616+(y-1.674)*.75+(Math.abs(x)-.254)*.24;
+     z=.032+(z-.069)*.75;
+    }else{
+     const back=1-smooth(.012,.176,z);
+     const crown=smooth(1.61,1.91,y);
+     const low=1-smooth(1.34,1.58,y);
+     x*=1-back*(.105*crown+.038*low);
+     y-=back*(.033*crown+.018*low);
+     z*=1-.055*back*crown;
+    }
+    vertices.setXYZ(i,x,y,z);changed=true;
+   }
+   if(changed){vertices.needsUpdate=true;mesh.geometry.computeVertexNormals();mesh.geometry.computeBoundingSphere();}
+  }
+ }
  const headwear=addSculptedHeadwear(rig,look,G),hair=addCharacterHair(rig,{...look,sculptHairOffset:.025,sculptHairDepth:-.075,sculptHairTexture:furMap}),eyewear=addCharacterEyewear(rig,{...look,helmet:showFace?'none':look.helmet,sculptEyewearDepth:-.025},G);
  const watch=look.watch&&look.watch!=='none'?wristWatch(look.watch,G.item('watch',look.watch).color):null;if(watch){root.add(watch.group);rig.attach(watch.group,'rightWrist');}
  const ring=look.ring&&look.ring!=='none'?fingerRing(G.item('ring',look.ring).color,look.ring):null;if(ring){root.add(ring.group);rig.attach(ring.group,'rightHand');}
+ if(streetSilhouette&&!helmet)rig.bones.head.scale.set(.78,.81,.80);
  rig.setRelaxedPose(true);
  return {root,rig,geometries,materials,textures,dispose(){headwear.dispose();hair.dispose();eyewear.dispose();watch?.dispose();ring?.dispose();geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());rig.dispose();}};
 }

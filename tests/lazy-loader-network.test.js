@@ -7,7 +7,7 @@ const source = fs.readFileSync(require.resolve('../app-lazy-loader.js'), 'utf8')
 const loader = source.slice(0, source.indexOf('  function ensureDomainsMaybeAsync')) +
   'globalThis.ensureDomain = ensureDomain; })();';
 
-function setup(failOnce = '') {
+function setup(failingScript = '', failures = 1) {
   const events = [];
   const executed = [];
   function node(attrs = {}) {
@@ -24,8 +24,8 @@ function setup(failOnce = '') {
     events.push({ type: element.rel || 'script', url: element.src || element.href });
     if (element.rel === 'preload') return;
     queueMicrotask(() => {
-      if (element.src === failOnce) {
-        failOnce = '';
+      if (element.src === failingScript && failures > 0) {
+        failures--;
         element.onerror();
       } else {
         if (element.src) executed.push(element.src);
@@ -56,8 +56,16 @@ test('chat starts all downloads before execution, evaluates in order and does no
   assert.equal(events.length, count);
 });
 
+test('a transient failure automatically retries only the missing script', async () => {
+  const { context, executed, events } = setup('second.js');
+  await Promise.all([context.ensureDomain('chat'), context.ensureDomain('chat')]);
+  assert.deepEqual(executed, ['first.js', 'second.js', 'third.js']);
+  assert.deepEqual(events.filter(e => e.type === 'script').map(e => e.url),
+    ['first.js', 'second.js', 'second.js', 'third.js']);
+});
+
 test('a failed dependency stops evaluation; retry resumes without repeating successful scripts', async () => {
-  const { context, executed } = setup('second.js');
+  const { context, executed } = setup('second.js', 2);
   await assert.rejects(context.ensureDomain('chat'), /second.js/);
   assert.deepEqual(executed, ['first.js']);
   await context.ensureDomain('chat');

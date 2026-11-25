@@ -1,5 +1,9 @@
+import {createRoadSigns} from './road-signs.mjs';
 import {loadUaz,loadVaz} from '../vehicles/road-classics.mjs';
 import {addCityCats} from './city-cats.mjs';
+import {createHeadlights} from '../stadium-race/headlights.mjs';
+import {buildWaterfrontBuilding} from './waterfront-architecture.mjs';
+import {buildVillaWaterfront,waterfrontWalkHeight} from './villa-waterfront.mjs';
 import {animateOwnedWheels} from '../stadium-race/wheel-parts.mjs';
 import {loadCityPalms,loadCityTrees} from './city-trees.mjs';
 import {buildMetropolis} from './metropolis-view.mjs';
@@ -29,6 +33,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  dusk.mapping=T.EquirectangularReflectionMapping;dusk.colorSpace=T.SRGBColorSpace;
  const camera=new T.PerspectiveCamera(59,1,.15,420);const hemi=new T.HemisphereLight('#dfeaff','#71805b',1.8);scene.add(hemi);
  const sun=new T.DirectionalLight('#ffd2ad',2.5);sun.position.set(-55,75,-40);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=sun.shadow.camera.bottom=-42;sun.shadow.camera.right=sun.shadow.camera.top=42;sun.shadow.camera.far=150;sun.shadow.normalBias=.055;sun.shadow.bias=-.0002;scene.add(sun,sun.target);
+ const headlights=createHeadlights(scene);
  const materials=new Map(),batches=new Map(),textures=[dusk],dynamic=[],disposers=[];
  function mergeParts(group,vertex=false){const bins=new Map();for(const child of [...group.children]){if(!child.isMesh)continue;const key=vertex?'all':child.material.uuid;if(!bins.has(key))bins.set(key,[]);bins.get(key).push(child);}for(const parts of bins.values()){if(parts.length<2)continue;const positions=[],normals=[],colors=[],uvs=[],indices=[];let offset=0;for(const m of parts){m.updateMatrix();const g=m.geometry.clone().applyMatrix4(m.matrix),p=g.attributes.position,n=g.attributes.normal,uv=g.attributes.uv;positions.push(...p.array);normals.push(...n.array);if(uv)uvs.push(...uv.array);for(let i=0;i<p.count;i++)colors.push(m.material.color.r,m.material.color.g,m.material.color.b);if(g.index)for(const i of g.index.array)indices.push(offset+i);else for(let i=0;i<p.count;i++)indices.push(offset+i);offset+=p.count;g.dispose();group.remove(m);if(!Object.values(geos).includes(m.geometry))m.geometry.dispose();}const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('normal',new T.Float32BufferAttribute(normals,3));if(uvs.length===offset*2)geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));if(vertex)geometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));geometry.setIndex(indices);const material=vertex?npcMaterial:parts[0].material,mesh=new T.Mesh(geometry,material);mesh.castShadow=mesh.receiveShadow=true;group.add(mesh);}}
  const envCanvas=document.createElement('canvas');envCanvas.width=512;envCanvas.height=256;const env=envCanvas.getContext('2d'),gradient=env.createLinearGradient(0,0,0,256);gradient.addColorStop(0,'#697e9f');gradient.addColorStop(.48,'#c8a1aa');gradient.addColorStop(.53,'#d9d7b8');gradient.addColorStop(1,'#465343');env.fillStyle=gradient;env.fillRect(0,0,512,256);env.fillStyle='#fff2ce';env.fillRect(80,70,28,38);const environment=new T.CanvasTexture(envCanvas);environment.mapping=T.EquirectangularReflectionMapping;environment.colorSpace=T.SRGBColorSpace;textures.push(environment);scene.environment=environment;scene.environmentIntensity=.55;
@@ -42,7 +47,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
  registerSurface(87,160,16,15,.041);
  const outdoors=createOutdoors(scene,textures,registerSurface,trees,palms);
  const classicsLoading=Promise.all([loadUaz(),loadVaz()]);
- const cats=addCityCats(scene,textures,disposers,groundHeight);
+ const cats=addCityCats(scene,textures,disposers,(x,z)=>Math.max(groundHeight(x,z),waterfrontWalkHeight(x,z)));
  const npcMaterial=new T.MeshStandardMaterial({vertexColors:true,roughness:.85});
  const facadeColors=new Set(BUILDINGS.map(b=>b.color));
  const mat=(color,emissive=false)=>{const key=color+emissive;if(!materials.has(key)){const glass=['#345b65','#365c61'].includes(color);const material=glass?new T.MeshPhysicalMaterial({color:'#6c8991',metalness:.35,roughness:.15,clearcoat:1,clearcoatRoughness:.13}):new T.MeshStandardMaterial({color,roughness:.82,metalness:.03,...(facadeColors.has(color)?{map:outdoors.facadeMap,bumpMap:outdoors.facadeMap,bumpScale:.035}:{}),...(emissive?{emissive:color,emissiveIntensity:.6}:{})});materials.set(key,material);}return materials.get(key);};
@@ -57,10 +62,9 @@ export async function createCityScene(canvas,onProgress,garage={}){
  function label(text,x,y,z,w=8,h=2,ry=0,bg='#123b3e',fg='#f2d294'){
   const c=document.createElement('canvas');c.width=Array.from(text).length<=2?256:1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,256);ctx.strokeStyle=fg;ctx.lineWidth=8;ctx.strokeRect(12,12,c.width-24,232);ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=c.width===256?'180px Georgia':'800 105px Arial';ctx.fillText(text,c.width/2,137,c.width-60);const map=new T.CanvasTexture(c);map.colorSpace=T.SRGBColorSpace;map.anisotropy=4;textures.push(map);const m=new T.MeshStandardMaterial({map,emissive:'#ffffff',emissiveMap:map,emissiveIntensity:.3,roughness:.7,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-2});const mesh=new T.Mesh(new T.PlaneGeometry(w,h),m);mesh.position.set(x,y,z);mesh.rotation.y=ry;scene.add(mesh);dynamic.push(mesh);return mesh;
  }
- for(const site of missionSites){
-  const p=site.approach;
-  box('#455851',p.x+12,2,p.z+12,.22,4,.22);
-  label(site.number+' · '+site.name,p.x+12,3.9,p.z+12,8,1.6,0,'#24504b','#ffedbc');
+ const roadSign=createRoadSigns({scene,textures,box,cylinder,groundHeight});
+ for(const {approach,number,name} of missionSites){
+  roadSign(approach.x+12,approach.z+12,[[number+' · '+name]],{width:2.6});
  }
  function groundTexture(kind){const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle=kind==='road'?'#4a5154':'#c7bca7';ctx.fillRect(0,0,256,256);let seed=77;for(let i=0;i<12000;i++){seed=(seed*1664525+1013904223)>>>0;ctx.fillStyle=seed%2?'#ffffff0a':'#0000000c';ctx.fillRect(seed%256,(seed>>>8)%256,1,1);}if(kind==='pave'){ctx.strokeStyle='#968e7d66';ctx.lineWidth=2;for(let i=0;i<256;i+=32){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,256);ctx.moveTo(0,i);ctx.lineTo(256,i);ctx.stroke();}}const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.colorSpace=T.SRGBColorSpace;t.repeat.set(kind==='road'?4:36,kind==='road'?45:36);textures.push(t);return t;}
  const pave=new T.Mesh(new T.PlaneGeometry(216,200),new T.MeshStandardMaterial({map:groundTexture('pave'),roughness:1}));pave.rotation.x=-PI/2;pave.position.set(10,-.04,-9);pave.receiveShadow=true;scene.add(pave);dynamic.push(pave);
@@ -70,15 +74,16 @@ export async function createCityScene(canvas,onProgress,garage={}){
  function horizontalCurb(z,side){const cuts=z===70&&side===-1?districtDriveways(BUILDINGS).map(d=>[d.x-d.width/2-.2,d.x+d.width/2+.2]).sort((a,b)=>a[0]-b[0]):[];let start=-97;for(const [a,b]of cuts){if(a>start)box('#d8cbb2',(start+a)/2,.08,z+side*7.3,a-start,.2,.4);box('#c6bda2',(a+b)/2,.015,z+side*7.3,b-a,.04,.6);start=b;}if(start<95)box('#d8cbb2',(start+95)/2,.08,z+side*7.3,95-start,.2,.4);}
  for(const z of ROAD_Z){road(-1,z,192,14,.03);for(const sign of [-1,1])horizontalCurb(z,sign);for(let x=-90;x<93;x+=8)if(!ROAD_X.some(v=>Math.abs(x-v)<10))box('#f0dfb5',x,.04,z,3.7,.012,.12);}
  for(const x of ROAD_X)for(const z of ROAD_Z){road(x,z,16,16,.035);for(let i=-5;i<=5;i+=2){for(const side of [-1,1]){box('#e9e1cf',x+i,.05,z+side*10,1.1,.02,3);box('#e9e1cf',x+side*10,.05,z+i,3,.02,1.1);}}}
- // Readable from the villa approach (northbound, facing negative Z).
- for(const [x,z,text] of [[47,110,'ЦЕНТР  →'],[82,79,'TWO ACES  ←     ПАРК  →'],[82,11,'КЛУБ  ←     ПОРТ  ↑']]){
-  box('#465554',x,1.65,z,.14,3.3,.14);
-  box('#264e50',x,3.25,z,5.8,1.25,.12);
-  label(text,x,3.25,z+.075,5.7,1.16,0,'#23494c','#f5e8c3');
- }
+ // Mounted on the verge, facing drivers coming from the villa.
+ roadSign(47,111.4,[['ЦЕНТР','right']]);
+ roadSign(82,79,[['TWO ACES','left'],['ПАРК','right']],{width:2.15});
+ roadSign(82,11,[['КЛУБ','left'],['ПОРТ','up']]);
+ const customFacades=new Set();
  // Textured façades, recessed glazing, balcony rails and entrances give buildings scale.
  for(const [index,b]of BUILDINGS.entries()){
-  const business=venuePlan(b);if(business){box(b.color,b.x,(b.h+4)/2,b.z,b.w,b.h-4,b.d);box(b.color,b.x,2,b.z-business.depth/2,b.w,4,b.d-business.depth);}else box(b.color,b.x,b.h/2,b.z,b.w,b.h,b.d);if(!business)box('#7f8b84',b.x,.52,b.z,b.w+.3,1.04,b.d+.3);box('#e7dbc7',b.x,b.h-.2,b.z,b.w+.65,.4,b.d+.65);
+  const business=venuePlan(b);
+  if(!business&&buildWaterfrontBuilding(b,{scene,mat,mergeParts})){customFacades.add(b);continue;}
+  if(business){box(b.color,b.x,(b.h+4)/2,b.z,b.w,b.h-4,b.d);box(b.color,b.x,2,b.z-business.depth/2,b.w,4,b.d-business.depth);}else box(b.color,b.x,b.h/2,b.z,b.w,b.h,b.d);if(!business)box('#7f8b84',b.x,.52,b.z,b.w+.3,1.04,b.d+.3);box('#e7dbc7',b.x,b.h-.2,b.z,b.w+.65,.4,b.d+.65);
   const floors=Math.floor(b.h/3.7);for(let f=business?1:0;f<floors;f++){const y=2.6+f*3.7;if(f>0){box('#c5c1b2',b.x,y-1.5,b.z,b.w+.12,.09,b.d+.12);}for(let side=0;side<4;side++){const front=side<2,sign=side%2===0?1:-1,count=Math.floor((front?b.w:b.d)/3.5);for(let n=0;n<count;n++){const offset=(n-(count-1)/2)*3.5,xx=front?b.x+offset:b.x+sign*(b.w/2+.06),zz=front?b.z+sign*(b.d/2+.06):b.z+offset;const lit=(n+f+index)%9===0;
   box('#303d3d',xx,y,zz,front?1.95:.12,2.2,front?.12:1.95);box(lit?'#ccb883':'#345b65',front?xx:xx+sign*.09,y,front?zz+sign*.09:zz,front?1.58:.06,1.84,front?.06:1.58);box('#d7d1bd',xx,y-1.13,zz,front?2.1:.26,.13,front?.26:2.1);box('#9eaca6',front?xx:xx+sign*.13,y,front?zz+sign*.13:zz,front?.045:.07,1.84,front?.07:.045);
   if(f%2===1&&n%3===0){box('#c2bba8',front?xx:xx+sign*.65,y-.95,front?zz+sign*.65:zz,front?2.55:1.4,.16,front?1.4:2.55);for(const railY of [y-.15,y-.85])box('#4e5d57',front?xx:xx+sign*1.22,railY,front?zz+sign*1.22:zz,front?2.5:.06,.055,front?.06:2.5);for(let j=-2;j<=2;j++)box('#4e5d57',front?xx+j*.55:xx+sign*1.22,y-.5,front?zz+sign*1.22:zz+j*.55,.045,.7,.045);}
@@ -96,7 +101,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
   }
   for(const sign of [-1,1]){box('#83918b',b.x+sign*(b.w/2-.12),b.h+.45,b.z,.18,.9,b.d);box('#83918b',b.x,b.h+.45,b.z+sign*(b.d/2-.12),b.w,.9,.18);}for(let i=0;i<2;i++){box('#7b8781',b.x-3+i*6,b.h+.75,b.z,2,1.5,2);box('#43524f',b.x-3+i*6,b.h+1.54,b.z,2.08,.08,2.08);}
  }
- dressStreets({box,cylinder,batch,label});
+ dressStreets({box,cylinder,batch,label,customFacades});
  buildDistrict({buildings:BUILDINGS,scene,textures,box,cylinder,batch,label,outdoors});
  onProgress('Открываем TWO ACES…');
  // The starting club is an actual walkable interior, open roof for the follow camera.
@@ -126,11 +131,19 @@ export async function createCityScene(canvas,onProgress,garage={}){
 
  for(const [x,z]of [[-51,11],[11,-13],[62,14],[11,60]]){cylinder('#284e4b',x,.65,z,.35,1.3);cylinder('#daa759',x,1.33,z,.39,.08);}
  for(const [x,z]of districtTrees)outdoors.tree(x,z,5.5+Math.abs(x)%3);
+ // Small green courtyards carry the avenue view through to the waterfront buildings.
+ for(const z of [16,35,55]){
+  outdoors.lawnRect(92,z,8,15,.026);
+  outdoors.paving(92,z,7.8,1.25,.045);
+  for(const dz of [-5,5])outdoors.tree(92,z+dz,5.4+(z+dz)%3*.35);
+  for(const dz of [-6.3,6.3])outdoors.shrub(95,z+dz,.68,.025);
+ }
 
  batch('ball','#ffdfaa',140,45,-170,13,13,13,0,0,true);
  road(106.5,70,23,14);
- buildIsland({scene,box,cylinder,batch,label,textures,outdoors});
+ buildIsland({scene,box,cylinder,batch,label,roadSign,textures,outdoors});
  const estate=buildEstate({scene,box,cylinder,batch,label,textures,outdoors});
+ buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,outdoors,mergeParts});
  // Commit all static architecture to material/shape batches.
  const villa=buildVilla({box,cylinder,batch,label,scene,textures,hall:garage.hall});
  const awards=createAwardInteraction({root:villa.root,scene,camera,canvas});
@@ -140,8 +153,17 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const staticMeshes=[];for(const b of batches.values()){const mesh=new T.InstancedMesh(geos[b.type],mat(b.color,b.emissive),b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(0,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);}mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);staticMeshes.push(mesh);}
  const [updateCats]=await Promise.all([cats,villa.ready]);
  onProgress('Манки выходит в город…');
- const look=garage.owner?garage.look:{...window.PokerGarage.defaults,body:'bodyNormal',suit:'emeraldBomber',pants:'blackDenim',shoes:'ivoryLow',helmet:'none',hair:'hairNatural',patch:'aces',glasses:'none'};
- const hero=await buildSculptedCharacter(window.PokerGarage,look);const avatar=new T.Group();hero.root.scale.setScalar(.57);hero.root.position.y=1.08;avatar.add(hero.root);scene.add(avatar);disposers.push(()=>hero.dispose());
+ const look={...garage.look};
+ const defaultClothes=!look.suit||look.suit==='none';
+ if(defaultClothes){
+  look.suit='emeraldBomber';
+  look.body='bodyNormal';
+ }
+ if(!look.pants||look.pants==='boxers')look.pants='indigoJeans';
+ if(!look.shoes||look.shoes==='none')look.shoes='ivoryLow';
+ const hero=await buildSculptedCharacter(window.PokerGarage,look,{streetFinish:defaultClothes,streetSilhouette:true});
+ const avatar=new T.Group();hero.root.scale.setScalar(.60);hero.root.position.y=1.12;
+ avatar.add(hero.root);scene.add(avatar);disposers.push(()=>hero.dispose());
  // A small NPC cast uses low-poly meshes, with the same chimp facial features.
  function person(color){const g=new T.Group(),parts={};function piece(geo,m,x,y,z,sx=1,sy=1,sz=1,parent=g){const o=new T.Mesh(geo,mat(m));o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;parent.add(o);return o;}
  piece(geos.ball,color,0,1.05,0,.32,.45,.2);piece(geos.ball,'#58402e',0,1.67,0,.24,.27,.21);piece(geos.ball,'#b9956f',0,1.59,.18,.19,.12,.12);for(const sign of [-1,1]){piece(geos.ball,'#a68564',sign*.25,1.67,0,.09,.12,.07);piece(geos.ball,'#161e1c',sign*.085,1.72,.195,.028,.03,.025);const leg=new T.Group();leg.position.set(sign*.15,.82,0);g.add(leg);piece(geos.box,'#2b3839',0,-.32,0,.2,.65,.2,leg);piece(geos.box,'#e0d2ae',0,-.65,.07,.23,.12,.34,leg);parts[sign<0?'leftLeg':'rightLeg']=leg;const arm=new T.Group();arm.position.set(sign*.34,1.3,0);g.add(arm);piece(geos.ball,color,0,-.18,0,.12,.29,.12,arm);piece(geos.ball,'#a68564',0,-.45,.03,.1,.12,.09,arm);parts[sign<0?'leftArm':'rightArm']=arm;}mergeParts(g,true);for(const part of Object.values(parts))mergeParts(part,true);return {root:g,parts};}
@@ -157,12 +179,12 @@ export async function createCityScene(canvas,onProgress,garage={}){
    const legs=new T.Group();for(const side of [-1,1])for(const [w,h,d,x,y,z,color]of [[.2,.18,.55,side*.15,.82,.25,'#2b3839'],[.18,.45,.18,side*.15,.575,.5,'#2b3839'],[.23,.1,.32,side*.15,.35,.6,'#d4c9ae']]){const mesh=new T.Mesh(geos.box,mat(color));mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.castShadow=true;legs.add(mesh);}mergeParts(legs,true);guest.root.add(legs);guest.parts.leftArm.rotation.x=-.55;guest.parts.rightArm.rotation.x=-.8;cafeGuests.push(guest);scene.add(guest.root);
   }
  }
- function car(color,police=false,kind){const g=new T.Group(),wheels=[],frontWheels=[];const paint=new T.MeshStandardMaterial({color,metalness:.42,roughness:.3}),glass=new T.MeshStandardMaterial({color:'#365c61',metalness:.15,roughness:.18,transparent:true,opacity:.58,depthWrite:false});dynamic.push({material:paint},{material:glass});function part(w,h,d,m,x,y,z){const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;g.add(o);return o;}
+ function car(color,police=false,kind){const g=new T.Group(),wheels=[],frontWheels=[],tail=mat('#d45945',true).clone();const paint=new T.MeshStandardMaterial({color,metalness:.42,roughness:.3}),glass=new T.MeshStandardMaterial({color:'#365c61',metalness:.15,roughness:.18,transparent:true,opacity:.58,depthWrite:false});dynamic.push({material:paint},{material:glass});function part(w,h,d,m,x,y,z){const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;g.add(o);return o;}
  const shell=new T.Shape(),w=2.16,d=4.6,r=.28; shell.moveTo(-w/2+r,-d/2);shell.lineTo(w/2-r,-d/2);shell.quadraticCurveTo(w/2,-d/2,w/2,-d/2+r);shell.lineTo(w/2,d/2-r);shell.quadraticCurveTo(w/2,d/2,w/2-r,d/2);shell.lineTo(-w/2+r,d/2);shell.quadraticCurveTo(-w/2,d/2,-w/2,d/2-r);shell.lineTo(-w/2,-d/2+r);shell.quadraticCurveTo(-w/2,-d/2,-w/2+r,-d/2);const body=new T.Mesh(new T.ExtrudeGeometry(shell,{depth:.36,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:2,curveSegments:4}),paint);body.rotation.x=-PI/2;body.position.y=.55;body.castShadow=true;g.add(body);part(2.05,.16,4.5,mat('#c8a66a'),0,.48,0);
  const cabin=new T.BufferGeometry(),vertices=[-.98,.93,-1.65,.98,.93,-1.65,.98,.93,1.0,-.98,.93,1.0,-.79,1.55,-1.15,.79,1.55,-1.15,.79,1.55,.25,-.79,1.55,.25];cabin.setAttribute('position',new T.Float32BufferAttribute(vertices,3));cabin.setIndex([0,4,5,0,5,1,1,5,6,1,6,2,2,6,7,2,7,3,3,7,4,3,4,0,4,7,6,4,6,5]);cabin.computeVertexNormals();const cabinMesh=new T.Mesh(cabin,glass);cabinMesh.castShadow=true;g.add(cabinMesh);part(1.66,.12,1.5,paint,0,1.56,-.45);part(2.06,.17,1.5,paint,0,.98,1.45);part(2.06,.17,.7,paint,0,.98,-1.95);
- for(const sign of [-1,1]){part(.08,.56,.1,paint,sign*.87,1.25,-.25);const rear=part(.085,.77,.095,paint,sign*.87,1.25,-1.42);rear.rotation.x=.66;const front=part(.085,.96,.095,paint,sign*.87,1.25,.63);front.rotation.x=-.88;part(.1,.06,.28,mat('#decba1'),sign*1.12,.9,-.15);part(.25,.14,.35,paint,sign*1.19,1.11,.58);part(.65,.16,.06,mat('#ffe6b1',true),sign*.68,.8,2.33);part(.67,.13,.06,mat('#d45945',true),sign*.68,.8,-2.33);for(const z of [-1.42,1.42]){const pivot=new T.Group();pivot.position.set(sign*1.09,.43,z);g.add(pivot);const tire=new T.Mesh(new T.CylinderGeometry(.43,.43,.27,16),mat('#222b2c'));tire.rotation.z=PI/2;pivot.add(tire);const rim=new T.Mesh(new T.CylinderGeometry(.27,.27,.282,12),mat('#d9b572'));rim.rotation.z=PI/2;pivot.add(rim);wheels.push(pivot);if(z>0)frontWheels.push(pivot);}}
+ for(const sign of [-1,1]){part(.08,.56,.1,paint,sign*.87,1.25,-.25);const rear=part(.085,.77,.095,paint,sign*.87,1.25,-1.42);rear.rotation.x=.66;const front=part(.085,.96,.095,paint,sign*.87,1.25,.63);front.rotation.x=-.88;part(.1,.06,.28,mat('#decba1'),sign*1.12,.9,-.15);part(.25,.14,.35,paint,sign*1.19,1.11,.58);part(.65,.16,.06,mat('#ffe6b1',true),sign*.68,.8,2.33);part(.67,.13,.06,tail,sign*.68,.8,-2.33);for(const z of [-1.42,1.42]){const pivot=new T.Group();pivot.position.set(sign*1.09,.43,z);g.add(pivot);const tire=new T.Mesh(new T.CylinderGeometry(.43,.43,.27,16),mat('#222b2c'));tire.rotation.z=PI/2;pivot.add(tire);const rim=new T.Mesh(new T.CylinderGeometry(.27,.27,.282,12),mat('#d9b572'));rim.rotation.z=PI/2;pivot.add(rim);wheels.push(pivot);if(z>0)frontWheels.push(pivot);}}
  for(const x of [-.47,.47]){part(.62,.3,.65,mat('#263d3b'),x,.68,-.25);part(.62,.6,.16,mat('#263d3b'),x,.96,-.62);part(.4,.18,.14,mat('#263d3b'),x,1.3,-.62);}
- part(1.1,.18,.07,mat('#1f2b2d'),0,.77,2.36);part(.6,.13,.07,mat('#e3d8b6'),0,.62,-2.37);if(kind==='taxi')part(.74,.26,.32,mat('#ffe7a0',true),0,1.75,-.35);if(kind==='van'){part(2.1,1.36,2.85,paint,0,1.55,-.76);part(.045,.95,.04,mat('#34454a'),0,1.54,-2.2);}if(police){part(1.4,.12,.35,mat('#273c44'),0,1.62,-.3);for(const sign of [-1,1])part(.55,.18,.35,mat(sign<0?'#477ee8':'#f75a53',true),sign*.4,1.76,-.3);}mergeParts(g);for(const w of wheels)mergeParts(w,true);return {root:g,wheels,frontWheels};}
+ part(1.1,.18,.07,mat('#1f2b2d'),0,.77,2.36);part(.6,.13,.07,mat('#e3d8b6'),0,.62,-2.37);if(kind==='taxi')part(.74,.26,.32,mat('#ffe7a0',true),0,1.75,-.35);if(kind==='van'){part(2.1,1.36,2.85,paint,0,1.55,-.76);part(.045,.95,.04,mat('#34454a'),0,1.54,-2.2);}if(police){part(1.4,.12,.35,mat('#273c44'),0,1.62,-.3);for(const sign of [-1,1])part(.55,.18,.35,mat(sign<0?'#477ee8':'#f75a53',true),sign*.4,1.76,-.3);}mergeParts(g);for(const w of wheels)mergeParts(w,true);return {root:g,wheels,frontWheels,tail};}
  onProgress('Вывозим машину из гаража…');const playerCar=await createOwnedVehicle(garage.look||window.PokerGarage.defaults);animateOwnedWheels(playerCar);const [uaz,vaz]=await classicsLoading;for(const classic of [uaz,vaz])if(classic)disposers.push(classic.dispose);const classics={uaz,vaz};const traffic=fleet.map(v=>classics[v.kind]?.(v.color)||car(v.color,false,v.kind)),police=car('#dce4de',true);scene.add(playerCar.root,police.root,...traffic.map(t=>t.root));
  const metropolitanCars=Array.from({length:9},(_,i)=>{const color=['#648b91','#d7ae6a','#aa7368','#91a38d'][i%4];if(i===1||i===6)return uaz?.(color)||car(color);if(i===2||i===7)return vaz?.(color)||car(color);return car(color);});
  for(const v of metropolitanCars){scene.add(v.root);v.root.visible=false;}
@@ -170,49 +192,93 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const caseGroup=new T.Group();caseGroup.position.set(PICKUP.x,.7,PICKUP.z);scene.add(caseGroup);function casePart(w,h,d,c,x,y,z){const o=new T.Mesh(new T.BoxGeometry(w,h,d),mat(c));o.position.set(x,y,z);o.castShadow=true;caseGroup.add(o);}casePart(1.2,.7,.45,'#28544a',0,0,0);casePart(1.23,.08,.48,'#dcba78',0,.16,0);for(const x of [-.4,.4])casePart(.09,.22,.48,'#d6b574',x,.02,0);casePart(.4,.08,.08,'#dcba78',0,.51,0);for(const x of [-.2,.2])casePart(.06,.16,.08,'#dcba78',x,.43,0);
  const marker=new T.Group();const ring=new T.Mesh(new T.TorusGeometry(2,.085,8,48),new T.MeshBasicMaterial({color:'#ffd27c',transparent:true,opacity:.85}));ring.rotation.x=-PI/2;ring.position.y=.14;marker.add(ring);const arrow=new T.Mesh(new T.ConeGeometry(.45,.8,4),new T.MeshBasicMaterial({color:'#ffe0a1'}));arrow.rotation.z=PI;arrow.position.y=3.5;marker.add(arrow);scene.add(marker);
  const clubRing=new T.Mesh(new T.TorusGeometry(2,.06,6,40),new T.MeshBasicMaterial({color:'#80c9bc',transparent:true,opacity:.65}));clubRing.rotation.x=-PI/2;clubRing.position.set(HOME.x,.12,HOME.z);scene.add(clubRing);dynamic.push(ring,arrow,clubRing);
- const shadowBlob=new T.Mesh(new T.CircleGeometry(.53,20),new T.MeshBasicMaterial({color:'#142e2d',transparent:true,opacity:.16,depthWrite:false}));shadowBlob.rotation.x=-PI/2;shadowBlob.position.y=.1;scene.add(shadowBlob);dynamic.push(shadowBlob);
- const cameraRay=new T.Raycaster(),rayOrigin=new T.Vector3(),desired=new T.Vector3(),lookAt=new T.Vector3(),orbit={yaw:0,pitch:.2,distance:6.2};let walk=0,stride=0,previousX=START.x,previousZ=START.z,previousSimulationTime=0,disposed=false;
+ const contactCanvas=document.createElement('canvas');
+ contactCanvas.width=contactCanvas.height=64;
+ const contact=contactCanvas.getContext('2d'),falloff=contact.createRadialGradient(32,32,2,32,32,31);
+ falloff.addColorStop(0,'#ffffffb5');falloff.addColorStop(.42,'#ffffff76');falloff.addColorStop(1,'#ffffff00');
+ contact.fillStyle=falloff;contact.fillRect(0,0,64,64);
+ const contactMap=new T.CanvasTexture(contactCanvas);
+ textures.push(contactMap);
+ const shadowBlob=new T.Mesh(new T.PlaneGeometry(1.1,1.05),new T.MeshBasicMaterial({map:contactMap,color:'#162722',transparent:true,opacity:.42,depthWrite:false}));
+ shadowBlob.rotation.x=-PI/2;scene.add(shadowBlob);dynamic.push(shadowBlob);
+ const cameraRay=new T.Raycaster(),rayOrigin=new T.Vector3(),desired=new T.Vector3(),lookAt=new T.Vector3(),orbit={yaw:0,pitch:.2,distance:6.2};let walk=0,stride=0,jog=0,previousX=START.x,previousZ=START.z,previousSimulationTime=0,disposed=false;
 
  function fit(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?64:58;camera.updateProjectionMatrix();}fit();
  let frameCount=0,lastShadowTime=-Infinity;
+ const shadowOffset=new T.Vector3(-40,70,-35);
+ const shadowRight=new T.Vector3(0,1,0).cross(shadowOffset).normalize();
+ const shadowUp=shadowOffset.clone().cross(shadowRight).normalize();
+ const shadowTarget=new T.Vector3(),shadowCar=new T.Vector3(Infinity,Infinity,Infinity);
+ let shadowYaw,shadowSteer;
  const cameraSolids=SOLIDS.map(b=>({...b,h:b.h??(BUILDINGS.find(v=>Math.abs(v.x-(b.minX+b.maxX)/2)<.1&&Math.abs(v.z-(b.minZ+b.maxZ)/2)<.1)?.h||7)}));
  renderer.shadowMap.autoUpdate=false;
  function render(s,dt,objective,intro=false){if(disposed)return;const simulationDt=Math.max(0,s.time-previousSimulationTime);previousSimulationTime=s.time;const pos=s.driving?s.car:s.player,moving=Math.hypot(pos.x-previousX,pos.z-previousZ)/Math.max(dt,.001);previousX=pos.x;previousZ=pos.z;if(simulationDt>0){
    const target=s.driving?0:Math.min(1,moving/4.5);
    stride+=(target-stride)*(1-Math.exp(-simulationDt*15));
-   if(!s.driving)walk+=Math.min(moving,8)*simulationDt*3.1;
-  }avatar.visible=!s.driving||!playerCar.closedCabin;avatar.position.set(s.player.x,0,s.player.z);avatar.rotation.y=s.player.yaw;hero.root.scale.setScalar(s.driving?playerCar.seat.scale:.57);hero.root.position.y=s.driving?playerCar.seat.height:1.08;if(s.driving){avatar.position.set(s.car.x+Math.cos(s.car.yaw)*playerCar.seat.side+Math.sin(s.car.yaw)*playerCar.seat.forward,0,s.car.z-Math.sin(s.car.yaw)*playerCar.seat.side+Math.cos(s.car.yaw)*playerCar.seat.forward);avatar.rotation.y=s.car.yaw;}shadowBlob.visible=!s.driving;shadowBlob.position.x=s.player.x;shadowBlob.position.z=s.player.z;
-  if(simulationDt>0){hero.rig.update(s.time,.35,simulationDt);const bones=hero.rig.bones;
-   for(const [side,offset] of [['left',0],['right',PI]]){
+   const running=s.driving?0:T.MathUtils.smoothstep(moving,4.8,7);
+   jog+=(running-jog)*(1-Math.exp(-simulationDt*12));
+   if(!s.driving)walk+=Math.min(moving,8)*simulationDt*(2.64-.54*jog);
+  }avatar.visible=!s.driving||!playerCar.closedCabin;avatar.position.set(s.player.x,s.driving?0:waterfrontWalkHeight(s.player.x,s.player.z),s.player.z);avatar.rotation.y=s.player.yaw;hero.root.scale.setScalar(s.driving?playerCar.seat.scale:.60);hero.root.position.y=s.driving?playerCar.seat.height:1.12;if(s.driving){avatar.position.set(s.car.x+Math.cos(s.car.yaw)*playerCar.seat.side+Math.sin(s.car.yaw)*playerCar.seat.forward,0,s.car.z-Math.sin(s.car.yaw)*playerCar.seat.side+Math.cos(s.car.yaw)*playerCar.seat.forward);avatar.rotation.y=s.car.yaw;}shadowBlob.visible=!s.driving;shadowBlob.position.y=waterfrontWalkHeight(s.player.x,s.player.z)+.008;shadowBlob.position.x=s.player.x;shadowBlob.position.z=s.player.z;
+  {
+   hero.rig.update(s.time,.45,simulationDt);
+   const bones=hero.rig.bones,idle=1-stride;
+   const sway=Math.sin(s.time*1.45)*.008;
+   for(const [side,offset,sign] of [['left',0,-1],['right',PI,1]]){
     const phase=walk+offset,reach=Math.sin(phase);
     // A positive knee angle folds the shin behind the character (+Z is forward).
     // Flex during swing, extend for contact, then absorb weight on the planted leg.
     const swing=Math.max(0,Math.cos(phase)),load=Math.max(0,reach);
-    const knee=(.08+1.12*swing*swing+.17*load)*stride;
-    const hip=-.58*reach*stride-knee*.43;
+    const knee=(.055+(.74+.43*jog)*swing*swing+.16*load)*stride+.035*idle;
+    const hip=-(.48+.21*jog)*reach*stride-knee*.42+sign*.027*idle;
     bones[side+'Hip'].rotation.x=s.driving?-1.3:hip;
+    bones[side+'Hip'].rotation.z=s.driving?0:-sign*(.088+.075*stride);
     bones[side+'Knee'].rotation.x=s.driving?1.45:knee;
     bones[side+'Ankle'].rotation.x=s.driving?0:-(hip+knee)*(.90-.44*swing);
     const shoulder=bones[side+'Shoulder'],elbow=bones[side+'Elbow'];
     const forearmSwing=-Math.sin(phase-.32);
-    shoulder.rotation.x=s.driving?-1.05:.47*reach*stride;
-    elbow.rotation.x=s.driving?-.5:-.15-(.48+.42*forearmSwing)*stride;
+    shoulder.rotation.x=s.driving?-1.05:(.32+.18*jog)*reach*stride-.04*idle;
+    shoulder.rotation.z=s.driving?0:-sign*(.139-.03*stride)+sway;
+    elbow.rotation.x=s.driving?-.5:-.13-(.23+.30*jog+.16*forearmSwing)*stride;
+    elbow.rotation.z=s.driving?0:-sign*.04;
     bones[side+'Wrist'].rotation.x=s.driving?0:(.07+.09*forearmSwing)*stride;
    }
-   bones.pelvis.rotation.y=s.driving?0:.075*Math.sin(walk)*stride;
+   bones.pelvis.rotation.y=s.driving?0:.10*Math.sin(walk)*stride-.055*idle;
+   bones.pelvis.rotation.z=s.driving?0:.034*Math.cos(walk)*stride+sway;
    bones.chest.rotation.y=-bones.pelvis.rotation.y*.7;
+   bones.chest.rotation.x=s.driving?0:.045*stride+.085*jog;
+   bones.chest.rotation.z=-bones.pelvis.rotation.z*.6;
   }hero.root.updateMatrixWorld(true);hero.rig.skeleton.update();
   const nearbyTraffic=s.metroTraffic.slice().sort((a,b)=>Math.hypot(a.x-pos.x,a.z-pos.z)-Math.hypot(b.x-pos.x,b.z-pos.z));
   metropolitanCars.forEach((v,i)=>{const t=nearbyTraffic[i];v.root.visible=!!t;if(t){v.root.position.set(t.x,0,t.z);v.root.rotation.y=t.yaw;for(const wheel of v.wheels)wheel.rotation.x+=t.speed*simulationDt/(wheel.userData.rollingRadius||.43);}});
-  for(const [visual,data]of [[playerCar,s.car],...traffic.map((v,i)=>[v,s.traffic[i]]),[police,s.police]]){visual.root.position.set(data.x,groundHeight(data.x,data.z),data.z);visual.root.rotation.y=data.yaw;for(const w of visual.wheels)w.rotation[w.userData.spinAxis||'x']+=data.speed*simulationDt/(w.userData.rollingRadius||.43)*(w.userData.spinSign||1);for(const w of visual.frontWheels)w.rotation.y=data===s.car?-(s.steer||0)*.28:0;}police.root.visible=!!s.heat;caseGroup.visible=!s.carrying&&s.missionActive;
+  for(const [visual,data]of [[playerCar,s.car],...traffic.map((v,i)=>[v,s.traffic[i]]),[police,s.police]]){visual.root.position.set(data.x,groundHeight(data.x,data.z),data.z);visual.root.rotation.y=data.yaw;visual.tail?.color.setHex(data.braking?0xff7162:0xd45945);for(const w of visual.wheels)w.rotation[w.userData.spinAxis||'x']+=data.speed*simulationDt/(w.userData.rollingRadius||.43)*(w.userData.spinSign||1);for(const w of visual.frontWheels)w.rotation.y=data===s.car?-(data.steer||0)*.28:0;}police.root.visible=!!s.heat;caseGroup.visible=!s.carrying&&s.missionActive;
   pedestrians.forEach((p,i)=>{const t=s.time*.018+p.offset*.17,velocity=Math.cos(t);p.root.position.z=-2+Math.sin(t)*63;const yaw=velocity>=0?0:PI,difference=Math.atan2(Math.sin(yaw-p.root.rotation.y),Math.cos(yaw-p.root.rotation.y));p.root.rotation.y+=difference*(1-Math.exp(-dt*5));for(const side of ['left','right']){const sign=side==='left'?1:-1,amplitude=Math.min(1,Math.abs(velocity)*3);p.parts[side+'Leg'].rotation.x=Math.sin(s.time*3.4+p.offset)*.4*sign*amplitude;p.parts[side+'Arm'].rotation.x=-Math.sin(s.time*3.4+p.offset)*.3*sign*amplitude;}});
   updateCats(s.time,pos);
   marker.visible=!!objective.target&&s.missionActive;const target=objective.target;if(target){marker.position.set(target.x,0,target.z);arrow.position.y=3.2+Math.sin(s.time*2.8)*.28;arrow.rotation.y=s.time*.8;}ring.material.opacity=.6+Math.sin(s.time*2)*.2;
   if(frameCount++%3===0){for(let i=0;i<seaPos.count;i++)seaPos.setY(i,seaBase[i*3+1]+Math.sin(seaBase[i*3]*.12+s.time*.65)*.18+Math.cos(seaBase[i*3+2]*.15+s.time*.5)*.1);seaPos.needsUpdate=true;}
   // Camera stays outside solids. Building ray hits shorten the arm instead of clipping.
-  rayOrigin.set(pos.x,s.driving?1.6:1.55,pos.z);estate.update(pos,dt);const indoors=villa.update(pos,dt,intro),inBusiness=insideVenue(pos,BUILDINGS),sheltered=indoors||inBusiness||(pos.x>100&&pos.x<114&&pos.z>176&&pos.z<186);const length=inBusiness?3.2:sheltered?(s.driving?6.2:4.4):s.driving?orbit.distance+3.5:orbit.distance;desired.set(pos.x-Math.sin(orbit.yaw)*length,rayOrigin.y+(inBusiness?.45:sheltered?1.15:1.8)+orbit.pitch*(inBusiness?1.2:sheltered?2:5),pos.z-Math.cos(orbit.yaw)*length);const direction=desired.clone().sub(rayOrigin);cameraRay.set(rayOrigin,direction.clone().normalize());cameraRay.far=direction.length();let arm=1;for(const solid of (pos.z<-109?nearbyLots(pos.x,pos.z):cameraSolids)){if(pos.x<solid.minX-length||pos.x>solid.maxX+length||pos.z<solid.minZ-length||pos.z>solid.maxZ+length)continue;const h=solid.h;let enter=0,exit=1;for(const [origin,delta,min,max]of [[rayOrigin.x,direction.x,solid.minX,solid.maxX],[rayOrigin.z,direction.z,solid.minZ,solid.maxZ],[rayOrigin.y,direction.y,0,h]]){if(Math.abs(delta)<.00001){if(origin<min||origin>max){enter=2;break;}}else{const a=(min-origin)/delta,b=(max-origin)/delta;enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));}}if(enter<=exit&&enter>0)arm=Math.min(arm,enter);}if(arm<1)desired.copy(rayOrigin).addScaledVector(direction,Math.max(.12,arm-.05));camera.position.lerp(desired,1-Math.exp(-dt*9));lookAt.copy(rayOrigin);lookAt.y+=s.driving?.1:.15;camera.lookAt(lookAt);
+  rayOrigin.set(pos.x,s.driving?1.6:1.55,pos.z);estate.update(pos,dt);const indoors=villa.update(pos,dt,intro),inBusiness=insideVenue(pos,BUILDINGS),sheltered=indoors||inBusiness||(pos.x>100&&pos.x<114&&pos.z>176&&pos.z<186);const speedFrame=s.driving&&!sheltered&&!matchMedia('(prefers-reduced-motion: reduce)').matches?Math.min(1,Math.abs(s.car.speed)/24):0;const length=inBusiness?3.2:sheltered?(s.driving?6.2:4.4):s.driving?orbit.distance+2.8+speedFrame*1.4:orbit.distance;desired.set(pos.x-Math.sin(orbit.yaw)*length,rayOrigin.y+(inBusiness?.45:sheltered?1.15:1.8)+orbit.pitch*(inBusiness?1.2:sheltered?2:5),pos.z-Math.cos(orbit.yaw)*length);const direction=desired.clone().sub(rayOrigin);cameraRay.set(rayOrigin,direction.clone().normalize());cameraRay.far=direction.length();let arm=1;for(const solid of (pos.z<-109?nearbyLots(pos.x,pos.z):cameraSolids)){if(pos.x<solid.minX-length||pos.x>solid.maxX+length||pos.z<solid.minZ-length||pos.z>solid.maxZ+length)continue;const h=solid.h;let enter=0,exit=1;for(const [origin,delta,min,max]of [[rayOrigin.x,direction.x,solid.minX,solid.maxX],[rayOrigin.z,direction.z,solid.minZ,solid.maxZ],[rayOrigin.y,direction.y,0,h]]){if(Math.abs(delta)<.00001){if(origin<min||origin>max){enter=2;break;}}else{const a=(min-origin)/delta,b=(max-origin)/delta;enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));}}if(enter<=exit&&enter>0)arm=Math.min(arm,enter);}if(arm<1)desired.copy(rayOrigin).addScaledVector(direction,Math.max(.12,arm-.05));camera.position.lerp(desired,1-Math.exp(-dt*9));lookAt.copy(rayOrigin);lookAt.y+=s.driving?.1:.15;lookAt.x+=Math.sin(orbit.yaw)*speedFrame*2.5;lookAt.z+=Math.cos(orbit.yaw)*speedFrame*2.5;camera.lookAt(lookAt);
   if(intro){camera.position.set(VILLA.x-58,36,VILLA.z+64);camera.lookAt(VILLA.x-6,2,VILLA.z-12);}
-  hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:1.45,4,dt);sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:1.9,4,dt);const shadowStep=84/1024,shadowX=Math.round(pos.x/shadowStep)*shadowStep,shadowZ=Math.round(pos.z/shadowStep)*shadowStep;sun.target.position.set(shadowX,0,shadowZ);sun.position.set(shadowX-40,70,shadowZ-35);if(!s.driving||s.time<lastShadowTime||s.time-lastShadowTime>=.085){renderer.shadowMap.needsUpdate=true;lastShadowTime=s.time;}
+  const waterfront=!sheltered&&pos.x>=4&&pos.x<=92&&pos.z>-31&&pos.z<171;
+  headlights.update({x:s.car.x,y:groundHeight(s.car.x,s.car.z),z:s.car.z,a:s.car.yaw},0,s.driving&&waterfront);
+  hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:waterfront?.96:1.45,4,dt);
+  sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:waterfront?.78:1.9,4,dt);
+  // Refresh the shadow from the same interpolated transform as the visible car.
+  const carPoseChanged=s.driving&&(!shadowCar.equals(playerCar.root.position)||shadowYaw!==s.car.yaw||shadowSteer!==s.car.steer);
+  if(!s.driving||carPoseChanged||s.time<lastShadowTime||s.time-lastShadowTime>=.085){
+   // Snap along the shadow camera's axes so stationary scenery does not shimmer as its map follows.
+   const texel=(sun.shadow.camera.right-sun.shadow.camera.left)/sun.shadow.mapSize.x;
+   shadowTarget.set(pos.x,0,pos.z);
+   const horizontal=shadowTarget.dot(shadowRight),vertical=shadowTarget.dot(shadowUp);
+   shadowTarget.addScaledVector(shadowRight,Math.round(horizontal/texel)*texel-horizontal);
+   shadowTarget.addScaledVector(shadowUp,Math.round(vertical/texel)*texel-vertical);
+   sun.target.position.copy(shadowTarget);
+   sun.position.copy(shadowTarget).add(shadowOffset);
+   renderer.shadowMap.needsUpdate=true;
+   shadowCar.copy(playerCar.root.position);
+   shadowYaw=s.car.yaw;
+   shadowSteer=s.car.steer;
+   lastShadowTime=s.time;
+  }
   renderer.render(scene,camera);
  }
  camera.position.set(START.x,4.3,START.z-6.2);return {renderer,scene,camera,orbit,fit,render,awards,get villa(){return {...villa.status,gate:estate.status};},get metrics(){return {calls:renderer.info.render.calls,triangles:renderer.info.render.triangles};},dispose(){if(disposed)return;disposed=true;villa.root.userData.disposed=true;disposers.forEach(fn=>fn());const geometry=new Set(),mats=new Set();scene.traverse(o=>{if(o.geometry)geometry.add(o.geometry);if(o.material)for(const m of [].concat(o.material))mats.add(m);});geometry.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());materials.forEach(m=>m.dispose());scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();});textures.forEach(t=>t.dispose());renderer.dispose();renderer.forceContextLoss();}};

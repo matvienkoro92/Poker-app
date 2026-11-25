@@ -11,6 +11,7 @@
 
   var DOMAIN_DEPS = {
     "profile": ["garage"],
+    "villa": ["garage"],
     "chat": ["garage"],
     "home-news-modal": ["garage"],
     "home-widget-club-choice": ["home-widget-modals"],
@@ -103,23 +104,31 @@
     if (!src) return Promise.resolve(true);
     if (scriptPromises[src]) return scriptPromises[src];
     scriptPromises[src] = new Promise(function (resolve, reject) {
-      var script = document.createElement("script");
-      script.src = src;
-      script.async = false;
-      script.setAttribute("data-poker-lazy-loaded-from", lazyScriptDomains(sourceNode).join(" "));
-      ["crossorigin", "integrity", "referrerpolicy"].forEach(function (attr) {
-        var value = sourceNode.getAttribute(attr);
-        if (value) script.setAttribute(attr, value);
-      });
-      script.onload = function () {
-        sourceNode.setAttribute("data-poker-loaded", "1");
-        resolve(true);
-      };
-      script.onerror = function () {
-        delete scriptPromises[src];
-        reject(new Error("Failed to load script " + src));
-      };
-      (document.head || document.documentElement).appendChild(script);
+      function attempt(retried) {
+        var script = document.createElement("script");
+        script.src = src;
+        script.async = false;
+        script.setAttribute("data-poker-lazy-loaded-from", lazyScriptDomains(sourceNode).join(" "));
+        ["crossorigin", "integrity", "referrerpolicy"].forEach(function (attr) {
+          var value = sourceNode.getAttribute(attr);
+          if (value) script.setAttribute(attr, value);
+        });
+        script.onload = function () {
+          sourceNode.setAttribute("data-poker-loaded", "1");
+          resolve(true);
+        };
+        script.onerror = function () {
+          script.remove();
+          if (!retried) {
+            attempt(true);
+            return;
+          }
+          delete scriptPromises[src];
+          reject(new Error("Failed to load script " + src));
+        };
+        (document.head || document.documentElement).appendChild(script);
+      }
+      attempt(false);
     });
     return scriptPromises[src];
   }
@@ -189,18 +198,14 @@
     var promiseKey = domain + "|s:" + (loadStyles ? "1" : "0") + "|j:" + (loadScripts ? "1" : "0");
     if (domainPromises[promiseKey]) return domainPromises[promiseKey];
     var deps = normalizeDomains(DOMAIN_DEPS[domain]);
-    domainPromises[promiseKey] = ensureDomains(deps, opts)
+    var scripts = loadScripts && !loadedScriptDomains[domain] ? lazyScriptsForDomain(domain) : [];
+    var dependencies = ensureDomains(deps, opts);
+    preloadLazyScripts(scripts);
+    domainPromises[promiseKey] = dependencies
       .then(function () {
-        var chain = Promise.resolve(true);
-        var scripts = loadScripts && !loadedScriptDomains[domain] ? lazyScriptsForDomain(domain) : [];
-        if (domain === "chat") preloadLazyScripts(scripts);
-        if (loadStyles && !loadedStyleDomains[domain]) {
-          lazyStylesForDomain(domain).forEach(function (style) {
-            chain = chain.then(function () {
-              return loadLazyStyle(style);
-            });
-          });
-        }
+        var styles = loadStyles && !loadedStyleDomains[domain] ? lazyStylesForDomain(domain) : [];
+        // Insert in document order for the cascade, then wait for all styles together.
+        var chain = Promise.all(styles.map(loadLazyStyle));
         if (loadScripts && !loadedScriptDomains[domain]) {
           scripts.forEach(function (script) {
             chain = chain.then(function () {

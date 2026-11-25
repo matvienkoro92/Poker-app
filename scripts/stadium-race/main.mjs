@@ -1,5 +1,4 @@
 import {createCourseSampler} from './course-path.mjs';
-import {thumbstick} from '../shared/thumbstick.mjs';
 import {miamiAddresses} from './miami-architecture.mjs';
 import {createCurveGuides} from './sign-lighting.mjs';
 import {createCourseGround,createCourseScenery} from './course-scenery.mjs';
@@ -29,6 +28,7 @@ import {createArchitectureMaterials} from './architecture-art.mjs';
 import {createRoadPropFactory} from './road-props.mjs';
 import {createUpperRoutes} from './upper-routes.mjs';
 import {createRaceEffects} from './effects.mjs';
+import {createTrialGhost,recordGhostFrame} from './trial-ghost.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 import {createOwnedVehicle} from '../city-game/vehicle.mjs';
 import {loadCityGarage} from '../city-game/garage.mjs';
@@ -38,33 +38,75 @@ import {disposeSceneResources} from '../garage-3d/scene-resources.mjs';
 // The simulation remains the authority for road, obstacles, opponents and finish.
 // Geometry is streamed around that distance; no garage data is written here.
 window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
- const E=window.LastBuyInRaceEngine,s=E.create(chapter,{sprint:options.sprint===true}),abort=new AbortController();
+ const E=window.LastBuyInRaceEngine,s=E.create(chapter,{sprint:options.sprint===true||options.trial===true,trial:options.trial===true}),abort=new AbortController();
  let effects,fleet,stopped=false,paused=true,finished=false,raf=0,last=0,acc=0,renderer,scene,kart,hero,observer,ready=false;
- const input={driving:true},signal=abort.signal,drivingAudio=createDrivingAudio();
- host.innerHTML=`<div class="race3d-stage"><div class="race3d-view"></div><div class="race3d-progress"><b data-place>4 / 4</b><span data-lap>1 / 3</span></div><button class="race3d-pause" data-pause aria-label="Пауза">Ⅱ</button><div class="race3d-notice" aria-live="polite"></div><div class="race3d-gauge" aria-label="Приборы автомобиля"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#06232cdd" stroke="#208f9d" stroke-width="3"/><path d="M 23 97 A 52 52 0 1 1 97 97" fill="none" stroke="#45c7d6" stroke-width="6" pathLength="100" data-nitro-ring/><path d="M 30 90 A 42 42 0 1 1 90 90" fill="none" stroke="#d8b858" stroke-width="2"/>${Array.from({length:9},(_,i)=>{const a=(135+i*33.75)*Math.PI/180;return '<circle cx="'+(60+38*Math.cos(a))+'" cy="'+(60+38*Math.sin(a))+'" r="1.4" fill="#b5e1df"/>';}).join('')}<g data-rpm-needle><path d="M 60 65 L 57 60 L 60 21 L 63 60 Z" fill="#e2a34a"/><circle cx="60" cy="60" r="4" fill="#e2a34a"/></g></svg><strong data-speed>0</strong><small>км/ч</small><span data-gear>1</span><label>N₂O</label></div><div class="race3d-controls"><div class="race3d-steering"><div class="race3d-joystick" role="slider" tabindex="0" aria-label="Вниз — тормоз. Руль" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="0"><i></i></div></div><div class="race3d-actions"><button data-key="handbrake">Ручник</button><button data-key="attack">Предмет</button><button data-key="special">Нитро</button></div></div><div class="race3d-dialog"><h2>Забрать своё первым</h2><p data-loading>Выкатываем машинку из гаража…</p><button data-start disabled>Загрузка…</button><button data-restart hidden>Начать заново</button></div></div>`;
+ const trial=s.trial,sectorEnds=[E.CITY_START,E.cityDistance(7000),E.FINISH];
+ let splits=[],ghostFrames=[],hoodView=false,cameraChanged=false;
+ const input={driving:true,gas:false},signal=abort.signal,drivingAudio=createDrivingAudio(options.isMuted);
+ host.innerHTML=`<div class="race3d-stage"><div class="race3d-view"></div><div class="race3d-progress"><b data-place>4 / 4</b><span data-lap>1 / 3</span></div><button class="race3d-pause" data-pause aria-label="Пауза">Ⅱ</button><div class="race3d-notice" aria-live="polite"></div><div class="race3d-gauge" aria-label="Приборы автомобиля"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#06232cdd" stroke="#208f9d" stroke-width="3"/><path d="M 23 97 A 52 52 0 1 1 97 97" fill="none" stroke="#45c7d6" stroke-width="6" pathLength="100" data-nitro-ring/><path d="M 30 90 A 42 42 0 1 1 90 90" fill="none" stroke="#d8b858" stroke-width="2"/>${Array.from({length:9},(_,i)=>{const a=(135+i*33.75)*Math.PI/180;return '<circle cx="'+(60+38*Math.cos(a))+'" cy="'+(60+38*Math.sin(a))+'" r="1.4" fill="#b5e1df"/>';}).join('')}<g data-rpm-needle><path d="M 60 65 L 57 60 L 60 21 L 63 60 Z" fill="#e2a34a"/><circle cx="60" cy="60" r="4" fill="#e2a34a"/></g></svg><strong data-speed>0</strong><small>км/ч</small><span data-gear>1</span><label>N₂O</label></div><div class="race3d-controls"><div class="race3d-pedals"><button type="button" data-key="gas">Газ</button><button type="button" data-key="down">Тормоз</button></div><div class="race3d-right-controls"><div class="race3d-actions"><button type="button" data-key="handbrake">Ручник</button><button type="button" data-key="attack">Предмет</button><button type="button" data-key="special">Нитро</button></div><div class="race3d-steering"><button type="button" data-key="left" aria-label="Влево">←</button><button type="button" data-key="right" aria-label="Вправо">→</button></div></div></div><div class="race3d-dialog"><h2>Забрать своё первым</h2><p data-loading>Выкатываем машинку из гаража…</p><button data-start disabled>Загрузка…</button><button data-restart hidden>Начать заново</button><button type="button" data-camera hidden>Камера · сзади</button></div></div>`;
  const $=q=>host.querySelector(q),view=$('.race3d-view'),dialog=$('.race3d-dialog'),start=$('[data-start]'),notice=$('.race3d-notice');
  host.addEventListener('pointerdown',()=>{if(ready)drivingAudio.start();},{signal});
  window.addEventListener('keydown',()=>{if(ready)drivingAudio.start();},{signal});
- const stick=$('.race3d-joystick');let stickId=null,stickOrigin,stickBrake=false;const brakeKeys=new Set();
- function steerPointer(e){const v=thumbstick(stickOrigin,e,stick.clientWidth*.3);input.steer=v.x;stickBrake=v.y>(stickBrake?.48:.66)&&v.y>Math.abs(v.x)*.85;input.down=stickBrake||brakeKeys.size>0;stick.style.setProperty('--stick-x',v.px+'px');stick.style.setProperty('--stick-y',v.py+'px');stick.setAttribute('aria-valuenow',String(Math.round(input.steer*100)));}
- stick.addEventListener('pointerdown',e=>{if(stickId!==null)return;e.preventDefault();stickOrigin={x:e.clientX,y:e.clientY};stickId=e.pointerId;stick.setPointerCapture(e.pointerId);steerPointer(e);},{signal});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)steerPointer(e);},{signal});for(const event of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(event,e=>{if(e.pointerId!==stickId)return;stickId=null;stickBrake=false;input.down=brakeKeys.size>0;delete input.steer;stick.style.setProperty('--stick-x','0px');stick.style.setProperty('--stick-y','0px');stick.setAttribute('aria-valuenow','0');},{signal});
- function clearInput(){for(const k of Object.keys(input))delete input[k];input.driving=true;stickId=null;stickBrake=false;brakeKeys.clear();stick.style.setProperty('--stick-x','0px');stick.style.setProperty('--stick-y','0px');stick.setAttribute('aria-valuenow','0');}
- function savePerformance(){try{const snapshot=view.raceSnapshot?.();if(!snapshot||!snapshot.quality.frames)return;sessionStorage.setItem('poker21-race:last-performance',JSON.stringify({at:Date.now(),quality:snapshot.quality,viewport:{width:view.clientWidth,height:view.clientHeight},triangles:snapshot.triangles,drawCalls:snapshot.drawCalls,simulationSeconds:Math.max(0,s.tick-180)/60,completed:s.won||s.lost}));}catch{}}
- function pause(){if(!ready||finished)return;savePerformance();paused=true;drivingAudio.update(s,false);clearInput();dialog.hidden=false;start.textContent='Продолжить';$('[data-restart]').hidden=false;$('[data-loading]').textContent='Билеты ждут на финише. Соперники тоже притормозили.';}
- start.addEventListener('click',()=>{if(!ready)return;drivingAudio.start();paused=false;dialog.hidden=true;last=0;view.querySelector('canvas')?.focus();},{signal});
- $('[data-restart]').addEventListener('click',()=>{if(!ready||finished)return;E.revive(s);s.score=0;effects?.reset();clearInput();acc=0;last=0;paused=false;dialog.hidden=true;$('[data-restart]').hidden=true;drivingAudio.start();view.querySelector('canvas')?.focus();},{signal});
- $('[data-pause]').addEventListener('click',pause,{signal});
- for(const button of host.querySelectorAll('[data-key]')){
-  button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);input[button.dataset.key]=true;},{signal});
-  for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,()=>{input[button.dataset.key]=false;},{signal});
+ if(trial){
+  $('[data-key=attack]').hidden=true;
+  $('[data-key=special]').hidden=true;
+  $('.race3d-actions').classList.add('race3d-trial-actions');
+  $('.race3d-stage').classList.add('race3d-time-trial');
+  $('[data-nitro-ring]').style.visibility='hidden';
+  $('.race3d-gauge label').hidden=true;
+  host.querySelector('.race3d-dialog h2').textContent='Спринт на время';
  }
- const keys={ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right',ArrowDown:'down',s:'down',' ':'handbrake',Shift:'handbrake',x:'attack',Enter:'attack',z:'special'};
- window.addEventListener('keydown',e=>{if(e.key==='Escape'){pause();return;}if(keys[e.key]){e.preventDefault();if(keys[e.key]==='down')brakeKeys.add(e.key);input[keys[e.key]]=true;}},{signal});
- window.addEventListener('keyup',e=>{if(keys[e.key]){e.preventDefault();if(keys[e.key]==='down'){brakeKeys.delete(e.key);input.down=stickBrake||brakeKeys.size>0;}else input[keys[e.key]]=false;}},{signal});
+ const heldKeys=new Set(),heldPointers=new Map();
+ const buttons=Array.from(host.querySelectorAll('[data-key]'));
+ const keys={ArrowUp:'gas',w:'gas',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right',ArrowDown:'down',s:'down',' ':'handbrake',Shift:'handbrake',x:'attack',Enter:'attack',z:'special'};
+ function updateControls(){
+  const held=new Set([...heldPointers.values(),...Array.from(heldKeys,key=>keys[key])]);
+  for(const button of buttons){
+   const action=button.dataset.key;
+   input[action]=held.has(action)&&(!trial||!['special','attack'].includes(action));
+   button.toggleAttribute('data-held',input[action]);
+  }
+ }
+ function clearInput(){heldKeys.clear();heldPointers.clear();updateControls();}
+ function savePerformance(){try{const snapshot=view.raceSnapshot?.();if(!snapshot||!snapshot.quality.frames)return;sessionStorage.setItem(trial?'poker21-race:last-trial-performance':'poker21-race:last-performance',JSON.stringify({at:Date.now(),quality:snapshot.quality,viewport:{width:view.clientWidth,height:view.clientHeight},triangles:snapshot.triangles,drawCalls:snapshot.drawCalls,simulationSeconds:Math.max(0,s.tick-180)/60,completed:s.won||s.lost}));}catch{}}
+ function pause(){if(!ready||finished)return;savePerformance();paused=true;drivingAudio.update(s,false);clearInput();dialog.hidden=false;start.textContent='Продолжить';$('[data-restart]').hidden=false;$('[data-camera]').hidden=false;$('[data-loading]').textContent='Билеты ждут на финише. Соперники тоже притормозили.';}
+ start.addEventListener('click',()=>{if(!ready)return;drivingAudio.start();paused=false;dialog.hidden=true;last=0;view.querySelector('canvas')?.focus();},{signal});
+ $('[data-restart]').addEventListener('click',()=>{if(!ready||finished)return;E.revive(s);splits=[];ghostFrames=[];s.score=0;effects?.reset();clearInput();acc=0;last=0;paused=false;dialog.hidden=true;$('[data-restart]').hidden=true;drivingAudio.start();view.querySelector('canvas')?.focus();},{signal});
+ $('[data-pause]').addEventListener('click',pause,{signal});
+ $('[data-camera]').addEventListener('click',()=>{
+  hoodView=!hoodView;
+  cameraChanged=true;
+  $('[data-camera]').textContent=hoodView?'Камера · капот':'Камера · сзади';
+ },{signal});
+ for(const button of buttons){
+  button.addEventListener('pointerdown',e=>{
+   if(paused||finished||e.button!==0)return;
+   e.preventDefault();
+   button.setPointerCapture(e.pointerId);
+   heldPointers.set(e.pointerId,button.dataset.key);
+   updateControls();
+  },{signal});
+  for(const event of ['pointerup','pointercancel','lostpointercapture']){
+   button.addEventListener(event,e=>{
+    if(heldPointers.delete(e.pointerId))updateControls();
+   },{signal});
+  }
+ }
+ window.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){pause();return;}
+  const key=e.key.length===1?e.key.toLowerCase():e.key;
+  if(paused||finished||!Object.hasOwn(keys,key)||(key==='Enter'&&e.target instanceof HTMLButtonElement))return;
+  e.preventDefault();
+  if(!e.repeat){heldKeys.add(key);updateControls();}
+ },{signal});
+ window.addEventListener('keyup',e=>{
+  const key=e.key.length===1?e.key.toLowerCase():e.key;
+  if(heldKeys.delete(key)){e.preventDefault();updateControls();}
+ },{signal});
  window.addEventListener('blur',pause,{signal});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();},{signal});
  function stop(){if(stopped)return;savePerformance();stopped=true;drivingAudio.stop();fleet?.dispose();abort.abort();cancelAnimationFrame(raf);observer?.disconnect();hero?.dispose();if(scene){scene.background?.dispose?.();scene.userData.environmentTarget?.dispose();disposeSceneResources(scene);}renderer?.dispose();renderer?.forceContextLoss();}
  async function init(){
-  const garage=await loadCityGarage();if(stopped)return;s.transport=garage.look.transport||'kart';
+  const garage=options.garage||await loadCityGarage();if(stopped)return;s.transport=garage.look.transport||'kart';
   renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});const renderQuality=createRenderQuality(devicePixelRatio||1);renderer.setPixelRatio(renderQuality.snapshot().pixelRatio);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Трёхмерная стадионная гонка');view.appendChild(renderer.domElement);view.dataset.garageSource=garage.source;
   scene=new T.Scene();scene.matrixWorldAutoUpdate=false;
@@ -93,6 +135,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
   const courseGround=createCourseGround(scene,E,sample);
   const roadClearance=createRoadClearance(E,sample),minimap=createMinimap(host.querySelector('.race3d-stage'),E,sample);
   function place(g,d,l=0,height=0,tier=0){const p=sample(d,l,tier);g.position.set(p.x,p.y+height,p.z);g.rotation.y=p.a;return p;}
+  const drawGhost=trial?createTrialGhost(scene,options.bestReplay,place):null;
   function groundShadow(mesh,d,lateral,tier=0){const p=sample(d,lateral,tier),a=sample(d-10,lateral,tier),b=sample(d+10,lateral,tier);mesh.position.set(p.x,p.y+.045,p.z);mesh.rotation.set(-Math.PI/2-Math.atan2(b.y-a.y,1.2),p.a,0,'YXZ');}
   const strips=Array.from({length:100},()=>{const g=group();const roadPlaceholder=new T.Group();g.add(roadPlaceholder);for(const side of [-1,1]){block(g,'#e65c59',side*7,-.03,0,.45,.14,2.55);block(g,'#f2e2bc',side*6.7,.015,0,.1,.03,2.55);block(g,'#77796a',side*11,-.3,0,7,.3,2.55);}return g;});
   const asphaltCanvas=document.createElement('canvas');asphaltCanvas.width=asphaltCanvas.height=256;
@@ -267,7 +310,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
    place(exitGate,exitDistance);exitGate.visible=Math.abs(s.distance-exitDistance)<4000;exitApproach.forEach((g,i)=>{place(g,exitDistance-500+i*100);g.visible=Math.abs(s.distance-exitDistance)<4000;});
    const lap=Math.floor(s.distance/E.LAP);place(finish,lap>=2?E.FINISH:(lap+1)*E.LAP);place(tunnel,E.LAP+5650);tunnel.visible=Math.abs(s.distance-(E.LAP+5650))<3400;
    sea.visible=s.distance+3800>E.cityDistance(6020);waterTexture.offset.x=s.tick*.0001;
-   const visible=[...E.trackObjects(s.distance,s.tick).filter(o=>!s.used.has(o.key)),...s.traps.filter(o=>!o.used).map(o=>({...o,kind:'trap'})),...s.enemyShots.map(o=>({...o,kind:'rocket'}))].filter(o=>o.distance>s.distance-100&&o.distance<s.distance+3800);
+   const visible=[...E.trackObjects(s.distance,s.tick).filter(o=>!s.used.has(o.key)&&(!trial||!E.trialPickup(o))),...s.traps.filter(o=>!o.used).map(o=>({...o,kind:'trap'})),...s.enemyShots.map(o=>({...o,kind:'rocket'}))].filter(o=>o.distance>s.distance-100&&o.distance<s.distance+3800);
    props.forEach((p,i)=>{const o=visible[i];p.g.visible=!!o;if(!o)return;const isPickup=pickups.has(o.kind);
     // Once the collection point is behind the car, retire a missed bonus
     // before it reaches the close chase camera. Pooled hazards retain full size.
@@ -281,7 +324,7 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
    rivals.forEach((g,i)=>{const r=s.rivals[i];rivalArt[i].setDistance(Math.abs(r.distance-s.distance)*(E.road(s.distance).city?1.45:1));g.visible=Math.abs(r.distance-s.distance)<3800;place(g,r.distance,r.lateral,r.air?jumpPose(r.air,r.airDuration,r.currentSpeed||r.speed).height:E.rampHeight(r.distance,r.lateral,r.tier||0,s.tick),r.tier||0);const ra=sample(r.distance+10,r.lateral,r.tier),rb=sample(r.distance-10,r.lateral,r.tier);g.rotation.order='YXZ';g.rotation.x=-Math.atan2(ra.y-rb.y,1.2);const steering=-E.road(r.distance).curve*.15;g.rotation.y-=r.heading||0;rivalArt[i].update(r.distance,Math.max(-1,Math.min(1,steering)),s.tick,r.stun>0);const contact=rivalArt[i].contactShadow;contact.visible=g.visible;groundShadow(contact,r.distance,r.lateral,r.tier||0);contact.material.opacity=r.air?.2:.7;g.traverse(m=>{if(m.isMesh&&!m.material?.transparent)m.castShadow=Math.abs(r.distance-s.distance)<280;});});
    for(const car of E.crossTrafficAt(s.tick,s.crossingOffsets)){const art=crossingCars[car.id];art.root.visible=car.active&&Math.abs(car.distance-s.distance)<1800;art.contactShadow.visible=art.root.visible;if(!art.root.visible)continue;art.setDistance(Math.abs(car.distance-s.distance));place(art.root,car.distance,car.lateral);art.root.rotation.y-=car.heading;art.update(car.wheelDistance,0,s.tick,false);groundShadow(art.contactShadow,car.distance,car.lateral);art.contactShadow.rotation.z=-car.heading;}
    for(const car of E.trafficAt(s.tick)){const art=trafficCars[car.id],model=art.root;art.setDistance(Math.abs(car.distance-s.distance));model.visible=car.distance>s.distance-180&&car.distance<s.distance+1000;if(model.visible){place(model,car.distance,car.lateral);model.rotation.y+=Math.PI;art.update(-car.distance,0,s.tick,false);groundShadow(art.contactShadow,car.distance,car.lateral);}art.contactShadow.visible=model.visible;model.traverse(m=>{if(m.isMesh)m.castShadow=model.visible&&Math.abs(car.distance-s.distance)<220;});}
-   const wide=camera.aspect>1.3, speedPull=kart.riderPose||matchMedia('(prefers-reduced-motion: reduce)').matches?0:Math.min(.65,s.speed*.085),cameraBack=kart.riderPose?5.8:(wide?5.4:7.5)+speedPull,cameraGround=sample(s.distance-cameraBack/.06,s.lateral,s.tier),desiredCamera=new T.Vector3(p.x-Math.sin(p.a)*cameraBack,Math.max(p.y+(kart.riderPose?2.7:wide?2.15:3.2)+jump.height*.27+rampLift*.27,cameraGround.y+1.8),p.z-Math.cos(p.a)*cameraBack),look=sample(s.distance+((kart.riderPose?130:wide?110:180)+speedPull*52),s.lateral,s.tier),desiredLook=new T.Vector3(look.x,look.y+(wide?.15:.6)+jump.height*.17+rampLift*.17,look.z),cameraNow=performance.now(),cameraBlend=1-Math.exp(-Math.min(.05,(cameraNow-cameraTime)/1000)*12);if(!s.tier){
+   const wide=camera.aspect>1.3, speedPull=kart.riderPose||matchMedia('(prefers-reduced-motion: reduce)').matches?0:Math.min(.65,s.speed*.085),cameraBack=kart.riderPose?5.8:(wide?5.4:9)+speedPull,cameraGround=sample(s.distance-cameraBack/.06,s.lateral,s.tier),desiredCamera=new T.Vector3(p.x-Math.sin(p.a)*cameraBack,Math.max(p.y+(kart.riderPose?2.7:wide?2.15:3.2)+jump.height*.27+rampLift*.27,cameraGround.y+1.8),p.z-Math.cos(p.a)*cameraBack),look=sample(s.distance+((kart.riderPose?130:wide?130:195)+speedPull*70),s.lateral,s.tier),desiredLook=new T.Vector3(look.x,look.y+(wide?.15:.25)+jump.height*.17+rampLift*.17,look.z),cameraNow=performance.now(),cameraBlend=1-Math.exp(-Math.min(.05,(cameraNow-cameraTime)/1000)*12);if(!s.tier){
     // Look past the open edge when the elevated lane falls between car and camera.
     const route=E.overpasses.find(r=>s.distance>r.start-150&&s.distance<r.end+220);
     if(route){
@@ -296,24 +339,44 @@ window.LastBuyInRace3D={mount(host,chapter,onWin,onLose,options={}){
      desiredLook.x-=Math.cos(p.a)*offset*.36;desiredLook.z+=Math.sin(p.a)*offset*.36;
     }
    }
-   if(Math.abs(s.distance-cameraDistance)>400||matchMedia('(prefers-reduced-motion: reduce)').matches){chasePosition.copy(desiredCamera);chaseLook.copy(desiredLook);}else{playerDelta.set(p.x,p.y,p.z).sub(lastPlayerPosition);chasePosition.add(playerDelta).lerp(desiredCamera,cameraBlend);chaseLook.add(playerDelta).lerp(desiredLook,cameraBlend);}lastPlayerPosition.set(p.x,p.y,p.z);cameraTime=cameraNow;cameraDistance=s.distance;chasePosition.y=Math.max(chasePosition.y,cameraGround.y+1.8);for(let i=1;i<10;i++){const t=i/10,ground=sample(s.distance-cameraBack/.06*(1-t),s.lateral,s.tier);chasePosition.y=Math.max(chasePosition.y,(ground.y+.45-(p.y+.35)*t)/(1-t));}camera.position.copy(chasePosition);if(!matchMedia('(prefers-reduced-motion: reduce)').matches){camera.position.x+=Math.cos(p.a)*contactJolt*.08;camera.position.z-=Math.sin(p.a)*contactJolt*.08;}camera.lookAt(chaseLook);
+   if(cameraChanged||Math.abs(s.distance-cameraDistance)>400||matchMedia('(prefers-reduced-motion: reduce)').matches){chasePosition.copy(desiredCamera);chaseLook.copy(desiredLook);}else{playerDelta.set(p.x,p.y,p.z).sub(lastPlayerPosition);chasePosition.add(playerDelta).lerp(desiredCamera,cameraBlend);chaseLook.add(playerDelta).lerp(desiredLook,cameraBlend);}lastPlayerPosition.set(p.x,p.y,p.z);cameraTime=cameraNow;cameraDistance=s.distance;chasePosition.y=Math.max(chasePosition.y,cameraGround.y+1.8);for(let i=1;i<10;i++){const t=i/10,ground=sample(s.distance-cameraBack/.06*(1-t),s.lateral,s.tier);chasePosition.y=Math.max(chasePosition.y,(ground.y+.45-(p.y+.35)*t)/(1-t));}camera.position.copy(chasePosition);if(!matchMedia('(prefers-reduced-motion: reduce)').matches){camera.position.x+=Math.cos(p.a)*contactJolt*.08;camera.position.z-=Math.sin(p.a)*contactJolt*.08;}if(hoodView){
+    const heading=p.a-(s.heading||0);
+    camera.position.set(p.x+Math.sin(heading)*.7,p.y+(kart.riderPose?1.55:1.28),p.z+Math.cos(heading)*.7);
+    desiredLook.copy(camera.position);
+    desiredLook.x+=Math.sin(heading)*25;
+    desiredLook.z+=Math.cos(heading)*25;
+    desiredLook.y+=Math.max(-.65,Math.min(1.4,look.y-p.y));
+    camera.lookAt(desiredLook);
+   }else camera.lookAt(chaseLook);
+   kart.root.visible=!hoodView;
+   cameraChanged=false;
    const shieldAge=s.lastPickup?.kind==='shield'?s.tick-s.lastPickup.tick:99;shieldAura.material.uniforms.sweep.value=shieldAge<30?-1+2*shieldAge/29:-2;shieldAura.visible=!!(s.shield||s.shieldImpact);shieldAura.position.set(p.x,p.y+.8,p.z);shieldAura.material.uniforms.strength.value=s.shieldImpact?.65:.28+Math.sin(s.tick*.06)*.04;
    effects.update(s,p,!!kart.riderPose);const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches,targetFov=reduceMotion?58:58+(!kart.riderPose?Math.min(4,s.speed*.45)+(s.boost?2:0):0);if(Math.abs(camera.fov-targetFov)>.02){camera.fov+=(targetFov-camera.fov)*(reduceMotion?1:.08);camera.updateProjectionMatrix();}
-   batchBoxes();renderer.render(scene,camera);minimap.update(s);
-   $('[data-place]').textContent=s.position+' / 4';$('[data-lap]').textContent=s.lap+' / '+(s.sprint?1:3);
-   const speed=Math.round(s.speed*.06*60*3.6*racePace(s)),gear=s.gear||1,rpm=s.rpm||900;drivingAudio.update(s,!paused&&!finished,E.road(s.distance).city?E.trafficAt(s.tick):[]);
+   drawGhost?.(s.tick,s.distance);batchBoxes();renderer.render(scene,camera);minimap.update(s);
+   $('[data-place]').textContent=trial?Math.max(0,(s.tick-180)/60).toFixed(2)+' с':s.position+' / 4';
+   if(trial){
+    const index=splits.length-1,best=options.bestSplits?.[index];
+    const delta=Number.isFinite(best)?(splits[index]-best)/60:null;
+    const difference=delta===null?'':' · '+(delta>=0?'+':'')+delta.toFixed(2);
+    $('[data-lap]').textContent='Сектор '+Math.min(splits.length+1,sectorEnds.length)+' / '+sectorEnds.length+difference;
+   }else $('[data-lap]').textContent=s.lap+' / '+(s.sprint?1:3);
+   const speed=Math.round(s.speed*.06*60*3.6*racePace(s)),gear=s.gear||1,rpm=s.rpm||900;drivingAudio.update(s,!paused&&!finished,E.road(s.distance).city?E.trafficAt(s.tick):[],input.gas);
    $('[data-speed]').textContent=speed;$('[data-gear]').textContent=gear;$('[data-rpm-needle]').setAttribute('transform','rotate('+(-135+rpm/8000*270)+' 60 60)');$('[data-nitro-ring]').style.strokeDasharray=(s.nitro??100)+' 100';
    notice.textContent=s.countdown?String(Math.ceil(s.countdown/60)):(s.hazardWarning?.kind==='crossing'?(s.hazardWarning.side>0?'МАШИНА СЛЕВА':'МАШИНА СПРАВА'):s.noticeTicks?s.notice:'');
    $('[data-key=attack]').textContent=s.itemRoll?'…':({rocket:'Ракета',shield:'Щит',turbo:'Разгон',trap:'Ловушка'}[s.item]|| (s.shield?'Щит':'Предмет'));
    view.dataset.tick=s.tick;view.dataset.distance=Math.round(s.distance);view.dataset.routeZone=s.routeZone;
   }
-  ready=true;start.disabled=false;paused=false;dialog.hidden=true;last=0;
+  ready=true;start.disabled=false;paused=trial;dialog.hidden=!trial;last=0;
+  if(trial){start.textContent='Старт';$('[data-loading]').textContent='Три сектора от стадиона до моста.';}
   renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause();ready=false;start.textContent='Перезагрузить гонку';start.disabled=false;$('[data-loading]').textContent='3D-сцена потеряла связь с видеокартой. Перезапусти заезд.';start.onclick=()=>{stop();window.LastBuyInRace3D.mount(host,chapter,onWin,onLose,options);};},{signal});
   // Read-only diagnostics used by the rendered route check.
   view.raceSnapshot=()=>({distance:s.distance,crossTraffic:E.crossTrafficAt(s.tick,s.crossingOffsets).filter(c=>Math.abs(c.distance-s.distance)<1800),roadLayout:E.roadLayout(s.distance),cityLife:cityLife.snapshot(),minimap:minimap.snapshot(),quarterLights:quarterLighting.snapshot(),roadTextureOrigin:{distance:roadBase-240,v:roadUV[1]},scenery:scenery.map(part=>({anchor:part.g.userData.anchor,position:part.g.position.toArray()})),world:kart.root.position.toArray(),tier:s.tier,deckHeight:E.deckHeight(s.distance,s.tier),upperRoutes:upperRoutes.snapshot(),exit:{distance:exitDistance,visible:exitGate.visible,passed:s.distance>exitDistance,opening:18.6},effects:effects.snapshot(),look:{...garage.look},source:garage.source,closedCabin:!!kart.closedCabin,vehicle:garage.look.transport||'kart',speedLimit:E.mobility[s.transport]?.max||null,screenX:new T.Vector3(kart.root.position.x,kart.root.position.y,kart.root.position.z).project(camera).x,triangles:renderer.info.render.triangles,playerWheels:kart.wheels.length,fleet:rivalArt.map(a=>({model:a.root.name,wheels:a.wheels.length,wheelAngle:a.wheels[0]?.children[0].rotation.x||0})),audio:drivingAudio.snapshot(),quality:{...renderQuality.snapshot(),rivalDetail:rivals.map(r=>r.userData.roadDetail)},handling:{heading:s.heading||0,slip:s.slipAngle||0,nitro:s.nitro,sprint:s.sprint},shadows:{enabled:renderer.shadowMap.enabled,playerGroundY:shadow.position.y,playerY:kart.root.position.y,rivals:rivalArt.map((a,i)=>({groundY:a.contactShadow.position.y,bodyY:a.root.position.y,air:s.rivals[i].air||0}))},cityDepth:cityDepth.snapshot(),visibleDetailBatches:geometryBatches.filter(b=>b.cull&&b.batch.visible).length,architecture:[...new Set(scenery.flatMap(part=>part.city.children.map(child=>child.userData.architecture).filter(Boolean)))],drawCalls:renderer.info.render.calls});
   // The reference drive covered 468 route units per second at cruising speed.
-  function racePace(s){return s.countdown||E.mobility[s.transport]?1:1.34;}
-  function frame(time){if(stopped)return;const delta=last?Math.min(100,time-last):0;if(!last){previousMotion=null;acc=0;}last=time;if(!paused&&!finished){acc+=delta*racePace(s);while(acc>=1000/60){previousMotion=captureMotion(s);E.step(s,input);acc-=1000/60;if(s.won||s.lost){finished=true;savePerformance();clearInput();if(s.won)onWin({chapter,score:s.score,hits:s.hits});else onLose(()=>{E.revive(s);effects.reset();finished=false;paused=false;dialog.hidden=true;$('[data-restart]').hidden=true;last=0;acc=0;});break;}}}else acc=0;if(stopped)return;draw(!paused&&!finished?renderMotion(previousMotion,s,acc/(1000/60)):s);raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);
+  function racePace(s){return trial||s.countdown||E.mobility[s.transport]?1:1.34;}
+  function frame(time){if(stopped)return;const delta=last?Math.min(100,time-last):0;if(!last){previousMotion=null;acc=0;}last=time;if(!paused&&!finished){acc+=delta*racePace(s);while(acc>=1000/60){previousMotion=captureMotion(s);E.step(s,input);if(trial){
+     if(s.distance>=sectorEnds[splits.length])splits.push(Math.max(0,s.tick-180));
+     recordGhostFrame(ghostFrames,s,s.air?jumpPose(s.air,s.airDuration,s.speed).height:E.rampHeight(s.distance,s.lateral,s.tier,s.tick));
+    }acc-=1000/60;if(s.won||s.lost){finished=true;savePerformance();clearInput();if(s.won)onWin({chapter,score:s.score,hits:s.hits,ticks:Math.max(0,s.tick-180),splits:splits.slice(),replay:ghostFrames});else onLose(()=>{E.revive(s);effects.reset();finished=false;paused=false;dialog.hidden=true;$('[data-restart]').hidden=true;last=0;acc=0;});break;}}}else acc=0;if(stopped)return;draw(!paused&&!finished?renderMotion(previousMotion,s,acc/(1000/60)):s);raf=requestAnimationFrame(frame);}raf=requestAnimationFrame(frame);
  }
  init().catch(error=>{if(stopped)return;ready=false;$('[data-loading]').textContent=error.userMessage||'Не удалось открыть 3D-гонку. Повтори загрузку.';start.textContent='Повторить';start.disabled=false;start.onclick=()=>{stop();window.LastBuyInRace3D.mount(host,chapter,onWin,onLose,options);};console.error(error);});
  return {stop};

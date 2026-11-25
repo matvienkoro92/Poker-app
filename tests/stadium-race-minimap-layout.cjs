@@ -9,7 +9,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
  await p.evaluate(async()=>{const {createMinimap}=await import('/scripts/stadium-race/minimap.mjs');const E=LastBuyInRaceEngine;const map=createMinimap(document.querySelector('.race3d-stage'),E,(d,l=0)=>({x:-l*10,y:0,z:d*.06,a:0}));const s=E.create();s.distance=26700;s.rivals.forEach((r,i)=>r.distance=s.distance+[300,-200,5000][i]);map.update(s);});
  fs.mkdirSync('output/stadium-race-refresh',{recursive:true});
  for(const viewport of [{width:390,height:844},{width:320,height:740},{width:844,height:390}]){
-  await p.setViewportSize(viewport);const map=await p.locator('.race3d-minimap').boundingBox(),stick=await p.locator('.race3d-joystick').boundingBox();
+  await p.setViewportSize(viewport);const map=await p.locator('.race3d-minimap').boundingBox(),stick=await p.locator('.race3d-controls').boundingBox();
   assert.ok(map.x>=0&&map.y>=0&&map.x+map.width<=viewport.width);assert.ok(map.y+map.height<stick.y,'radar must not cover steering');
   await p.screenshot({path:'output/stadium-race-refresh/layout-'+viewport.width+'.png'});
  }

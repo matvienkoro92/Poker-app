@@ -692,3 +692,9 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 .deposits .deposits__card>.deposits__card-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch}
 .deposits .deposits__card-foot>.deposits__withdrawal-actions{display:contents}
 .deposits .deposits__card-foot button{width:100%;min-width:0;min-height:42px!important;height:100%;padding:8px!important;white-space:normal;overflow-wrap:anywhere;display:flex;align-items:center;justify-content:center}
+
+.deposits .deposits__card button[data-dep="poker21-unpublish"] {
+  background: #ffda57;
+  border-color: #e4b83c;
+  color: #282015;
+}

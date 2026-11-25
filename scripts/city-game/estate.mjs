@@ -1,7 +1,42 @@
 import * as T from '../../vendor/three/three.module.min.js';
 import {detailEstate} from './estate-details.mjs';
-import {VILLA,GATE} from './world.mjs';
-import {lighthouseShore} from './metropolis.mjs';
+import {VILLA,GATE,BRIDGE,landAt} from './world.mjs';
+import {lighthouseShore,roads} from './metropolis.mjs';
+// The atlas contour can run inland where the playable city and bridge overlap it.
+export function estateShoreRocks(){
+ const shoreline=lighthouseShore;
+ const winding=Math.sign(shoreline.reduce((area,a,i)=>{
+  const b=shoreline[(i+1)%shoreline.length];
+  return area+a.x*b.z-b.x*a.z;
+ },0));
+ const paved=[
+  [-98,118,-109,92],
+  [BRIDGE.minX,BRIDGE.maxX,BRIDGE.minZ,BRIDGE.maxZ],
+  [34.5,45.5,105,160],
+  [34.5,77.5,99.5,110.5],
+  [66.5,77.5,70,108],
+  [40,95,155,165],
+ ];
+ const rocks=[];
+ for(const [i,a] of shoreline.entries()){
+  const b=shoreline[(i+1)%shoreline.length],dx=b.x-a.x,dz=b.z-a.z;
+  const length=Math.hypot(dx,dz), count=Math.ceil(length/5);
+  const nx=winding*dz/length,nz=-winding*dx/length;
+  for(let j=0;j<count;j++){
+   const x=a.x+dx*j/count,z=a.z+dz*j/count,scale=.8+(i+j)%4*.22;
+   const margin=scale+1.4;
+   if(paved.some(([left,right,top,bottom])=>x+margin>=left&&x-margin<=right&&z+margin>=top&&z-margin<=bottom))continue;
+   if(landAt(x+nx*3,z+nz*3)||!landAt(x-nx*3,z-nz*3))continue;
+   if(roads.some(({a,b,width})=>{
+    const dx=b.x-a.x,dz=b.z-a.z;
+    const t=Math.min(1,Math.max(0,((x-a.x)*dx+(z-a.z)*dz)/(dx*dx+dz*dz)));
+    return Math.hypot(x-a.x-t*dx,z-a.z-t*dz)<width/2+margin;
+   }))continue;
+   rocks.push({x,z,scale});
+  }
+ }
+ return rocks;
+}
 export function buildEstate({scene,box:rawBox,cylinder:rawCylinder,batch:rawBatch,label:rawLabel,outdoors,textures}){
  const dx=VILLA.x-211,dz=VILLA.z-88;
  const box=(c,x,y,z,...args)=>rawBox(c,x+dx,y,z+dz,...args),cylinder=(c,x,y,z,...args)=>rawCylinder(c,x+dx,y,z+dz,...args),batch=(type,c,x,y,z,...args)=>rawBatch(type,c,x+dx,y,z+dz,...args),label=(t,x,y,z,...args)=>rawLabel(t,x+dx,y,z+dz,...args);
@@ -11,20 +46,14 @@ export function buildEstate({scene,box:rawBox,cylinder:rawCylinder,batch:rawBatc
  outdoors.lawnRect(69,114,98,58,.018);
  rawBox('#a1947b',69,-.02,114,98,.04,58);
  rawBox('#787f77',40,.06,132.5,11,.12,55);rawBox('#787f77',56,.06,105,43,.12,11);rawBox('#787f77',72,.06,89,11,.12,38);rawBox('#b8b097',48,.07,160,16,.14,10);
- outdoors.asphalt(40,132.5,11,55);outdoors.asphalt(56,105,43,11);outdoors.asphalt(72,89,11,38);
- outdoors.paving(32.8,139,2.8,43,.075);outdoors.paving(47.2,139,2.8,43,.075);
- for(const x of [34.2,45.8]){rawBox('#c3bea6',x,.09,139,.22,.18,43);rawBox('#4b5651',x+(x<40?.2:-.2),.128,139,.055,.012,43);}
- // Subtle lane-edge repairs and expansion cuts keep the approach from reading as a flat plane.
- for(let z=119;z<158;z+=6){rawBox('#636d66',35.1,.132,z,.35,.008,2.5);rawBox('#879184',44.9,.132,z,.035,.009,4);}
- for(let z=111;z<159;z+=7)rawBox('#e8d7ac',40,.13,z,.1,.015,3);for(let x=43;x<75;x+=7)rawBox('#e8d7ac',x,.13,105,3,.015,.1);
- for(const [px,pz]of [[27,126],[24,146],[36,174],[62,184],[88,188],[122,144]])outdoors.palm(px,pz,7);
+ outdoors.asphalt(40,132.5,11,55);
+ outdoors.paving(47.2,139,2.8,43,.075);
+ for(const x of [45.8]){rawBox('#c3bea6',x,.09,139,.22,.18,43);rawBox('#4b5651',x+(x<40?.2:-.2),.128,139,.055,.012,43);}
+ for(let z=111;z<159;z+=7)rawBox('#e8d7ac',40,.142,z,.1,.015,3);for(let x=43;x<75;x+=7)rawBox('#e8d7ac',x,.143,105,3,.015,.1);
+ for(const [px,pz]of [[27,126],[24,146],[36,174],[62,184],[88,188],[122,144]])outdoors.coastalPalm(px,pz,6.4+(pz%5)*.34,px<34&&pz<165?.21:0);
  for(const [px,pz]of [[51,126],[51,144],[51,169],[67,178],[92,177],[117,170]])outdoors.shrub(px,pz,1.3);
- for(const [px,pz]of [[26,120],[30,163],[54,183]])outdoors.tree(px,pz,5.5);
- for(let i=0;i<lighthouseShore.length;i++){
-  const a=lighthouseShore[i],b=lighthouseShore[(i+1)%lighthouseShore.length],count=Math.ceil(Math.hypot(a.x-b.x,a.z-b.z)/5);
-  for(let j=0;j<count;j++)outdoors.rock(a.x+(b.x-a.x)*j/count,a.z+(b.z-a.z)*j/count,.8+(i+j)%4*.22);
- }
- for(const pz of [115,137,160]){rawCylinder('#43564c',34,3.2,pz,.08,6.4);rawBox('#43564c',35,6.35,pz,2,.1,.1);rawBatch('box','#ffe0a0',35.7,6.25,pz,.55,.1,.3,0,0,true);}
+ for(const [px,pz]of [[26,120],[30,163],[54,183]])outdoors.coastalTree(px,pz,5.25+(pz%7)*.23,px<34&&pz<165?.21:0);
+ for(const {x,z,scale} of estateShoreRocks())outdoors.rock(x,z,scale);
  // An ocean lounge belongs to the villa: timber pergola, outdoor sofas and low planting.
  rawBox('#8c7354',107,.035,181,14,.07,10);outdoors.deck(107,181,14,10,.08);
  outdoors.paving(103,174.5,2.6,5,.045);for(const px of [100.7,113.3])for(const pz of [176.7,185.3]){rawBox('#68513a',px,1.75,pz,.18,3.5,.18);rawCylinder('#79684d',px,-.6,pz,.15,1.2);}

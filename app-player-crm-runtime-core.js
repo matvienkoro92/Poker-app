@@ -1750,8 +1750,7 @@
     { key: "schedule", label: "Расписание", view: "schedule", startapp: "schedule" },
     { key: "bonus-game", label: "Игра · Найди туза", view: "bonus-game", startapp: "bonus_game" },
     { key: "plasterer-game", label: "Игра · Переедь Штукатура", view: "plasterer-game", startapp: "plasterer_game" },
-    { key: "cooler-game", label: "Игра · Кулер", view: "cooler-game", startapp: "cooler_game" },
-    { key: "cooler-flight", label: "Игра · Кулер · полёт", view: "cooler-flight", startapp: "cooler_flight" }
+    { key: "cooler-game", label: "Игра · Кулер", view: "cooler-game", startapp: "cooler_game" }
   ];
 
   function crmLinkTargetByKey(key) {

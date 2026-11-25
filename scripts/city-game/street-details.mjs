@@ -1,8 +1,9 @@
 import {venueForBuilding} from './district-plan.mjs';
 import {BUILDINGS,ROAD_X,ROAD_Z} from './world.mjs';
 // Street furniture remains on pavements and inside building footprints: no new invisible obstacles.
-export function dressStreets({box,cylinder,batch,label}){
+export function dressStreets({box,cylinder,batch,label,customFacades}){
  for(const [index,b]of BUILDINGS.entries()){
+  if(customFacades?.has(b))continue;
   const z=b.z+b.d/2+.24;
   if(!venueForBuilding(b)){
   // Stone portal, recessed door, bell panel, address enamel, awning with individual seams.
@@ -30,14 +31,5 @@ export function dressStreets({box,cylinder,batch,label}){
    for(let i=0;i<5;i++)for(let j=0;j<3;j++)batch('ball','#c0ae7f',x-3+i*.3,.17,z+side*8.1+j*.26,.055,.025,.055);
   }
   cylinder('#394946',x+3,.045,z+4,.48,.02);for(let i=-2;i<=2;i++)box('#889080',x+3+i*.13,.062,z+4,.025,.012,.6);
- }
- // Repeated waterfront furniture: slatted benches, bins, bike stands and softly lit bollards.
- for(const z of [116,136,156]){
-  const x=31;
-  for(let i=0;i<6;i++){box('#806347',x,.56,z-.75+i*.3, .8,.09,.23);box('#806347',x-.43,1.04,z-.75+i*.3,.08,.65,.23);}
-  for(const dz of [-.65,.65]){box('#34483f',x,.27,z+dz,.65,.54,.09);box('#34483f',x,1.36,z+dz,.86,.06,.06);}
-  cylinder('#354940',x, .58,z+2.3,.3,1.16);cylinder('#a88e5e',x,1.18,z+2.3,.32,.04);cylinder('#152b2b',x,1.21,z+2.3,.22,.025);
-  for(const dz of [-2.5,-3.5]){cylinder('#697a70',x,.4,z+dz,.035,.8);box('#697a70',x,.82,z+dz,.7,.07,.07);}
-  cylinder('#3b5148',x+2,.36,z+3,.11,.72);batch('box','#f1d7a1',x+2,.73,z+3,.16,.06,.16,0,0,true);
  }
 }

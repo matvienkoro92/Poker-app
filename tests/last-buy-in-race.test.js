@@ -86,3 +86,32 @@ test('airborne yaw settles and upper rail does not retain outward momentum',()=>
  E.step(r,{driving:true});assert.equal(r.heading,0);assert.equal(r.velocityHeading,0);const before=r.distance;
  for(let i=0;i<120;i++)E.step(r,{driving:true});assert.ok(r.distance>before+400);assert.equal(r.tier,0);
 });
+
+test('manual gas distinguishes coasting from braking and different cars accelerate differently',()=>{
+ const coast=ready(),brake=ready(),kart=ready(),bmw=ready();
+ kart.speed=bmw.speed=0;
+ bmw.transport='bmw-e60';
+ for(let i=0;i<15;i++){
+  E.step(coast,{driving:true,gas:false});
+  E.step(brake,{driving:true,gas:true,down:true});
+  E.step(kart,{driving:true,gas:true});
+  E.step(bmw,{driving:true,gas:true});
+ }
+ assert.ok(coast.speed>brake.speed*2);
+ assert.ok(kart.speed>bmw.speed);
+});
+
+test('city time trial finishes solo, preserves its rules on retry and ignores boost inputs',()=>{
+ const s=E.create(9,{sprint:true,trial:true});
+ assert.equal(s.rivals.length,0);
+ s.countdown=0;
+ s.speed=6;
+ s.distance=E.FINISH-2;
+ E.step(s,{driving:true,gas:true,special:true});
+ assert.equal(s.won,true);
+ assert.equal(s.nitro,100);
+ E.revive(s);
+ assert.equal(s.startDistance,E.LAP*2);
+ assert.equal(s.trial,true);
+ assert.equal(s.rivals.length,0);
+});

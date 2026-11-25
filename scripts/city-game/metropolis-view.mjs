@@ -108,6 +108,15 @@ export function buildMetropolis(scene,trees,palms){
     add(px-sx*side*1.6,6.91,pz-sz*side*1.6,.65,.09,.44,bridge?0xffda9e:0xffe4c2,angle,false,-3);
    }
   }
+  // Edge markings and flush reflectors make motion readable at road level.
+  for(const side of [-1,1]){
+   const shoulder=side*(width/2-.48);
+   add(x+sx*shoulder,.061,z+sz*shoulder,.1,.014,Math.max(1,len-23),bridge?0xe3d9bb:0xaaa99d,angle);
+   for(let m=15;m<len-12;m+=bridge?14:23){
+    const px=a.x+dx*m/len+sx*shoulder,pz=a.z+dz*m/len+sz*shoulder;
+    add(px,.077,pz,.25,.018,.45,bridge?0xf2dab0:0xddd4bd,angle);
+   }
+  }
   for(let m=12;m<len-8;m+=14){const px=a.x+dx*m/len,pz=a.z+dz*m/len;add(px,.075,pz,.18,.025,4.8,0xead3a4,angle);
    if(!bridge&&m%42===12){const tx=px+sx*14,tz=pz+sz*14;add(tx,2.3,tz,.45,4.6,.45,0x78634b);add(tx,5.3,tz,3.1,2.6,3.1,0x637f57,0,true);}
   }

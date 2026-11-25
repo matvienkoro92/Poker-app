@@ -1855,7 +1855,7 @@ navItems.forEach(function (item) {
         if (shell) shell.addEventListener("close", finishOpening, { once: true });
         Promise.resolve().then(async function () {
           if (typeof window.pokerEnsureLazyDomains === "function") {
-            await window.pokerEnsureLazyDomains(["profile"], { styles: true, scripts: true });
+            await window.pokerEnsureLazyDomains(["villa"], { styles: true, scripts: true });
           }
           if (shell && !shell.open) return;
           if (typeof window.pokerOpenPlayerHall !== "function") throw new Error("Не удалось открыть виллу. Попробуйте ещё раз.");

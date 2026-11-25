@@ -15,9 +15,27 @@ export function notice(s,t,seconds=3){s.notice=t;s.noticeTime=seconds;}
 export function rescue(s){if(s.rescueCooldown>0)return;const p=nearestRoad(s.car);if(blocked(p.x,p.z,1.6))return;s.car.x=p.x;s.car.z=p.z;s.car.speed=0;s.car.yaw=[-64,0,72].includes(p.x)?Math.PI:Math.PI/2;s.rescueCooldown=8;notice(s,'Машина возвращена на дорогу.',3);}
 function hit(s,amount){if(s.crashCooldown>0)return;s.health=Math.max(0,s.health-amount);s.crashCooldown=1.2;if(!s.health){s.failed=true;notice(s,'Машина повреждена. Рома пришлёт другую.',5);}}
 export function step(s,a,dt=1/60){if(s.failed||s.win)return;s.time+=dt;if(s.missionActive)s.elapsed+=dt;s.crashCooldown=Math.max(0,s.crashCooldown-dt);s.rescueCooldown=Math.max(0,s.rescueCooldown-dt);s.noticeTime=Math.max(0,s.noticeTime-dt);
-if(s.driving){const c=s.car,throttle=clamp(a.forward||0,-1,1),steer=clamp(a.turn||0,-1,1);let accel=throttle>0?10:throttle<0?(c.speed>1?-20:-6):0;c.speed+=accel*Math.abs(throttle)*dt;if(a.brake)c.speed*=Math.exp(-6*dt);c.speed*=Math.exp(-.36*dt);if(!throttle)c.speed*=Math.exp(-.8*dt);c.speed=clamp(c.speed,-7,24);if(Math.abs(c.speed)<.06)c.speed=0;c.yaw-=steer*dt*Math.min(1.7,Math.abs(c.speed)*.17)*Math.sign(c.speed||1)*(a.brake?1.3:1);const crashed=move(c,Math.sin(c.yaw)*c.speed*dt,Math.cos(c.yaw)*c.speed*dt,1.6);if(crashed&&Math.abs(c.speed)>3){hit(s,Math.min(15,Math.abs(c.speed)*.7));c.speed*=-.2;}s.player.x=c.x;s.player.z=c.z;s.player.yaw=c.yaw;
+if(s.driving){
+ const c=s.car,throttle=a.pedalBrake?0:clamp(a.forward||0,-1,1);
+ const targetSteer=clamp(a.turn||0,-1,1);
+ c.steer=(c.steer||0)+(targetSteer-(c.steer||0))*Math.min(1,dt*16);
+ const accel=throttle>0?10:throttle<0?(c.speed>1?-20:-6):0;
+ c.speed+=accel*Math.abs(throttle)*dt;
+ if(a.pedalBrake){
+  c.reverseHold=(c.reverseHold||0)+dt;
+  if(c.speed>.35||c.reverseHold<.35)c.speed*=Math.exp(-7*dt);
+  else c.speed=Math.max(-5,c.speed-5*dt);
+ }else c.reverseHold=0;
+ if(a.brake)c.speed*=Math.exp(-6*dt);
+ c.speed*=Math.exp(-(throttle?.36:.61)*dt);
+ c.speed=clamp(c.speed,-7,24);
+ if(Math.abs(c.speed)<.06)c.speed=0;
+ c.yaw-=c.steer*dt*Math.min(1.7,Math.abs(c.speed)*.17)*Math.sign(c.speed||1)*(a.brake?1.3:1);
+ const crashed=move(c,Math.sin(c.yaw)*c.speed*dt,Math.cos(c.yaw)*c.speed*dt,1.6);
+ if(crashed&&Math.abs(c.speed)>3){hit(s,Math.min(15,Math.abs(c.speed)*.7));c.speed*=-.2;}
+ s.player.x=c.x;s.player.z=c.z;s.player.yaw=c.yaw;
 }else{let x=a.x||0,z=a.z||0;const len=Math.hypot(x,z);if(len>1){x/=len;z/=len;}const speed=a.run?7:4.5;move(s.player,x*speed*dt,z*speed*dt,.45);if(Math.hypot(x,z)>.1)s.player.yaw=Math.atan2(x,z);}
-for(const t of s.traffic){advanceTraffic(t,dt);if(s.driving){
+for(const t of s.traffic){advanceTraffic(t,dt,s.driving?s.car:null);if(s.driving){
  const dx=s.car.x-t.x,dz=s.car.z-t.z,side=dx*Math.cos(t.yaw)-dz*Math.sin(t.yaw),along=dx*Math.sin(t.yaw)+dz*Math.cos(t.yaw);
  const contact=Math.abs(side)<1.85&&Math.abs(along)<3.2;
  if(contact&&!t.touching){hit(s,Math.min(10,2+Math.abs(s.car.speed)*.45));s.car.speed*=-.25;}

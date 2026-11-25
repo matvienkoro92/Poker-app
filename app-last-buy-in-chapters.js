@@ -246,7 +246,7 @@
   "goal": "Освободить три станции и опустить мост",
   "before": "Валера обесточил мост и оставил роботов у трёх станций. Манки ждёт с билетами у шлагбаума. Мисслику нужны три зелёные лампочки.",
   "quote": "Мисслик: «Кнопки большие. Шансы хорошие».",
-  "after": "Три станции работают, мост опущен. Но Валера припарковал «Железный натс» прямо у клуба. Машина с билетами не пройдёт — Кулершан берётся за последний участок по воздуху.",
+  "after": "Три станции работают, мост опущен. Команда продолжает путь к клубу с билетами.",
   "mapLocation": "Скоростной мост",
   "mapPoint": [
    60,
@@ -354,5 +354,5 @@
  }
 ];
 for(const c of chapters){c.previewFrames=c.previewFrames||[{speaker:c.previewHeadline,text:c.before+' '+c.quote}];c.outroFrames=[{speaker:c.outroHeadline,text:c.after}];}
-Object.defineProperty(chapters,'activeOrder',{value:Object.freeze([0,1,2,3,5,6,7,8,9,10,12,13,14,11])});
+Object.defineProperty(chapters,'activeOrder',{value:Object.freeze([0,1,2,3,5,6,7,8,9,10,13,14,11])});
 return chapters;});

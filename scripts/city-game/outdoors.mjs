@@ -17,14 +17,40 @@ export function createOutdoors(scene,textures,registerSurface,trees,palms){
  const crown=new T.IcosahedronGeometry(1,2);const cp=crown.attributes.position;for(let i=0;i<cp.count;i++){const x=cp.getX(i),y=cp.getY(i),z=cp.getZ(i),f=1+.1*Math.sin(x*12+y*9+z*17);cp.setXYZ(i,x*f,y*f,z*f);}// Preserve radial normals for soft foliage shading.
 
  const leafGeometry=new T.BufferGeometry();leafGeometry.setAttribute('position',new T.Float32BufferAttribute([0,0,-1,.4,0,0,0,.08,0,.4,0,0,0,0,1,0,.08,0,0,0,1,-.4,0,0,0,.08,0,-.4,0,0,0,0,-1,0,.08,0,.4,0,0,0,0,-1,0,-.04,0,0,0,1,.4,0,0,0,-.04,0,-.4,0,0,0,0,1,0,-.04,0,0,0,-1,-.4,0,0,0,-.04,0],3));leafGeometry.computeVertexNormals();
- const geos={trunk,frond,crown,branch:new T.CylinderGeometry(1,1.25,1,8),leaf:leafGeometry,rock:new T.IcosahedronGeometry(1,1)},bins=new Map(),dummy=new T.Object3D();
+ // Separate leaflets leave gaps between the fronds so the sky shows through.
+ const palmLeafPositions=[],palmLeafColors=[];
+ const palmSpine=t=>[t,.33*Math.sin(Math.PI*t)-.38*t*t,0];
+ function palmTriangle(a,b,c,tint){
+  palmLeafPositions.push(...a,...b,...c);
+  for(const light of [.93,1,.96])palmLeafColors.push(tint.r*light,tint.g*light,tint.b*light);
+ }
+ for(let i=0;i<26;i++){
+  const t=.07+i*.034,root=palmSpine(t),next=palmSpine(t+.04);
+  const reach=.235*Math.sin(Math.PI*t)**.82;
+  const tint=new T.Color().setHSL(.225+i*.0015,.51,.22+i*.002);
+  for(const side of [-1,1]){
+   const end=[t+.14,root[1]-.11*reach-.09*t,side*reach];
+   const rib=[t+.055,root[1]-.025,side*reach*.57];
+   const edge=[t+.023,next[1]-.05,side*reach*.5];
+   palmTriangle(root,rib,edge,tint);
+   palmTriangle(rib,end,edge,tint);
+  }
+  const right=[root[0],root[1],.009],left=[root[0],root[1],-.009];
+  palmTriangle(right,next,left,new T.Color('#829b4a'));
+ }
+ const coastalFrond=new T.BufferGeometry();
+ coastalFrond.setAttribute('position',new T.Float32BufferAttribute(palmLeafPositions,3));
+ coastalFrond.setAttribute('color',new T.Float32BufferAttribute(palmLeafColors,3));
+ coastalFrond.computeVertexNormals();
+ const geos={trunk,frond,coastalFrond,crown,branch:new T.CylinderGeometry(1,1.25,1,8),leaf:leafGeometry,rock:new T.IcosahedronGeometry(1,1)},bins=new Map(),dummy=new T.Object3D();
  function add(kind,material,x,y,z,sx,sy,sz,rx=0,ry=0,rz=0){const key=kind+material;if(!bins.has(key))bins.set(key,{kind,material,items:[]});bins.get(key).items.push([x,y,z,sx,sy,sz,rx,ry,rz]);}
  function palm(x,z,h=7,base=0){if(palms)return palms.add(x,z,h,base);const bend=rnd()*6.28;add('trunk','trunk',x,base,z,h,h,h,0,bend,0);const cx=x+Math.cos(bend)*h*.08,cz=z-Math.sin(bend)*h*.08;for(let i=0;i<13;i++){const a=i*2.399+Math.sin(x+z),length=(i<9?3.4:2.4)*(h/7)*(.88+rnd()*.2);add('frond','leaf',cx,base+h-.16,cz,length,length,length,0,a,i<9?-.07:.55);}for(let i=0;i<3;i++)add('rock','trunk',cx+Math.sin(i*2)*.2,base+h-.28,cz+Math.cos(i*2)*.2,.16,.2,.16);}
  function shrub(x,z,s=1,base=0){for(let i=0;i<3;i++){const a=i*2.399;foliage(x+Math.sin(a)*s*.28,.5*s+(i%2)*.15+base,z+Math.cos(a)*s*.28,s*.52);}}
  function branch(a,b,r){const start=new T.Vector3(...a),end=new T.Vector3(...b),v=end.clone().sub(start),mid=start.add(end).multiplyScalar(.5),q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),v.clone().normalize()),rotation=new T.Euler().setFromQuaternion(q);add('branch','trunk',mid.x,mid.y,mid.z,r,v.length(),r,rotation.x,rotation.y,rotation.z);}
- function foliage(x,y,z,s=1){
+ function foliage(x,y,z,s=1,canopy=false){
   // Solid overlapping leaflets need neither transparent cards nor distance-dependent swaps.
-  for(let j=0;j<54;j++){const a=j*2.399,v=1-2*(j+.5)/54,rad=Math.sqrt(1-v*v)*s;add('leaf','bush',x+Math.cos(a)*rad,y+v*s*.72,z+Math.sin(a)*rad,.55*s,.7*s,.48*s,.7*Math.sin(j*3.1),a,.6*Math.cos(j*1.7));}
+  const count=canopy?40:54;
+  for(let j=0;j<count;j++){const a=j*2.399,v=1-2*(j+.5)/count,rad=Math.sqrt(1-v*v)*s;add('leaf','bush',x+Math.cos(a)*rad,y+v*s*.72,z+Math.sin(a)*rad,(canopy?.39:.55)*s,(canopy?.52:.7)*s,(canopy?.35:.48)*s,.7*Math.sin(j*3.1),a,.6*Math.cos(j*1.7));}
  }
  function tree(x,z,h=6){
   if(trees)return trees.add(x,z,h);
@@ -32,7 +58,52 @@ export function createOutdoors(scene,textures,registerSurface,trees,palms){
   for(let i=0;i<9;i++){const a=i*2.399,reach=h*(i<6?.27:.15),y=h*(.55+i*.035),tip=[x+Math.sin(a)*reach,y+h*.12,z+Math.cos(a)*reach];branch([x+.08,y-h*.17,z],tip,h*(.015-i*.0008));foliage(tip[0],tip[1],tip[2],h*.20);}
   foliage(x,h*.94,z,h*.17);
  }
+ function coastalPalm(x,z,h=7,base=0){
+  if(palms)return palms.add(x,z,h,base);
+  const phase=rnd()*Math.PI*2,lean=h*(.075+rnd()*.05),ux=Math.cos(phase),uz=Math.sin(phase);
+  const trunkPoint=t=>[x+ux*lean*t*t,base+h*t,z+uz*lean*t*t];
+  for(let i=0;i<8;i++){
+   const t=i/8,next=(i+1)/8;
+   branch(trunkPoint(t),trunkPoint(next),h*(.028-.013*t));
+  }
+  for(let i=1;i<19;i++){
+   const t=i/20,[px,py,pz]=trunkPoint(t),r=h*(.022-.008*t);
+   add('rock','trunk',px,py,pz,r*1.7,.038,r*1.7,0,phase);
+  }
+  const [cx,cy,cz]=trunkPoint(1);
+  for(let i=0;i<18;i++){
+   const tier=i<11?0:1,angle=phase+i*2.399;
+   const length=h*(tier?.4:.53)*(.73+rnd()*.32);
+   add('coastalFrond','leaf',cx,cy+(tier?.15:-.07),cz,length,length,length,0,angle,tier?.49:-.13-rnd()*.21);
+  }
+  for(let i=0;i<5;i++){
+   const angle=phase+i*2.399;
+   add('rock','trunk',cx+Math.cos(angle)*.16,cy-.13,cz+Math.sin(angle)*.16,.13,.26,.15,0,angle);
+  }
+ }
+ function coastalTree(x,z,h=6,base=0){
+  if(trees)return trees.add(x,z,h,base);
+  const phase=rnd()*Math.PI*2,lean=.28+rnd()*.36;
+  const fork=[x+Math.cos(phase)*lean,base+h*.44,z+Math.sin(phase)*lean];
+  const bend=[(x+fork[0])*.5,base+h*.22,(z+fork[2])*.5];
+  branch([x,base-.06,z],bend,h*.043);
+  branch(bend,fork,h*.034);
+  for(let i=0;i<7;i++){
+   const angle=phase+i*2.399,reach=h*(.19+rnd()*.16);
+   const tip=[fork[0]+Math.cos(angle)*reach,base+h*(.71+rnd()*.23),fork[2]+Math.sin(angle)*reach];
+   const elbow=[fork[0]+Math.cos(angle)*reach*.58,base+h*(.56+rnd()*.13),fork[2]+Math.sin(angle)*reach*.58];
+   branch(fork,elbow,h*(.017+rnd()*.004));
+   branch(elbow,tip,h*.011);
+   for(let j=0;j<4;j++){
+    const spread=angle+(j-1.5)*.77,extent=h*(.065+rnd()*.06);
+    const bud=[tip[0]+Math.cos(spread)*extent,tip[1]+h*(rnd()*.13-.035),tip[2]+Math.sin(spread)*extent];
+    branch(tip,bud,h*.004);
+    foliage(bud[0],bud[1],bud[2],h*(.079+rnd()*.049),true);
+   }
+  }
+  foliage(fork[0],base+h*.97,fork[2],h*.113,true);
+ }
  function surface(map,x,z,w,d,y=.025,tile=8,roughness=.93){registerSurface(x,z,w,d,y);const t=map.clone();t.repeat.set(w/tile,d/tile);t.needsUpdate=true;textures.push(t);const material=new T.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:map===grass?.025:.018,roughness});const mesh=new T.Mesh(new T.PlaneGeometry(w,d),material);mesh.rotation.x=-Math.PI/2;mesh.position.set(x,y,z);mesh.receiveShadow=true;scene.add(mesh);return mesh;}
  function lawnEllipse(x,z,rx,rz,y=.015){const t=grass.clone();t.repeat.set(rx*2/10,rz*2/10);t.needsUpdate=true;textures.push(t);const mesh=new T.Mesh(new T.CircleGeometry(1,96),new T.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:.025,roughness:1}));mesh.rotation.x=-Math.PI/2;mesh.scale.set(rx,rz,1);mesh.position.set(x,y,z);mesh.receiveShadow=true;scene.add(mesh);return mesh;}
- return {palm,shrub,tree,lawnEllipse,asphalt:(x,z,w,d,y=.125)=>surface(asphalt,x,z,w,d,y,4,.94),lawnRect:(x,z,w,d,y=.025)=>surface(grass,x,z,w,d,y,10),paving:(x,z,w,d,y=.04)=>surface(stone,x,z,w,d,y,3,.83),deck:(x,z,w,d,y=.08)=>surface(wood,x,z,w,d,y,2,.62),facadeMap:plaster,stoneMap:stone,rock(x,z,s=1){add('rock','rock',x,.25*s,z,s,.6*s,s,0,rnd()*6.28);},flush(){for(const b of bins.values()){const mesh=new T.InstancedMesh(geos[b.kind],materials[b.material],b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,rx,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(rx,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);if(b.kind==='leaf')mesh.setColorAt(i,new T.Color().setHSL(.24+(i%7)*.009,.28+(i%3)*.04,.38+(i%5)*.025));}mesh.name='Landscape '+b.kind;mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);}for(const [kind,g]of Object.entries(geos))if(![...bins.values()].some(b=>b.kind===kind))g.dispose();for(const [name,m]of Object.entries(materials))if(![...bins.values()].some(b=>b.material===name))m.dispose();}};
+ return {palm,coastalPalm,coastalTree,shrub,tree,lawnEllipse,asphalt:(x,z,w,d,y=.125)=>surface(asphalt,x,z,w,d,y,4,.94),lawnRect:(x,z,w,d,y=.025)=>surface(grass,x,z,w,d,y,10),paving:(x,z,w,d,y=.04)=>surface(stone,x,z,w,d,y,3,.83),deck:(x,z,w,d,y=.08)=>surface(wood,x,z,w,d,y,2,.62),facadeMap:plaster,stoneMap:stone,rock(x,z,s=1){add('rock','rock',x,.25*s,z,s,.6*s,s,0,rnd()*6.28);},flush(){for(const b of bins.values()){const mesh=new T.InstancedMesh(geos[b.kind],materials[b.material],b.items.length);for(let i=0;i<b.items.length;i++){const [x,y,z,sx,sy,sz,rx,ry,rz]=b.items[i];dummy.position.set(x,y,z);dummy.scale.set(sx,sy,sz);dummy.rotation.set(rx,ry,rz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);if(b.kind==='leaf')mesh.setColorAt(i,new T.Color().setHSL(.224+(i%7)*.013,.29+(i%3)*.045,.40+(i%5)*.037));}mesh.name='Landscape '+b.kind;mesh.castShadow=true;mesh.receiveShadow=true;mesh.computeBoundingSphere();scene.add(mesh);}for(const [kind,g]of Object.entries(geos))if(![...bins.values()].some(b=>b.kind===kind))g.dispose();for(const [name,m]of Object.entries(materials))if(![...bins.values()].some(b=>b.material===name))m.dispose();}};
 }

@@ -17,69 +17,6 @@
   }
 
 
-  var coolerSpeech = null, coolerSpeechTimer = null, coolerPose = null, coolerTarget = null;
-  var greetingArt = './assets/cooler-flight/cooler-scene-greeting-v1.webp';
-  var angryArt = './assets/cooler-flight/cooler-scene-angry-v1.webp';
-  var hurtArt = './assets/cooler-flight/cooler-scene-hurt-v1.webp';
-  var coolerPoseChange = 0;
-  function changeCoolerPose(src) {
-    if(!coolerPose || coolerPose.getAttribute('src')===src)return;
-    var previous=coolerPose, change=++coolerPoseChange;
-    var next=previous.cloneNode(false);next.src=src;next.loading='eager';
-    function swap(){
-      if(change!==coolerPoseChange || coolerPose!==previous || !next.naturalWidth)return;
-      previous.replaceWith(next);coolerPose=next;
-    }
-    if(typeof next.decode==='function')next.decode().then(swap).catch(function(){});
-    else if(next.complete)swap();else next.addEventListener('load',swap,{once:true});
-  }
-  function closeCooler() {
-    coolerPoseChange++;
-
-    clearTimeout(coolerSpeechTimer);coolerSpeechTimer=null;
-    if(coolerSpeech)coolerSpeech.remove();coolerSpeech=null;
-    if(coolerPose){coolerPose.parentElement.classList.remove('evening-cooler-active');coolerPose.remove();}coolerPose=null;
-    if(coolerTarget)coolerTarget.setAttribute('aria-expanded','false');coolerTarget=null;
-  }
-  function positionCoolerSpeech() {
-    if(!coolerSpeech || !coolerTarget)return;
-    var rect=coolerTarget.getBoundingClientRect(),width=coolerSpeech.offsetWidth,height=coolerSpeech.offsetHeight;
-    coolerSpeech.style.left=Math.max(8,Math.min(window.innerWidth-width-8,rect.left-width*.75))+'px';
-    coolerSpeech.style.top=Math.max(12,Math.min(window.innerHeight-height-12,rect.top+rect.height*.2-height-10))+'px';
-  }
-  function inviteCooler() {
-    changeCoolerPose(greetingArt);coolerSpeech.dataset.state='invite';
-    coolerSpeech.innerHTML='<p>Помогите набить мне банкрол.</p><p>Сыграйте со мной в игру Кулершан.</p><div class="evening-cooler-speech__actions"><button type="button" data-cooler-choice="play">Сыграть</button><button type="button" data-cooler-choice="skip">Послать</button><button type="button" data-cooler-choice="hit">Ударить</button></div>';
-    positionCoolerSpeech();
-  }
-  document.addEventListener('click',function(event){
-    var choice=event.target.closest && event.target.closest('[data-cooler-choice]');
-    if(choice && coolerSpeech && coolerSpeech.contains(choice)){
-      event.preventDefault();
-      if(choice.dataset.coolerChoice==='skip'){
-        changeCoolerPose(angryArt);coolerSpeech.dataset.state='angry';coolerSpeech.innerHTML='<p>Игру-то понимать надо!</p>';positionCoolerSpeech();
-        coolerSpeechTimer=setTimeout(function(){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});},3000);
-      }else if(choice.dataset.coolerChoice==='hit'){
-        changeCoolerPose(hurtArt);coolerSpeech.dataset.state='hurt';coolerSpeech.innerHTML='<p>Ах ты ска! Не дорос еще с дядей Кулером тягаться!</p>';positionCoolerSpeech();
-        coolerSpeechTimer=setTimeout(function(){coolerSpeechTimer=null;if(coolerSpeech && document.body.dataset.view==='download')inviteCooler();else closeCooler();},3000);
-      }else{var play=choice.dataset.coolerChoice==='play';var target=coolerTarget;closeCooler();if(play && typeof window.setView==='function')window.setView('cooler-flight');else if(target)target.focus({preventScroll:true});}
-      return;
-    }
-    var target=event.target.closest && event.target.closest('.evening-reference__cooler-hit, [data-play-cooler]');
-    if(!target || coolerSpeechTimer)return;
-    event.preventDefault();closeCooler();coolerTarget=target;target.setAttribute('aria-expanded','true');
-    var scene=target.parentElement,art=scene.querySelector('img.evening-reference__art--portal-side');if(!art&&!scene.classList.contains('underwater-play')&&!scene.classList.contains('play-card'))return;
-    if(art){coolerPose=art.cloneNode(false);coolerPose.classList.add('evening-cooler-pose');coolerPose.src=greetingArt;scene.appendChild(coolerPose);}
-    coolerSpeech=document.createElement('div');coolerSpeech.className='evening-cooler-speech';coolerSpeech.setAttribute('role','dialog');coolerSpeech.setAttribute('aria-label','Кулер приглашает в Кулершан');coolerSpeech.setAttribute('aria-live','polite');document.body.appendChild(coolerSpeech);
-    inviteCooler();var pose=coolerPose;function showPose(){if(coolerPose===pose){scene.classList.add('evening-cooler-active');pose.classList.add('evening-cooler-pose--visible');}}if(pose?.complete && pose.naturalWidth)showPose();else if(pose)pose.addEventListener('load',showPose,{once:true});
-    coolerSpeech.querySelector('button').focus({preventScroll:true});
-    (art?[greetingArt,hurtArt,angryArt]:[]).forEach(function(src){var image=new Image();image.src=src;});
-  });
-  document.addEventListener('keydown',function(e){if(e.key==='Escape' && coolerSpeech){var target=coolerTarget;closeCooler();if(target)target.focus({preventScroll:true});}});
-  window.addEventListener('resize',positionCoolerSpeech);
-  window.addEventListener('scroll',positionCoolerSpeech,{passive:true});
-  new MutationObserver(function(){if(document.body.dataset.view!=='download')closeCooler();}).observe(document.body,{attributes:true,attributeFilter:['data-view']});
-
   var vpnCatDialog = null;
   var awakeVpnCat = null;
   document.addEventListener("click", function (event) {
@@ -115,7 +52,6 @@
     panel = panel === "poker21" ? "poker21" : "tournament";
     if (!current) { pendingPanel = panel; return; }
     flushDrag();
-    closeCooler();
     current.dataset.playPanel = panel;
     current.classList.remove("play-flow--dragging");
     current.querySelector(".play-flow__track").style.transform = "";
@@ -300,18 +236,19 @@
       dialog.querySelector('[data-villa-game-cancel]').onclick=function(){dialog.close();};
       dialog.addEventListener('close',function(){if(source&&source.isConnected)source.focus({preventScroll:true});});
       dialog.querySelector('[data-villa-game-confirm]').onclick=async function(){
-        var button=this;button.disabled=true;
+        var button=this;button.disabled=true;dialog.querySelector('[data-villa-game-error]').textContent='';
         try{
-          if(typeof window.pokerEnsureLazyDomains==='function')await window.pokerEnsureLazyDomains(['profile'],{styles:true,scripts:true});
+          if(typeof window.pokerEnsureLazyDomains==='function')await window.pokerEnsureLazyDomains(['villa'],{styles:true,scripts:true});
           if(typeof window.pokerOpenVillaGameRoom!=='function')throw Error('Не удалось загрузить комнату. Попробуйте ещё раз.');
           dialog.close();await window.pokerOpenVillaGameRoom(selected);
-        }catch(e){dialog.querySelector('[data-villa-game-error]').textContent=e.message||'Не удалось открыть комнату.';if(!dialog.open)dialog.showModal();}
+        }catch(e){dialog.querySelector('[data-villa-game-error]').textContent=/^Failed to load (script|stylesheet)/.test(e?.message)?'Не удалось загрузить игровую комнату. Проверьте соединение и попробуйте снова.':e?.message||'Не удалось открыть комнату.';button.textContent='Попробовать снова';if(!dialog.open)dialog.showModal();}
         finally{button.disabled=false;}
       };
     }
     dialog.querySelector('h2').textContent=game==='billiards'?'Перейти в бильярдную?':game==='nards'?'Перейти в гостиную для игры в нарды?':'Перейти в гостиную для игры в шахматы?';
     dialog.querySelector('[data-villa-game-description]').textContent='Откроется игровая комната на вашей вилле.';
     dialog.querySelector('[data-villa-game-error]').textContent='';
+    dialog.querySelector('[data-villa-game-confirm]').textContent='Перейти';
     dialog.showModal();
   });
 })();

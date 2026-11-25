@@ -23,7 +23,7 @@ test('disabled schedule does nothing and downtime never creates already expired 
  assert.equal(recurring.plan({config:{enabled:false},template,tournaments:[],time:at('2026-11-12T18:00:00')}),null);
  const slot=plan('2026-11-15T18:00:00');assert.equal(slot.startsAt,at('2026-11-16T00:00:00'));
 });
-test('cron creates one night event with original owner/equipment and normal full chat announcement',async()=>{
+test('cron opens registrations early and announces each of them only three hours before start',async()=>{
  let settings;const messages=[],f=fixture({recurringConfig:async()=>settings,notify:async p=>messages.push(p)});
  f.time(at('2026-11-12T13:00:00'));
  const t=await f.create({startsAt:at('2026-11-12T14:00:00'),drawAt:at('2026-11-12T14:00:00'),capacity:32,roundTargets:[1,1,1,1,1],entryType:'free',prizeKind:'tickets',prizeMode:'fixed',prizeAmounts:[1000,300]});
@@ -33,10 +33,18 @@ test('cron creates one night event with original owner/equipment and normal full
  f.time(at('2026-11-12T14:05:00'));await Promise.all([f.service.sweep(),f.service.sweep()]);
  const night=[...f.tournaments.values()].find(x=>x.recurring);
  assert.equal(night.startsAt,at('2026-11-13T00:00:00'));assert.deepEqual(night.prizeAmounts,[500]);assert.deepEqual(night.owner,prior.owner);assert.deepEqual(night.equipment,prior.equipment);
- assert.equal(messages.length,1);assert.match(messages[0].text,/Открыта регистрация/);assert.match(messages[0].text,/00:00 МСК/);assert.match(messages[0].text,/500 ₽/);assert.match(messages[0].text,/Мест: 32/);assert.ok(messages[0].reply_markup);
+ assert.equal(messages.length,0);
+ f.time(at('2026-11-12T20:59:59'));await f.service.sweep();assert.equal(messages.length,0);
+ f.time(at('2026-11-12T21:00:00'));await Promise.all([f.service.sweep(),f.service.sweep()]);
+ assert.equal(messages.length,1);assert.match(messages[0].text,/Идёт регистрация/);assert.match(messages[0].text,/00:00 МСК/);assert.match(messages[0].text,/500 ₽/);assert.match(messages[0].text,/Мест: 32/);assert.ok(messages[0].reply_markup.inline_keyboard[0][0].url.endsWith(night.id));
  await f.service.sweep();assert.equal(messages.length,1);assert.equal(f.tournaments.size,2);
  // Empty night cancels at midnight; the cycle still opens the next daily event.
  f.time(at('2026-11-13T00:00:00'));await f.service.sweep();
  f.time(at('2026-11-13T00:05:00'));await f.service.sweep();
  const day=[...f.tournaments.values()].find(x=>x.recurring?.kind==='day');assert.ok(day);assert.deepEqual(day.prizeAmounts,[1000,300]);assert.equal(day.startsAt,at('2026-11-13T14:00:00'));
+ const registrations=()=>messages.filter(p=>p.text.includes('Идёт регистрация'));
+ f.time(at('2026-11-13T10:59:59'));await f.service.sweep();assert.equal(registrations().length,1);
+ f.time(at('2026-11-13T11:00:00'));await f.service.sweep();assert.equal(registrations().length,2);
+ assert.match(registrations()[1].text,/Идёт регистрация: «Кубок двух тузов»/);
+ assert.ok(registrations()[1].reply_markup.inline_keyboard[0][0].url.endsWith(day.id));
 });

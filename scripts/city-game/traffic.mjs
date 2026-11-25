@@ -24,13 +24,21 @@ export const fleet=[
  {path:docks,start:19,pace:6,color:'#496b8c',kind:'uaz'}
 ];
 export function createTraffic(){return fleet.map(({path,start,pace},id)=>{const p=path[start],route=(start+1)%path.length,n=path[route];return {...p,id,route,speed:pace,yaw:Math.atan2(n.x-p.x,n.z-p.z)};});}
-export function advanceTraffic(t,dt){
+export function advanceTraffic(t,dt,player){
  const {path,pace}=fleet[t.id];let remaining=dt;
+ let approach=1;
+ if(player){
+  const dx=player.x-t.x,dz=player.z-t.z,sin=Math.sin(t.yaw),cos=Math.cos(t.yaw);
+  const gap=dx*sin+dz*cos,offset=Math.abs(dx*cos-dz*sin);
+  if(gap>0&&gap<15&&offset<2.1)approach=Math.max(.08,Math.min(1,(gap-3.7)/11));
+ }
+ const previousSpeed=t.speed;
  while(remaining>0){
   const n=path[t.route],dx=n.x-t.x,dz=n.z-t.z,d=Math.hypot(dx,dz);
-  t.speed=pace*(d<4?.72:1);const travel=Math.min(d,t.speed*remaining);
+  t.speed+=(pace*(d<4?.72:1)*approach-t.speed)*Math.min(1,remaining*8);const travel=Math.min(d,t.speed*remaining);
   if(d>0){t.yaw=Math.atan2(dx,dz);t.x+=dx*travel/d;t.z+=dz*travel/d;}
   if(travel<d)break;
-  remaining-=travel/t.speed;t.route=(t.route+1)%path.length;
+  remaining-=travel/Math.max(.01,t.speed);t.route=(t.route+1)%path.length;
  }
+ t.braking=t.speed<previousSpeed-dt*.8;
 }

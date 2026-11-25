@@ -1,7 +1,7 @@
 import * as T from '../../vendor/three/three.module.min.js';
 import {lunaSite} from './metropolis.mjs';
 import {ISLAND} from './world.mjs';
-export function buildIsland({scene,box,cylinder,batch,label,textures,outdoors}){
+export function buildIsland({scene,box,cylinder,batch,label,roadSign,textures,outdoors}){
  const {x,z,rx,rz}=ISLAND;
  const ground=new T.Mesh(new T.CylinderGeometry(1,1.03,1,72),new T.MeshStandardMaterial({color:'#bba77d',roughness:1}));ground.position.set(x,-.52,z);ground.scale.set(rx,1,rz);ground.receiveShadow=true;scene.add(ground);
  outdoors.lawnEllipse(x,z,rx-1,rz-1);
@@ -10,7 +10,7 @@ export function buildIsland({scene,box,cylinder,batch,label,textures,outdoors}){
  box('#a9a088',157,.045,67,10,.08,74);box('#c9bda5',157,.07,67,11,.04,74);
  box('#7d8581',136,.08,70,52,.16,14);for(const side of [-1,1]){box('#d4c3a1',136,.22,70+side*6.7,52,.24,.5);box('#47564e',136,1.15,70+side*6.7,52,.09,.1);for(let xx=112;xx<163;xx+=4)cylinder('#a79877',xx,.75,70+side*6.7,.12,1.5);}
  for(let xx=113;xx<162;xx+=7)box('#e3d2a2',xx,.17,70,3,.015,.12);for(const xx of [116,132,148]){box('#c6ba9e',xx,-1.4,70,1.4,2.8,12);}
- label('ПРИЧАЛ →',111,3.3,78,13,1.2);
+ roadSign(111,78,[['ПРИЧАЛ','right']]);
  // A park silhouette locates the already-existing bonus mission, without changing its unlock.
  const parkBox=(color,x,y,z,...args)=>box(color,lunaSite.x+x-199,y,lunaSite.z+z-34,...args);
  const parkCylinder=(color,x,y,z,...args)=>cylinder(color,lunaSite.x+x-199,y,lunaSite.z+z-34,...args);

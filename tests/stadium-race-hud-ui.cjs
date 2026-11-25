@@ -8,8 +8,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await p.evaluate(()=>{testRace.countdown=0;testRace.notice='ТРАМПЛИН';testRace.noticeTicks=150;testRace.distance=24400;testRace.speed=6;testRace.airDuration=48;testRace.air=24;});
   await p.waitForFunction(()=>document.querySelector('.race3d-view').raceSnapshot().distance===24400);
   assert.equal(await p.locator('#storyLives').isVisible(),false);
-  assert.equal(await p.locator('.race3d-stage [data-key=down]').count(),0);
-  const gauge=await p.locator('.race3d-gauge').boundingBox(),stick=await p.locator('.race3d-joystick').boundingBox();
+  assert.equal(await p.locator('.race3d-stage [data-key=down]').count(),1);
+  const gauge=await p.locator('.race3d-gauge').boundingBox(),stick=await p.locator('.race3d-controls').boundingBox();
   assert.ok(gauge.y<=65&&gauge.y>=50);assert.ok(size.height-stick.y-stick.height<=24);
   const boxes=await p.evaluate(()=>{const selectors=['#storyBack','.race3d-progress','.race3d-pause','#storySound'];return selectors.map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {selector,x:r.x,y:r.y,right:r.right,bottom:r.bottom};});});
   for(let i=1;i<boxes.length;i++){assert.ok(boxes[i].x>=boxes[i-1].right,JSON.stringify(boxes));assert.ok(Math.abs(boxes[i].y-boxes[0].y)<3,JSON.stringify(boxes));}

@@ -3,7 +3,7 @@ import {thumbstick} from '../shared/thumbstick.mjs';
 import {mapPoint,mapPercent,lighthouseShore,shores,lagoon,parks,lots,roads,landmarks,lunaSite,metroNearest,missionSites} from './metropolis.mjs';
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {create,step,interact,rescue,subject,prompt,objective,checkpoint,notice} from './engine.mjs';
-import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,PORT,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,roadRoute} from './world.mjs';
+import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,PORT,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,roadRoute,waterfrontBasin,waterfrontWaterEdges} from './world.mjs';
 import {loadCityGarage} from './garage.mjs';
 import {createCityScene} from './scene.mjs';
 import {createAwardInspector} from './award-inspector.mjs';
@@ -12,10 +12,10 @@ function syncCityRadio(active){if(radioActive===active)return;radioActive=active
 const $=id=>document.getElementById(id),SAVE='poker21-city:v1';
 let saved={};try{saved=JSON.parse(localStorage.getItem(SAVE)||'{}')||{};}catch(_){}
 let state=create(saved),view=null,started=false,paused=true,disposed=false,last=0,acc=0,savePhase=state.phase,showedResult=false,quality='standard',soundEnabled=saved.sound===true,lastMapTime=-Infinity;
-const keys=new Set(),stick={x:0,y:0,id:null},held={gas:false,brake:false},listeners=[];let cameraDrag=null,lastCameraDrag=-10,lastHealth=100;
+const keys=new Set(),stick={x:0,y:0,id:null},held={gas:false,brake:false,left:false,right:false},controls=new Map(),listeners=[];let cameraDrag=null,lastCameraDrag=-10,lastHealth=100;
 function on(target,event,fn,opts){target.addEventListener(event,fn,opts);listeners.push(()=>target.removeEventListener(event,fn,opts));}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify({...checkpoint(state),sound:soundEnabled,best:saved.best||null}));}catch(_){}}
-function clearInput(){keys.clear();held.gas=held.brake=false;stick.x=stick.y=0;stick.id=null;cameraDrag=null;$('cityStick').querySelector('i').style.transform='translate(-50%,-50%)';}
+function clearInput(){keys.clear();controls.clear();for(const [id,key] of driveButtons){held[key]=false;$(id).removeAttribute('data-held');}stick.x=stick.y=0;stick.id=null;cameraDrag=null;$('cityStick').querySelector('i').style.transform='translate(-50%,-50%)';}
 function freeze(){previousCar=null;paused=true;syncCityRadio(false);clearInput();audio.silence();last=0;acc=0;}
 function resume(){if(!started||state.failed||document.hidden)return;paused=false;last=0;acc=0;renderLoop?.request();}
 function pause(){if(awardInspector.isOpen||!started||$('cityPauseDialog').open||$('cityResult').open||$('cityMapDialog').open)return;freeze();$('cityPauseDialog').showModal();}
@@ -29,10 +29,10 @@ function openCityRadio(){
  radioDialog.showModal();syncCityRadio(true);
 }
 const audio={context:null,engine:null,gain:null,enabled:false,start(){if(!soundEnabled)return;try{if(!this.context){const C=window.AudioContext||window.webkitAudioContext;this.context=new C();this.engine=this.context.createOscillator();this.gain=this.context.createGain();const filter=this.context.createBiquadFilter();filter.type='lowpass';filter.frequency.value=420;this.engine.type='sawtooth';this.engine.frequency.value=48;this.gain.gain.value=0;this.engine.connect(filter).connect(this.gain).connect(this.context.destination);this.engine.start();}this.context.resume().catch(()=>{});}catch(_){soundEnabled=false;}},update(){if(!this.context||!this.gain)return;const active=soundEnabled&&!paused&&state.driving;this.gain.gain.setTargetAtTime(active?.018:0,this.context.currentTime,.12);this.engine.frequency.setTargetAtTime(42+Math.abs(state.car.speed)*4,this.context.currentTime,.08);},silence(){if(this.gain)this.gain.gain.value=0;},beep(f=500){if(!soundEnabled)return;this.start();if(!this.context)return;const o=this.context.createOscillator(),g=this.context.createGain(),t=this.context.currentTime;o.frequency.value=f;g.gain.setValueAtTime(.035,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g).connect(this.context.destination);o.start(t);o.stop(t+.18);o.onended=()=>{o.disconnect();g.disconnect();};}};
-function soundUI(){$('citySound').setAttribute('aria-pressed',String(soundEnabled));$('citySound').setAttribute('aria-label',soundEnabled?'Выключить звук':'Включить звук');$('citySound').style.opacity=soundEnabled?'1':'.55';}
+function soundUI(){const button=$('citySound');button.setAttribute('aria-pressed',String(soundEnabled));button.textContent=soundEnabled?'Выключить звук':'Включить звук';}
 on($('citySound'),'click',()=>{soundEnabled=!soundEnabled;audio.start();soundUI();save();});soundUI();
 on($('cityStart'),'click',()=>{if(!view)return;started=true;$('cityIntro').hidden=true;document.body.classList.add('city-started');$('cityControls').hidden=false;audio.start();resume();});
-on($('cityPause'),'click',pause);on($('cityResume'),'click',()=>{$('cityPauseDialog').close();resume();});
+on($('cityPause'),'click',()=>{$('cityMapDialog').close();pause();});on($('cityResume'),'click',()=>{$('cityPauseDialog').close();resume();});
 on($('cityPauseDialog'),'cancel',e=>{e.preventDefault();$('cityPauseDialog').close();resume();});
 on($('cityRescue'),'click',()=>{rescue(state);$('cityPauseDialog').close();resume();});on($('cityRestart'),'click',reset);
 on($('cityQuality'),'click',()=>{quality=quality==='standard'?'low':'standard';view.renderer.setPixelRatio(Math.min(devicePixelRatio,quality==='low'?1:1.5));view.renderer.shadowMap.enabled=quality!=='low';view.fit();$('cityQuality').textContent='Графика: '+(quality==='low'?'экономная':'стандарт');});
@@ -47,7 +47,25 @@ const joy=$('cityStick');
 on(joy,'pointerdown',e=>{if(paused||stick.id!==null)return;stick.origin={x:e.clientX,y:e.clientY};stick.id=e.pointerId;joy.setPointerCapture(e.pointerId);joyMove(e);e.preventDefault();});
 function joyMove(e){if(stick.id!==e.pointerId)return;const v=thumbstick(stick.origin,e,joy.clientWidth*.34);stick.x=v.x;stick.y=v.y;joy.querySelector('i').style.transform='translate(calc(-50% + '+v.px+'px),calc(-50% + '+v.py+'px))';}
 on(joy,'pointermove',joyMove);function joyEnd(e){if(e.pointerId!==stick.id)return;stick.id=null;stick.x=stick.y=0;joy.querySelector('i').style.transform='translate(-50%,-50%)';}on(joy,'pointerup',joyEnd);on(joy,'pointercancel',joyEnd);on(joy,'lostpointercapture',joyEnd);
-for(const [id,key]of [['cityGas','gas'],['cityBrake','brake']]){const b=$(id);on(b,'pointerdown',e=>{if(paused)return;held[key]=true;b.setPointerCapture(e.pointerId);e.preventDefault();});for(const ev of ['pointerup','pointercancel','lostpointercapture'])on(b,ev,()=>held[key]=false);}
+const driveButtons=[['cityGas','gas'],['cityBrake','brake'],['cityLeft','left'],['cityRight','right']];
+for(const [id,key] of driveButtons){
+ const button=$(id);
+ on(button,'pointerdown',event=>{
+  if(paused||event.button!==0)return;
+  event.preventDefault();
+  button.setPointerCapture(event.pointerId);
+  controls.set(event.pointerId,key);
+  held[key]=true;
+  button.setAttribute('data-held','');
+ });
+ for(const type of ['pointerup','pointercancel','lostpointercapture']){
+  on(button,type,event=>{
+   if(!controls.delete(event.pointerId))return;
+   held[key]=Array.from(controls.values()).includes(key);
+   button.toggleAttribute('data-held',held[key]);
+  });
+ }
+}
 on($('cityCanvas'),'pointerdown',e=>{if(paused||!started)return;cameraDrag={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false};$('cityCanvas').setPointerCapture(e.pointerId);});
 on($('cityCanvas'),'pointermove',e=>{if(!cameraDrag||cameraDrag.id!==e.pointerId)return;if(Math.hypot(e.clientX-cameraDrag.startX,e.clientY-cameraDrag.startY)>8)cameraDrag.moved=true;view.orbit.yaw-=(e.clientX-cameraDrag.x)*.006;view.orbit.pitch=Math.max(-.25,Math.min(.7,view.orbit.pitch+(e.clientY-cameraDrag.y)*.004));cameraDrag.x=e.clientX;cameraDrag.y=e.clientY;lastCameraDrag=state.time;});
 on($('cityCanvas'),'pointerup',e=>{const drag=cameraDrag;cameraDrag=null;if(!paused&&started&&drag?.id===e.pointerId&&!drag.moved)awardInspector.open(view.awards.pick(e.clientX,e.clientY,state));});
@@ -64,9 +82,9 @@ function rememberCityPosition(){
 }
 on(window,'pagehide',()=>{rememberCityPosition();save();dispose();});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
-function input(){const f=(keys.has('KeyW')||keys.has('ArrowUp')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-stick.y,r=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0)+stick.x;const forward=Math.max(-1,Math.min(1,f+(state.driving&&held.gas?1:0))),turn=Math.max(-1,Math.min(1,r));state.steer=turn;const yaw=view.orbit.yaw;return {forward,turn,brake:held.brake||keys.has('Space'),x:Math.sin(yaw)*forward-Math.cos(yaw)*turn,z:Math.cos(yaw)*forward+Math.sin(yaw)*turn,run:held.gas||keys.has('ShiftLeft')||keys.has('ShiftRight')};}
+function input(){const f=(keys.has('KeyW')||keys.has('ArrowUp')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(state.driving?0:stick.y),r=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0)+(state.driving?Number(held.right)-Number(held.left):stick.x);const forward=Math.max(-1,Math.min(1,f+(state.driving&&held.gas?1:0))),turn=Math.max(-1,Math.min(1,r));const yaw=view.orbit.yaw;return {forward,turn,brake:keys.has('Space'),pedalBrake:state.driving&&held.brake,x:Math.sin(yaw)*forward-Math.cos(yaw)*turn,z:Math.cos(yaw)*forward+Math.sin(yaw)*turn,run:held.gas||keys.has('ShiftLeft')||keys.has('ShiftRight')};}
 let lastUI='';
-function navigationObjective(){return destination?{title:destination.title||destination.name,detail:destination.approach?'Подъезд · '+destination.name:'Маршрут на карте · можно сменить пункт назначения',target:destination.approach||destination}:objective(state);}
+function navigationObjective(){return destination?{title:destination.title||destination.name,detail:destination.detail||(destination.approach?'Подъезд · '+destination.name:'Маршрут на карте · можно сменить пункт назначения'),target:destination.approach||destination}:objective(state);}
 let cachedNavigation=null;
 function navigationFrom(p,target){
  if(cachedNavigation&&cachedNavigation.tx===target.x&&cachedNavigation.tz===target.z&&Math.hypot(p.x-cachedNavigation.x,p.z-cachedNavigation.z)<1)return cachedNavigation;
@@ -74,11 +92,13 @@ function navigationFrom(p,target){
  cachedNavigation={x:p.x,z:p.z,tx:target.x,tz:target.z,path,text:navigationText(drivingDirections(p,path,target))};
  return cachedNavigation;
 }
-function updateUI(){const o=navigationObjective(),p=subject(state),d=o.target?Math.round(Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,distanceText=!o.target?'':state.driving?navigationFrom(p,o.target).text:'◆ '+d+' м до цели',key=[o.title,o.detail,distanceText,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
+function updateUI(){const o=navigationObjective(),p=subject(state);
+ $('cityMission').hidden=!o.target&&!state.heat&&!state.failed;
+ const d=o.target?Math.round(Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,distanceText=!o.target?'':state.driving?navigationFrom(p,o.target).text:'◆ '+d+' м до цели',key=[o.title,o.detail,distanceText,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
  $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ПРИЧАЛ / ОСТРОВ ВИЛЛЫ':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ПРИЧАЛ ВИЛЛЫ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=distanceText;$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
  const radio=$('cityRadio');radio.classList.toggle('is-hidden',state.noticeTime<=0);radio.querySelector('p').textContent=state.notice;radio.style.bottom=state.driving?'350px':'';
  const info=document.querySelector('.city-drive-info');info.hidden=!state.driving;$('citySpeed').textContent=Math.round(Math.abs(state.car.speed)*3.6);$('cityCondition').style.width=state.health+'%';$('cityCondition').style.background=state.health<35?'#ed9a74':'#d3d9ad';$('cityConditionText').textContent='КУЗОВ '+Math.round(state.health)+'%';
- const actionText=awardInspector.near()?'Рассмотреть награду · E':prompt(state),actionButton=$('cityAction');actionButton.classList.toggle('is-ready',!!actionText);actionButton.disabled=!actionText||Math.abs(state.driving?state.car.speed:0)>2;actionButton.querySelector('span').textContent=actionText?(actionText.includes('награду')?'Осмотреть':actionText.includes('Магнитофон')?'Музыка':actionText.includes('Выйти')?'Выйти':actionText.includes('руль')?'В машину':actionText.includes('Ромой')?'Рома':actionText.includes('виллу')?'Домой':actionText.includes('Вернуть')?'Передать':actionText.includes('кейс')?'Кейс':'Действие'):'Действие';actionButton.setAttribute('aria-label',actionText||'Действие недоступно');$('cityGas').querySelector('span').textContent=state.driving?'Газ':'Бежать';$('cityBrake').hidden=!state.driving;
+ const actionText=awardInspector.near()?'Рассмотреть награду · E':prompt(state),actionButton=$('cityAction');actionButton.classList.toggle('is-ready',!!actionText);actionButton.disabled=!actionText||Math.abs(state.driving?state.car.speed:0)>2;actionButton.querySelector('span').textContent=actionText?(actionText.includes('награду')?'Осмотреть':actionText.includes('Магнитофон')?'Музыка':actionText.includes('Выйти')?'Выйти':actionText.includes('руль')?'В машину':actionText.includes('Ромой')?'Рома':actionText.includes('виллу')?'Домой':actionText.includes('Вернуть')?'Передать':actionText.includes('кейс')?'Кейс':'Действие'):'Действие';actionButton.setAttribute('aria-label',actionText||'Действие недоступно');$('cityGas').querySelector('span').textContent=state.driving?'Газ':'Бежать';$('cityBrake').hidden=!state.driving;$('cityStick').hidden=state.driving;$('citySteering').hidden=!state.driving;$('cityControls').classList.toggle('city-controls-driving',state.driving);
  if(state.phase!==savePhase){savePhase=state.phase;save();}
  if((state.win||state.failed)&&!showedResult){showedResult=true;freeze();const won=state.win;$('cityResultBadge').textContent=won?'ДОСТАВКА / ВЫПОЛНЕНО':'ДОСТАВКА / ЕЩЁ ПОПЫТКА';$('cityResultTitle').textContent=won?'Все свои на месте.':'Рома уже выезжает.';const time=Math.floor(state.elapsed);if(won){saved.best=Math.min(saved.best||Infinity,time);save();}$('cityResultText').textContent=won?'Кейс с билетами вернулся в TWO ACES. Время: '+Math.floor(time/60)+' мин '+time%60+' с. Можно остаться в городе и свободно покататься.':'Машина повреждена. Продолжение вернёт тебя к последнему этапу доставки с целой машиной.';$('cityResultContinue').textContent=won?'Остаться в городе':'Продолжить доставку';document.body.classList.toggle('city-failed',!won);$('cityResult').showModal();audio.beep(won?880:180);}
 }
@@ -107,6 +127,10 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();lighthouseShore.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(lunaSite.x),Z(lunaSite.z),9*k,0,Math.PI*2);ctx.stroke();}
  // Draw the local street network over the campaign illustration too.
  const rect=(x,z,w,d)=>ctx.fillRect(X(x-w/2),Z(z-d/2),w*k,d*k);
+ const basin=waterfrontBasin;ctx.fillStyle='#286171';ctx.beginPath();
+ for(let z=basin.minZ;z<=basin.maxZ;z+=2)ctx.lineTo(X(waterfrontWaterEdges(z).east),Z(z));
+ for(let z=basin.maxZ;z>=basin.minZ;z-=2)ctx.lineTo(X(waterfrontWaterEdges(z).west),Z(z));
+ ctx.closePath();ctx.fill();
  ctx.fillStyle=illustrated?'#abae9c':'#819085';
  for(const x of ROAD_X)rect(x,-9,14,208);
  for(const z of ROAD_Z)rect(-1,z,192,14);

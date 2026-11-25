@@ -19,9 +19,21 @@ export const LIMITS=bounds;
 export const ISLAND={x:194,z:70,rx:52,rz:65};
 export const PENINSULA={x:73,z:146,rx:55,rz:50};
 export const ESTATE={minX:53,maxX:119,minZ:117,maxZ:173};
+export const waterfrontBasin={minZ:101,maxZ:169};
+export function waterfrontShoreX(z){
+ return 22+2.2*Math.sin((z-102)*.14)+.95*Math.cos((z-102)*.057);
+}
+export function waterfrontWaterEdges(z){
+ const {minZ,maxZ}=waterfrontBasin;
+ const t=(z-minZ)/(maxZ-minZ);
+ const end=Math.sqrt(Math.max(0,1-Math.pow(2*t-1,8)));
+ const east=waterfrontShoreX(z);
+ const middle=(east-83)*.5;
+ return {west:middle-(east-middle)*end,east:middle+(east-middle)*end};
+}
 export const GATE={x:53,z:160,width:10};
 export const BRIDGE={minX:110,maxX:162,minZ:63,maxZ:77};
-export function landAt(x,z){return metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||onLighthouseShore(x,z)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
+export function landAt(x,z){if(z>waterfrontBasin.minZ&&z<waterfrontBasin.maxZ){const edge=waterfrontWaterEdges(z);if(x>edge.west&&x<edge.east)return false;}return metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||onLighthouseShore(x,z)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
 export function islandExitRoute(point){return [{x:157,z:point.z},{x:157,z:70},{x:72,z:70}];}
 export function estateExitRoute(){return [{x:61,z:160},{x:40,z:160},{x:40,z:105},{x:72,z:105},{x:72,z:70}];}
 export const ROAD_X=[-64,0,72],ROAD_Z=[-75,0,70];
@@ -39,7 +51,11 @@ export const BUILDINGS=[
  {x:29,z:28,w:30,d:28,h:23,color:'#d4a590',name:'ALL IN RECORDS'},
  {x:54,z:33,w:15,d:34,h:16,color:'#b2bbcd'},
  {x:-33,z:84,w:41,d:14,h:20,color:'#b6c9c3'},
- {x:32,z:85,w:42,d:14,h:18,color:'#cbb59d'}
+ {x:32,z:85,w:42,d:14,h:18,color:'#cbb59d'},
+ // The east side of the avenue backs onto a small waterfront neighbourhood.
+ {x:105,z:16,w:17,d:15,h:12,color:'#d7b498'},
+ {x:107,z:35,w:20,d:17,h:19,color:'#afc0b5'},
+ {x:104,z:55,w:18,d:14,h:16,color:'#d7c1a5'}
 ];
 const villaRect=(x,z,w,d,h=5.4)=>{const p=villaPoint(x,z);return {...rect(p.x,p.z,d,w),h};};
 const rect=(x,z,w,d)=>({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});

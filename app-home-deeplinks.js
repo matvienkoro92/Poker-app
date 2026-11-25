@@ -56,8 +56,7 @@ function pokerInitHomeDeepLinks(opts) {
     if (coolerQuery && /^[a-f0-9]{12}$/i.test(coolerQuery)) coolerDuel = [coolerQuery, coolerQuery];
   } catch (eCoolerQuery) {}
   if (coolerDuel) {
-    window.__pendingCoolerDuel = coolerDuel[1].toLowerCase();
-    openViewThen("cooler-flight");
+    openViewThen("profile");
     return;
   }
   function retryDeepLinkAction(action, attemptsLeft) {
@@ -142,8 +141,8 @@ function pokerInitHomeDeepLinks(opts) {
     }
     var createGame=/^create_(billiards|chess|short|long)$/.exec(startParam);
     if(createGame){openHomeModalDeepLink(function(){return createGame[1]==='billiards'?typeof window.pokerOpenBilliardsInvite==='function'&&window.pokerOpenBilliardsInvite('',false,true):typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames(createGame[1],null,false,null,false,true);},['profile']);return;}
-    if(startParam==='games_chess'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('chess');},['profile']);return;}
-    if(startParam==='games_hall'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('nards');},['profile']);return;}
+    if(startParam==='games_chess'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('chess');},['villa']);return;}
+    if(startParam==='games_hall'){openHomeModalDeepLink(function(){return typeof window.pokerOpenVillaGameRoom==='function'&&window.pokerOpenVillaGameRoom('nards');},['villa']);return;}
     var nardsAppearance=/^nards_appearance_(outside|inside|pieces|dice)$/.exec(startParam);
     if(nardsAppearance){openHomeModalDeepLink(function(){return typeof window.pokerOpenBoardGames==='function'&&window.pokerOpenBoardGames('long',null,false,nardsAppearance[1]);},['profile']);return;}
     var dartsLink=/^darts_(watch_)?([A-HJ-NP-Z2-9]{10})$/.exec(startParam);
@@ -174,7 +173,7 @@ function pokerInitHomeDeepLinks(opts) {
         if (typeof open !== "function") return false;
         open();
         return true;
-      }, ["profile"]);
+      }, ["villa"]);
       return;
     }
     var tournamentBetMatch = startParam.match(/^tournament_bet_(tb_[a-z0-9_:-]+)$/i);
@@ -632,7 +631,7 @@ function pokerInitHomeDeepLinks(opts) {
       bonus_game: "bonus-game",
       plasterer_game: "plasterer-game",
       cooler_game: "cooler-game",
-      cooler_flight: "cooler-flight",
+      cooler_flight: "profile",
     };
     if (simpleViewByStartApp[startParam]) {
       var vn = simpleViewByStartApp[startParam];
