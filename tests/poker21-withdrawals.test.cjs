@@ -7,7 +7,8 @@ const {applyOperation,summary}=require('../lib/admin-deposits');
 const handle=require('../lib/api-handlers/poker21-withdrawals');
 
 test('only published withdrawals enter the cabinet and share the admin reservation balance',async t=>{
-  const entryId=randomUUID(),offerId=randomUUID();
+  const entryId=randomUUID();
+  let offerId=randomUUID();
   const entry={room:'P21',playerId:'123456',recipient:'Тест',bank:'Тест',phone:'+79990000000',total:900000};
   let state=applyOperation(null,{action:'create',requestId:entryId,entry},'admin').state;
   const original=process.env.POKER21_WITHDRAWALS_SYNC_KEY;
@@ -30,9 +31,15 @@ test('only published withdrawals enter the cabinet and share the admin reservati
   state=applyOperation(state,{action:'poker21-publish',entryId,requestId:offerId,amount:900000},'admin').state;
   assert.equal(summary(state.entries[0]).available,900000);
   assert.equal((await call('list')).data.items[0].amount,9000);
+  assert.equal((await call('remove',offerId,'321')).code,403);
+  assert.equal((await call('remove',offerId,'758417')).code,200);
+  assert.deepEqual((await call('list')).data.items,[]);
+  state=applyOperation(state,{action:'poker21-publish',entryId,requestId:randomUUID(),amount:900000},'admin').state;
+  offerId=state.entries[0].poker21Offer.id;
   assert.equal((await call('take',offerId,'758417')).code,403);
   assert.equal((await call('take',offerId)).code,200);
   assert.equal((await call('take',offerId,'321')).code,409);
+  assert.equal((await call('remove',offerId,'758417')).code,409);
   assert.equal(summary(state.entries[0]).available,0);
   const reservationId=state.entries[0].reservations[0].id;
   assert.equal((await call('cancel',reservationId)).code,200);
