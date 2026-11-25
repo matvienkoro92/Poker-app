@@ -2697,22 +2697,8 @@
     var canResolveClubPlayer = newsModalMode === "club" && !!String(row && row.actorNick || "").trim();
     var canOpenProfile = !ticker && !!(eventPlayerId || canResolveClubPlayer);
     var profileLevel = Math.max(0, Number(linkedProfile && linkedProfile.level) || 0);
-    var ratingSnapshot = newsModalMode === "club" ? clubRatingSnapshotForNick(row && row.actorNick) : null;
-    var snapshotLeague1Place = Math.max(0, Number(ratingSnapshot && ratingSnapshot.league1Place) || 0);
-    var snapshotLeague2Place = Math.max(0, Number(ratingSnapshot && ratingSnapshot.league2Place) || 0);
-    var snapshotRatingLeague = snapshotLeague1Place && (!snapshotLeague2Place || snapshotLeague1Place <= snapshotLeague2Place)
-      ? 1
-      : (snapshotLeague2Place ? 2 : 0);
-    var snapshotRatingPlace = snapshotRatingLeague === 1 ? snapshotLeague1Place : (snapshotRatingLeague === 2 ? snapshotLeague2Place : 0);
-    var profileRatingPlace = Math.max(0, Number(linkedProfile && linkedProfile.ratingPlace) || snapshotRatingPlace || 0);
-    var profileRatingLeague = Math.max(0, Number(linkedProfile && linkedProfile.ratingLeague) || snapshotRatingLeague || 0);
-    var profileMetaParts = [];
-    if (profileLevel) profileMetaParts.push("Уровень " + profileLevel);
-    if (profileRatingPlace && profileRatingLeague) {
-      profileMetaParts.push("Лига " + profileRatingLeague + " · " + profileRatingPlace + "-е место");
-    }
-    var profileMetaHtml = !ticker && profileMetaParts.length
-      ? '<span class="home-friend-news-modal__player-meta">' + esc(profileMetaParts.join(" · ")) + '</span>'
+    var profileMetaHtml = !ticker && profileLevel
+      ? '<span class="home-friend-news-modal__player-meta">Уровень ' + profileLevel + '</span>'
       : "";
     var poker21LinkedHtml = !ticker && linkedProfile && linkedProfile.poker21Linked
       ? '<span class="home-friend-news-modal__poker21-linked" title="Poker21 привязан" aria-label="Poker21 привязан">✓</span>'
@@ -2727,7 +2713,12 @@
         ' data-home-news-player-avatar="' + esc(avatar) + '"' +
         ' role="button" tabindex="0"'
       : "";
+    var profileCue = canOpenProfile
+      ? '<span class="home-friend-news-modal__profile-cue">' + (['ID400800'].includes(eventPlayerId) ? 'Профиль и образ' : 'Профиль') + ' <b aria-hidden="true">›</b></span>'
+      : "";
+    var feedbackParts = ticker || isLastLonger ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var heroHeader = !ticker && isDayHero && !isLastLonger && newsModalMode === "club";
+    var rewardTools = feedbackParts.portraitTools && titleAmountHtml;
     var structuredText = isLastLonger && !ticker
       ? '<span class="home-friend-news-modal__last-longer-line"><b>Ластлонгер</b> · ' + esc(row.newsTitle || row.actorNick || "Игрок") +
         ' · ' + esc(row.lastLongerTitle || "Турнир") + ' · ' + esc(formatRub(row.lastLongerStake)) +
@@ -2736,10 +2727,11 @@
       ? '<span class="home-friend-news-modal__player-title">' + (heroHeader ? '<span class="home-news-hero-identity">' : "") + '<span class="home-friend-news-modal__player-name">' + esc(row.newsTitle) + '</span>' +
         (row.type === "birthday" ? profileMetaHtml : "") +
         (!ticker ? '<small data-news-admin-telegram="' + esc(eventPlayerId) + '" style="font-size:0.5em;color:#aac5d7;margin-left:8px"></small>' : '') +
-        poker21LinkedHtml + (heroHeader ? "</span>" : "") + (!ticker && isDayHero && !isLastLonger
+        poker21LinkedHtml + (heroHeader ? "</span>" : "") + (rewardTools ? "" : !ticker && isDayHero && !isLastLonger
           ? '<span class="home-friend-news-modal__hero-reward">' + titleAmountHtml + '<span class="home-friend-news-modal__day-hero home-friend-news-modal__day-hero--inline">ГЕРОЙ ДНЯ</span></span>'
           : titleAmountHtml) + '</span>' +
         (row.type === "birthday" ? "" : profileMetaHtml) +
+        (rewardTools && heroHeader ? '<span class="home-friend-news-modal__day-hero home-friend-news-modal__day-hero--inline">ГЕРОЙ ДНЯ</span>' : "") +
         '<span class="home-friend-news-modal__event-lines">' + row.newsLines.map(function (line, index) {
           if (titleAmountHtml && row.tournamentName && index === 0 && row.tournamentPlace > 0) {
             line = row.tournamentPlace + "-е место · " + row.tournamentName;
@@ -2748,10 +2740,6 @@
           return "<strong>" + eventTextHtml(line) + "</strong>";
         }).join("") + "</span>"
       : "<strong>" + eventTextHtml(row.text) + "</strong>";
-    var profileCue = canOpenProfile
-      ? '<span class="home-friend-news-modal__profile-cue">' + (['ID400800'].includes(eventPlayerId) ? 'Профиль и образ' : 'Профиль') + ' <b aria-hidden="true">›</b></span>'
-      : "";
-    var feedbackParts = ticker || isLastLonger ? { actions: "", comments: "" } : eventFeedbackHtml(row, profileCue);
     var feedbackId = ticker ? "" : feedbackEventId(row);
     var shareToken = ticker ? "" : clubNewsEventShareToken(feedbackId);
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
@@ -2768,11 +2756,11 @@
       "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +
       (ticker ? eventTextHtml(clubTicker ? clubTickerText(row) : row.text) :
-        '<span data-home-news-read-id="' + esc(row.id) + '">' + structuredText + "</span>" +
+        '<span data-home-news-read-id="' + esc(row.id) + '">' + (rewardTools ? '<span class="home-news-reward-actions">' + titleAmountHtml + feedbackParts.portraitTools + "</span>" : "") + structuredText + "</span>" +
         (row.image ? '<img class="chat-user-modal__wall-image" src="' + esc(row.image) + '" alt="Фото к записи" loading="lazy">' : "") +
         (showCardTime && !isLastLonger ? "<small>" + esc(timeLabel) + "</small>" : "") +
         feedbackParts.actions) +
-      "</span>" + (feedbackParts.portraitTools || "") + feedbackParts.comments + (isDisqualified ? '<span class="home-news-disqualified-stamp">Дисквалифицирован</span>' : "") + "</span>";
+      "</span>" + (rewardTools ? "" : feedbackParts.portraitTools || "") + feedbackParts.comments + (isDisqualified ? '<span class="home-news-disqualified-stamp">Дисквалифицирован</span>' : "") + "</span>";
   }
 
   function modalEventsHtml(rows) {

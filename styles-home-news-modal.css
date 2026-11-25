@@ -3149,7 +3149,7 @@ body .home-friend-news-modal--club .home-news-portrait-tools .home-friend-news-m
   min-height: 32px;
   background: #17181ced;
 }
-body .home-friend-news-modal--club .home-friend-news-modal__item:has(> .home-news-portrait-tools) .home-friend-news-modal__action-controls {
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-portrait-tools) .home-friend-news-modal__action-controls {
   display: flex;
   justify-content: flex-start;
 }
@@ -3170,8 +3170,8 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 .home-news-hero-identity small:empty { display: none; }
 
 @media (max-width: 600px) {
-  body .home-friend-news-modal--club .home-friend-news-modal__item:has(> .home-news-portrait-tools):not(.home-friend-news-modal__item--comments-open) {
-    --portrait-width: 25%;
+  body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-portrait-tools):not(.home-friend-news-modal__item--comments-open) {
+    --portrait-width: 28%;
     .home-friend-news-modal__icon, .home-news-portrait-tools { width: var(--portrait-width); }
     .home-friend-news-modal__icon { bottom: 38px; height: auto; }
     .home-friend-news-modal__copy { margin-left: var(--portrait-width); width: calc(100% - var(--portrait-width)); }
@@ -3213,3 +3213,53 @@ button.home-week-cup:focus-visible { outline: 2px solid #efc777; }
 .honors-award-mini th { color: #b9c5bd; font-size: 11px; }
 .honors-award-mini td:last-child, .honors-award-mini th:last-child { text-align: right; }
 .honors-award-mini td:last-child { font-weight: 700; color: #ffe1a0; }
+
+/* Fit circular portraits inside the space above the card actions. */
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-portrait-tools):not(.home-friend-news-modal__item--comments-open)
+  > .home-friend-news-modal__icon:has(.home-friend-news__avatar:not(.home-friend-news__avatar--personal-art)) {
+  container-type: size;
+  bottom: 40px;
+  height: auto;
+}
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-portrait-tools):not(.home-friend-news-modal__item--comments-open)
+  > .home-friend-news-modal__icon .home-friend-news__avatar:not(.home-friend-news__avatar--personal-art) {
+  --avatar-diameter: min(112px, calc(100cqmin - 12px));
+  box-sizing: border-box;
+  width: var(--avatar-diameter);
+  height: var(--avatar-diameter);
+}
+
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-reward-actions) {
+  .home-news-reward-actions {
+    float: right;
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    margin: 0 0 3px 6px;
+  }
+  .home-news-reward-actions .home-news-portrait-tools { position: static; width: auto; }
+  .home-news-reward-actions .home-friend-news-modal__event-copy { width: 28px; min-width: 28px; height: 28px; min-height: 28px; }
+  .home-news-reward-actions .home-friend-news-modal__event-copy:not(.home-friend-news-modal__event-copy--copied) {
+    color: #c6b394;
+    border-color: rgba(232, 184, 88, .40);
+  }
+  .home-friend-news-modal__player-title { display: block; width: auto; }
+  .home-news-hero-identity { display: inline-flex; }
+  .home-friend-news-modal__player-name { flex: initial; }
+  .home-friend-news-modal__copy [data-home-news-read-id] { display: flow-root; }
+  .home-friend-news-modal__event-lines { clear: both; }
+  .home-news-honors-slot { margin-top: 4px; }
+  &:not(.home-friend-news-modal__item--comments-open) > .home-friend-news-modal__icon { bottom: 0; }
+}
+body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-reward-actions) {
+  .home-news-reward-actions > .home-friend-news-modal__title-amount { font-weight: 900; }
+  .home-friend-news-modal__day-hero--inline {
+    position: absolute !important;
+    inset: auto auto 6px 2px !important;
+    margin: 0 !important;
+    width: calc(var(--portrait-width, 33%) - 6px) !important;
+    box-sizing: border-box;
+  }
+  .home-week-cup { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
+  .home-week-cup img { min-height: 0; min-width: 0; }
+}
