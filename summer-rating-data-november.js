@@ -5743,4 +5743,215 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "24.11.2026": [
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Юрий_77",
+          "place": 2,
+          "reward": 2322.48,
+          "points": 110
+        },
+        {
+          "nick": "Local",
+          "place": 3,
+          "reward": 1225.81,
+          "points": 90
+        },
+        {
+          "nick": "FreshMeat",
+          "place": 10,
+          "reward": 26.65,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Irakli",
+          "place": 1,
+          "reward": 5761.88,
+          "points": 135
+        },
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 1737.19,
+          "points": 110
+        },
+        {
+          "nick": "Палач",
+          "place": 4,
+          "reward": 1249.69,
+          "points": 70
+        },
+        {
+          "nick": "Andrei350",
+          "place": 17,
+          "reward": 55,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "FrankL",
+          "place": 1,
+          "reward": 16800,
+          "points": 135
+        },
+        {
+          "nick": "Waaar",
+          "place": 4,
+          "reward": 3000,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "14:00",
+      "name": "Tournament Rebuy",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ouninpohja",
+          "place": 1,
+          "reward": 3730,
+          "points": 135
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "😈777😈",
+          "place": 2,
+          "reward": 9847.5,
+          "points": 110
+        },
+        {
+          "nick": "Виктор",
+          "place": 3,
+          "reward": 730,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Турнир Тракториста",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ярый",
+          "place": 2,
+          "reward": 24200,
+          "points": 110
+        },
+        {
+          "nick": "Даунстрик",
+          "place": 3,
+          "reward": 11300,
+          "points": 90
+        },
+        {
+          "nick": "Porquinho",
+          "place": 7,
+          "reward": 4700,
+          "points": 40
+        },
+        {
+          "nick": "myhomor4ik",
+          "place": 12,
+          "reward": 1400,
+          "points": 0
+        },
+        {
+          "nick": "Просто",
+          "place": 25,
+          "reward": 1200,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "ПокерМанки",
+          "place": 1,
+          "reward": 28857.5,
+          "points": 135
+        },
+        {
+          "nick": "😈777😈",
+          "place": 2,
+          "reward": 12380,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 7,
+          "reward": 1549.96,
+          "points": 40
+        },
+        {
+          "nick": "WiNifly",
+          "place": 6,
+          "reward": 1504.16,
+          "points": 50
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 3,
+          "reward": 791.66,
+          "points": 90
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 5,
+          "reward": 624.58,
+          "points": 60
+        },
+        {
+          "nick": "PLOtnik",
+          "place": 8,
+          "reward": 204.16,
+          "points": 30
+        }
+      ]
+    }
+  ]
 };

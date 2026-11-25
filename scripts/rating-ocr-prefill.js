@@ -778,6 +778,11 @@ async function parseOcrFile(file) {
         needsPlaceCheck = false;
       }
     }
+    // Both November 24 screenshots show seventh place for this result.
+    if (playerId === "942620" && date === "24.11.2026" && time === "18:00" && reward === 4700) {
+      place = 7;
+      needsPlaceCheck = false;
+    }
     // Confirmed against IMG_8882: the ninth-place digit is missing from OCR.
     if (playerId === "942620" && date === "06.09.2026" && time === "18:00" && reward === 5628.12) {
       place = 9;
