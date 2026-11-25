@@ -38,6 +38,7 @@ const handlers = {
   "pokerplus-bind": () => require(path.join(handlersDir, "pokerplus-bind.js")),
   "pokerplus-unbind": () => require(path.join(handlersDir, "pokerplus-unbind.js")),
   "pokerplus-player": () => require(path.join(handlersDir, "pokerplus-player.js")),
+  "poker21-withdrawals": () => require(path.join(handlersDir, "poker21-withdrawals.js")),
   "ppc-withdrawals": () => require(path.join(handlersDir, "ppc-withdrawals.js")),
   "pokerplus-tables": () => require(path.join(handlersDir, "pokerplus-tables.js")),
   "pokerplus-competitions": () => require(path.join(handlersDir, "pokerplus-competitions.js")),
