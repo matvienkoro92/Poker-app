@@ -976,3 +976,17 @@ test('phone correction rejects invalid phones, active reservations and duplicate
  const duplicate=applyOperation(state,{action:'create',requestId:requestId(942),entry:{...entry,phone:op.phone}},'admin-a').state;
  assert.throws(()=>applyOperation(duplicate,op,'admin-a'),/активный реквизит/);
 });
+
+test('club income is linked to an active club and counted once for the shift',()=>{
+  const now=Date.now(),body={action:'channel-operation',requestId:requestId(80),channelId:'clubs',clubId:'591373',amount:3500000,direction:'income',room:'P21',playerId:'123456'};
+  const access={availableClubs:[{id:'591373',name:'ALL FRIENDS PLUS'}]};
+  assert.throws(()=>applyOperation(null,body,'admin',now),/подключённый клуб/);
+  assert.throws(()=>applyOperation(null,{...body,direction:'outgoing'},'admin',now,'Аня',access),/подключённый клуб/);
+  const {state}=applyOperation(null,body,'admin',now,'Аня',access);
+  assert.equal(state.channelOperations[0].clubName,'ALL FRIENDS PLUS');
+  assert.equal(state.channelOperations[0].clubId,'591373');
+  assert.equal(applyOperation(state,body,'admin',now).duplicate,true);
+  const stats=view(state,now);
+  assert.equal(stats.paymentForms.providers.find(p=>p.id==='clubs').total,3500000);
+  assert.equal(stats.statistics.deposits,3500000);
+});
