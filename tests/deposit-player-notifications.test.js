@@ -105,3 +105,13 @@ test('payout notifications and failed private deliveries do not introduce new su
  const m=mocked();await m.api.deliver('evt','token',now);assert.equal(m.mirrors.length,0);
  const blocked=mocked({sendResults:[{ok:false,error_code:403}]});blocked.events.set('evt',JSON.stringify({...event(entry(),'create'),id:'evt'}));await blocked.api.deliver('evt','token',now);assert.equal(blocked.mirrors.length,0);
 });
+test('new available club withdrawals get an independent, repeatable publication id',()=>{
+ const {clubOfferEvent}=require('../lib/deposit-player-notifications');
+ const e=entry({phone:'+79990000000',bank:'Сбер'}),op={action:'create',requestId:e.id};
+ const make=extra=>clubOfferEvent({entries:[{...e,...extra}]},op);
+ assert.equal(make().entryId,e.id);
+ assert.deepEqual(make(),make());
+ assert.equal(make({paymentType:'usdt'}),null);
+ assert.equal(make({archived:true}),null);
+ assert.equal(clubOfferEvent({entries:[e]},{action:'payment',entryId:e.id}),null);
+});
