@@ -1,3 +1,6 @@
+import {quayShopPlan} from './quay-shop-plan.mjs';
+import {streetFences,litterBins,quayCrossings} from './quay-crossings.mjs';
+import {quayHouses,quayRails,quayKiosk,quayBenches} from './quayside-block.mjs';
 import {onLighthouseShore,mapPoint,bounds,metroLand,nearbyLots,metroNearest,metroRoute,gateways} from './metropolis.mjs';
 import {buildingSolids,districtTrees} from './district-plan.mjs';
 import {estateFeatures} from './estate-plan.mjs';
@@ -59,7 +62,14 @@ export const BUILDINGS=[
 ];
 const villaRect=(x,z,w,d,h=5.4)=>{const p=villaPoint(x,z);return {...rect(p.x,p.z,d,w),h};};
 const rect=(x,z,w,d)=>({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});
-export const SOLIDS=[...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
+// Leave the diagonal cafe threshold reachable from the crossing.
+const cafe=quayHouses[0],front=cafe.z-cafe.d/2,right=cafe.x+cafe.w/2,chamfer=1.84;
+const cafeSolids=[{...rect(cafe.x,cafe.z+chamfer/2,cafe.w,cafe.d-chamfer),h:cafe.h}];
+for(let i=0;i<8;i++){
+ const depth=chamfer/8,cut=chamfer-(i+.5)*depth;
+ cafeSolids.push({minX:right-cafe.w,maxX:right-cut,minZ:front+i*depth,maxZ:front+(i+1)*depth,h:cafe.h});
+}
+export const SOLIDS=[...cafeSolids,...quayCrossings.flatMap(c=>c.poles.map(([x,z])=>({...rect(x,z,.18,.18),h:3.5}))),...quayHouses.slice(1).flatMap(b=>quayShopPlan(b).solids),...[...quayRails,quayKiosk,...quayBenches,...streetFences,...litterBins].map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
  {...rect(68,133,6.8,6.8),h:1.8},
  // Mainland estate fence, with one ten-metre opening towards the promenade.
  {...rect(53,136,.65,38),h:3.1},{...rect(53,169,.65,8),h:3.1},

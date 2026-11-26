@@ -1,7 +1,8 @@
+import {panelMoulding} from './shop-joinery.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 import {venuePlan,districtDriveways} from './district-plan.mjs';
 // The shop fit-out is actual geometry; signs and menus are mounted on physical objects.
-export function buildDistrict({buildings,scene,textures,box,cylinder,batch,label,outdoors}){
+export function buildDistrict({buildings,scene,textures,box,cylinder,batch,label,outdoors,mergeParts}){
  const glass=new T.MeshPhysicalMaterial({color:'#abc5be',metalness:.12,roughness:.1,transparent:true,opacity:.19,depthWrite:false,side:T.DoubleSide});
  function panel(x,y,z,w,h){const p=new T.Mesh(new T.PlaneGeometry(w,h),glass);p.position.set(x,y,z);p.name='Shopfront glazing';scene.add(p);}
  function chair(x,z,color,angle=0){
@@ -26,6 +27,14 @@ export function buildDistrict({buildings,scene,textures,box,cylinder,batch,label
   label(v.name,b.x,3.43,front+.173,Math.min(b.w-1,12),.55,0,v.color,'#f0dbab');
   for(const side of [-1,1]){
    const wing=(b.w-2.4)/2,x=b.x+side*(1.2+wing/2);
+   const panels=new T.Group(),finish=new T.MeshStandardMaterial({color:v.color,roughness:.55});
+   const bays=Math.max(1,Math.round(wing/1.55)),span=wing/bays;
+   for(let i=0;i<bays;i++){
+    const mould=new T.Mesh(panelMoulding(span-.12,.37),finish);
+    mould.position.set(x-wing/2+(i+.5)*span,.37,front+.147);
+    mould.castShadow=mould.receiveShadow=true;panels.add(mould);
+   }
+   mergeParts(panels);scene.add(panels);
    panel(x,1.82,front+.06,wing-.13,2.7);box('#334b44',x,.37,front+.075,wing,.55,.13);box('#334b44',x,3.02,front+.075,wing,.08,.15);
    for(let dx=-wing/2;dx<=wing/2+.01;dx+=2.1)box('#4c5f50',x+dx,1.81,front+.08,.065,2.4,.12);
    box('#d2c7af',b.x+side*1.22,1.54,front+.06,.12,3.08,.3);box('#bba26c',b.x+side*1.13,1.7,front+.17,.045,.42,.05);

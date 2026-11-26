@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420">
+  <defs>
+    <linearGradient id="wood"><stop stop-color="#37131a"/><stop offset=".18" stop-color="#864432"/><stop offset=".68" stop-color="#57251f"/><stop offset="1" stop-color="#281016"/></linearGradient>
+    <linearGradient id="brass"><stop stop-color="#926033"/><stop offset=".32" stop-color="#f3cc87"/><stop offset=".78" stop-color="#b57d46"/><stop offset="1" stop-color="#704321"/></linearGradient>
+  </defs>
+  <path d="M40 394 69 376h282l29 18-12 13H52Z" fill="url(#wood)" stroke="#a77849" stroke-width="2"/>
+  <path d="M40 394h340l-5 5H45Z" fill="url(#brass)"/>
+  <path d="M52 406h316l-8 7H60Z" fill="url(#wood)" stroke="#9e6940" stroke-width="2"/>
+</svg>

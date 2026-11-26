@@ -1,3 +1,4 @@
+import {quayWheelRise} from './quayside-block.mjs';
 import {circuits,cityDriver} from './metropolis.mjs';
 import {createTraffic,advanceTraffic} from './traffic.mjs';
 import {START,CAR_START,PICKUP,HOME,VILLA_ENTRY,GARAGE_RADIO,move,blocked,nearestRoad,roadRoute} from './world.mjs';
@@ -31,11 +32,18 @@ if(s.driving){
  c.speed=clamp(c.speed,-7,24);
  if(Math.abs(c.speed)<.06)c.speed=0;
  c.yaw-=c.steer*dt*Math.min(1.7,Math.abs(c.speed)*.17)*Math.sign(c.speed||1)*(a.brake?1.3:1);
+ const previousRise=quayWheelRise(c.x,c.z,c.yaw);
  const crashed=move(c,Math.sin(c.yaw)*c.speed*dt,Math.cos(c.yaw)*c.speed*dt,1.6);
+ const rise=quayWheelRise(c.x,c.z,c.yaw);
+ if(rise>0||previousRise>0){
+  // Uphill travel spends kinetic energy. Pavers add rolling resistance.
+  const speedSquared=Math.max(0,c.speed*c.speed-2*9.81*(rise-previousRise));
+  c.speed=Math.sign(c.speed)*Math.sqrt(speedSquared)*Math.exp(-.12*dt);
+ }
  if(crashed&&Math.abs(c.speed)>3){hit(s,Math.min(15,Math.abs(c.speed)*.7));c.speed*=-.2;}
  s.player.x=c.x;s.player.z=c.z;s.player.yaw=c.yaw;
 }else{let x=a.x||0,z=a.z||0;const len=Math.hypot(x,z);if(len>1){x/=len;z/=len;}const speed=a.run?7:4.5;move(s.player,x*speed*dt,z*speed*dt,.45);if(Math.hypot(x,z)>.1)s.player.yaw=Math.atan2(x,z);}
-for(const t of s.traffic){advanceTraffic(t,dt,s.driving?s.car:null);if(s.driving){
+for(const t of s.traffic){advanceTraffic(t,dt,s.driving?s.car:null,s.time);if(s.driving){
  const dx=s.car.x-t.x,dz=s.car.z-t.z,side=dx*Math.cos(t.yaw)-dz*Math.sin(t.yaw),along=dx*Math.sin(t.yaw)+dz*Math.cos(t.yaw);
  const contact=Math.abs(side)<1.85&&Math.abs(along)<3.2;
  if(contact&&!t.touching){hit(s,Math.min(10,2+Math.abs(s.car.speed)*.45));s.car.speed*=-.25;}

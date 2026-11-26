@@ -339,8 +339,7 @@ body:has(.home-friend-news-modal--club:not([hidden])) #app.app > .card {
   margin: 10px 0 20px;
 }
 
-.home-friend-news-modal__list .home-friend-news-modal__date,
-.home-friend-news-modal__list .home-friend-news-modal__day-total {
+.home-friend-news-modal__list .home-friend-news-modal__date {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3081,16 +3080,12 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
 
 /* Club news opens from bottom navigation without a separate title bar. */
 body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__header{display:none}
-.home-friend-news-modal__list .home-friend-news-modal__day-total {
-  display: block;
-  margin: -4px 0 12px;
-  padding: 0 8px;
-  line-height: 1.5;
-}
-
-.home-friend-news-modal__day-total strong {
-  font: inherit;
-  white-space: nowrap;
+@media (max-width: 360px) {
+  .home-friend-news-modal__list .home-friend-news-modal__date:has(strong) {
+    gap: 2px;
+    letter-spacing: 0;
+    font-size: 10px !important;
+  }
 }
 .home-news-pinned-rankings { margin: 12px 0 20px; }
 .home-news-pinned-rankings details + details { margin-top: 10px; }
@@ -3393,7 +3388,7 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
       .home-news-reward-actions > .home-friend-news-modal__title-amount::before,
       .home-news-reward-actions > .home-friend-news-modal__title-amount::after { content: none; }
       .home-news-hero-identity { max-width: 45cqw; }
-      &::after { content: ''; pointer-events: none; position: absolute; inset: 2% 0 auto auto; width: 19%; height: 45%; background: url('./assets/club-news-personal/day-hero-gold-cup.webp') center / contain no-repeat; mask-image: radial-gradient(ellipse,#000 55%,transparent 83%); }
+      &::after { content: ''; pointer-events: none; position: absolute; inset: 2% 0 auto auto; width: 19%; height: 45%; background: url('./assets/achievement-trophy-day-hero-v2.webp') center / contain no-repeat, url('./assets/club-news-personal/hero-trophy-shelf.svg') center / contain no-repeat; }
     }
   }
   .home-friend-news-modal__item.home-friend-news-event--last-longer:nth-child(n) {
@@ -3452,7 +3447,7 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
     &.home-friend-news-event--featured-hero {
       min-height:43cqw;
       &::before {content:"";width:15%;height:43%;inset:0 auto auto 0;background:url('./assets/club-news-personal/award-rank-one.webp') top left / contain no-repeat;mask-image:linear-gradient(90deg,#000 77%,transparent);box-shadow:none;border:0;transform:none;}
-      &::after {inset:2% 0 auto auto;width:21%;height:53%;background:url('./assets/club-news-personal/award-cup-stage.webp') right top / contain no-repeat;mask-image:linear-gradient(90deg,transparent,#000 9%);}
+      &::after {inset:2% 0 auto auto;width:21%;height:53%;filter:drop-shadow(0 2px 4px #18090b);}
       .home-news-reward-actions > .home-friend-news-modal__title-amount {font:bold clamp(29px,9.4cqw,62px)/1 Georgia,serif;letter-spacing:-.055em;color:#ffdaa0;margin:2px 0 4px;text-shadow:0 2px 3px #180608;}
       .home-news-hero-tag {font:700 clamp(9px,2.2cqw,14px)/1 Georgia,serif;border-radius:9px;background:linear-gradient(#ffe5a1,#d99b4e);padding:2px 7px;}
     }

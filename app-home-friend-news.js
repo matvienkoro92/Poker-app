@@ -2813,13 +2813,12 @@
           var amount = Number(row && row.prizeAmount);
           return sum + (Number.isFinite(amount) && amount > 0 ? Math.round(amount * 100) : 0);
         }, 0) / 100;
-        if (dayTotal > 0) dayTotalHtml = '<div class="home-friend-news-modal__day-total"><span>Общий выигрыш за день: </span><strong>' + esc(dayTotal.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽") + '</strong></div>';
+        if (dayTotal > 0) dayTotalHtml = ' · <strong>' + esc(dayTotal.toLocaleString("ru-RU", { maximumFractionDigits: 2 }) + " ₽") + '</strong>';
       }
       return '<section class="home-friend-news-modal__day-group">' +
         (newsModalMode === "club" && groupIndex === 0 ? clubWinsDayTabsHtml() : "") +
         '<div class="home-friend-news-modal__date"><span>' + esc(eventDateLabel(group.at, true)) +
-          ' <small>(' + count + ' ' + countWord + ')</small></span></div>' +
-        dayTotalHtml +
+          ' <small>(' + count + ' ' + countWord + ')</small>' + dayTotalHtml + '</span></div>' +
         '<div class="home-friend-news-modal__day-events">' +
           dayEventsHtml +
         "</div>" +

@@ -13,6 +13,35 @@ export function detailEstate({scene,box,cylinder,batch,label,outdoors,textures})
   for(let t=0;t<=length;t+=5.5){const px=ax+(bx-ax)*t/length,pz=az+(bz-az)*t/length;box('#a7a08a',px,1.5,pz,.65,3,.65);box(cream,px,3.05,pz,.77,.1,.77);}
  }
  screen(53,117,53,154.4);screen(53,165.6,53,173);screen(53,117,119,117);
+ // Road face: recessed terracotta panels between cut-stone piers.
+ const tile=document.createElement('canvas');tile.width=512;tile.height=256;
+ const ctx=tile.getContext('2d');ctx.fillStyle='#8e7660';ctx.fillRect(0,0,512,256);
+ let seed=813;
+ const random=()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);
+ for(let row=0;row<16;row++)for(let col=-1;col<11;col++){
+  const v=Math.floor(random()*24);
+  ctx.fillStyle='rgb('+(137+v)+','+(88+v)+','+(64+v)+')';
+  ctx.fillRect(col*51.2+(row%2)*25.6,row*16,50,14.7);
+ }
+ for(let i=0;i<27000;i++){
+  ctx.fillStyle=i%2?'#f1c69d20':'#412b2224';ctx.fillRect(random()*512,random()*256,2,1);
+ }
+ const tileMap=new T.CanvasTexture(tile);tileMap.colorSpace=T.SRGBColorSpace;
+ tileMap.wrapS=tileMap.wrapT=T.RepeatWrapping;tileMap.repeat.set(2.3,1.25);tileMap.anisotropy=4;textures.push(tileMap);
+ const wallFinish=new T.MeshStandardMaterial({map:tileMap,bumpMap:tileMap,bumpScale:.018,roughness:.91});
+ const panel=new T.PlaneGeometry(4.77,1.78);
+ for(let i=0;i<12;i++){
+  const cx=55.75+i*5.5;
+  const face=new T.Mesh(panel,wallFinish);face.rotation.y=Math.PI;face.position.set(cx,1.56,116.776);face.receiveShadow=true;scene.add(face);
+  for(const y of [.61,2.53])box(cream,cx,y,116.74,4.9,.10,.15);
+  box('#90816d',cx,.52,116.72,4.87,.09,.18);
+  if(i%2===1){
+   const px=cx-2.75;
+   box(iron,px,2.18,116.59,.27,.48,.18);
+   batch('box','#ffd897',px,2.18,116.485,.17,.32,.052,0,0,true);
+   for(const y of [1.96,2.4])box(bronze,px,y,116.54,.32,.055,.25);
+  }
+ }
  // Rear and seaward edges keep the ocean view while screening the seating from neighbouring plots.
  for(const [ax,bx]of [[53,101.5],[104.5,119]]){
   box(stone,(ax+bx)/2,.48,173,bx-ax,.96,.42);box(cream,(ax+bx)/2,1.02,173,bx-ax+.05,.12,.55);

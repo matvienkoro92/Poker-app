@@ -1,3 +1,4 @@
+import {signalGap} from './quay-crossings.mjs';
 // Lane centres in metres, following the same junctions as the road mesh.
 import {ROAD_X,ROAD_Z,estateExitRoute} from './world.mjs';
 const [west,centre,east]=ROAD_X,[port,club,quay]=ROAD_Z;
@@ -24,7 +25,7 @@ export const fleet=[
  {path:docks,start:19,pace:6,color:'#496b8c',kind:'uaz'}
 ];
 export function createTraffic(){return fleet.map(({path,start,pace},id)=>{const p=path[start],route=(start+1)%path.length,n=path[route];return {...p,id,route,speed:pace,yaw:Math.atan2(n.x-p.x,n.z-p.z)};});}
-export function advanceTraffic(t,dt,player){
+export function advanceTraffic(t,dt,player,time=0){
  const {path,pace}=fleet[t.id];let remaining=dt;
  let approach=1;
  if(player){
@@ -35,7 +36,9 @@ export function advanceTraffic(t,dt,player){
  const previousSpeed=t.speed;
  while(remaining>0){
   const n=path[t.route],dx=n.x-t.x,dz=n.z-t.z,d=Math.hypot(dx,dz);
-  t.speed+=(pace*(d<4?.72:1)*approach-t.speed)*Math.min(1,remaining*8);const travel=Math.min(d,t.speed*remaining);
+  const gap=signalGap(t,time);
+  t.speed+=(Math.min(pace,Math.sqrt(5*gap))*(d<4?.72:1)*approach-t.speed)*Math.min(1,remaining*8);const travel=Math.min(d,gap,t.speed*remaining);
+  if(travel===gap)t.speed=0;
   if(d>0){t.yaw=Math.atan2(dx,dz);t.x+=dx*travel/d;t.z+=dz*travel/d;}
   if(travel<d)break;
   remaining-=travel/Math.max(.01,t.speed);t.route=(t.route+1)%path.length;

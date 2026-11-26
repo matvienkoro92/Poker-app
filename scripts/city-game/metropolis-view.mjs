@@ -232,9 +232,6 @@ export function buildMetropolis(scene,trees,palms){
     add(x,1.41,z-.35,1.98,.16,3.1,0xe7dcca);
    }}
  }
- const beacon=mapPoint(565,575);
- for(let tier=0;tier<6;tier++)add(beacon.x,2+tier*4,beacon.z,6-tier*.5,4,6-tier*.5,tier%2?0xf1e7d0:0xb55d4d);
- add(beacon.x,25,beacon.z,4,2.2,4,0xf3cf7e);
  const runway=mapPoint(109,546);
  add(runway.x,.06,runway.z,740,.12,23,0x626767,-.14);
  for(let n=-8;n<=8;n++)add(runway.x+n*40,.14,runway.z+n*5.64,15,.02,.65,0xebe4d1,-.14);

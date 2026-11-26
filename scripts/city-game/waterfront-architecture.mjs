@@ -8,13 +8,38 @@ const styleByFootprint = {
  '104,55': {wall:'#d7c1a5',trim:'#f3e1c4',accent:'#6a8a80',roof:'#9b7760',radius:2,tall:false}
 };
 
+// Extruded facade panels use metre-scale UVs. A tile spans four metres.
+function masonryMaterial(color,tall){
+ const canvas=document.createElement('canvas');
+ canvas.width=canvas.height=256;
+ const ctx=canvas.getContext('2d');
+ const rows=tall?8:16,cols=tall?4:8;
+ ctx.fillStyle='#aaa69e';
+ ctx.fillRect(0,0,256,256);
+ for(let row=0;row<rows;row++){
+  for(let col=-1;col<cols;col++){
+   const tone=220+((row*19+(col+cols)%cols*13)%25);
+   ctx.fillStyle='rgb('+tone+','+(tone-2)+','+(tone-5)+')';
+   ctx.fillRect((col+(row%2)*.5)*256/cols,row*256/rows,256/cols-1,256/rows-1);
+  }
+ }
+ const map=new T.CanvasTexture(canvas);
+ map.wrapS=map.wrapT=T.RepeatWrapping;
+ map.repeat.set(.25,.25);
+ map.colorSpace=T.SRGBColorSpace;
+ map.anisotropy=4;
+ const material=new T.MeshStandardMaterial({color,map,bumpMap:map,bumpScale:.024,roughness:.92});
+ material.addEventListener('dispose',()=>map.dispose());
+ return material;
+}
+
 export function buildWaterfrontBuilding(building,{scene,mat,mergeParts}){
  const {x,z,w,d,h}=building,style=styleByFootprint[x+','+z];
  if(!style)return false;
  const {wall,trim,accent,roof,radius,tall}=style;
  const facade=new T.Group();
  facade.name="Waterfront facade";
- const stone=mat(trim),plaster=mat(wall),glass=mat('#345b65'),metal=mat(accent);
+ const stone=mat(trim),plaster=masonryMaterial(wall,tall),glass=mat('#345b65'),metal=mat(accent);
  function rounded(width,depth,r){
   const a=width/2,b=depth/2,s=new T.Shape();
   s.moveTo(-a+r,-b);s.lineTo(a-r,-b);s.quadraticCurveTo(a,-b,a,-b+r);
@@ -74,6 +99,16 @@ export function buildWaterfrontBuilding(building,{scene,mat,mergeParts}){
     const cross=h-(arched?w*.5:h*.44);
     detailBox(panel,.044,h-.14,.06,charcoal,x,y+h*.5,-wallDepth+.015);
     detailBox(panel,w-.05,.045,.06,charcoal,x,y+cross,-wallDepth+.018);
+   }
+   if(publicFront&&!entry&&y<1){
+    const stripes=9,stripeWidth=(w+.32)/stripes;
+    for(let i=0;i<stripes;i++){
+     const cloth=i%2?stone:mat(tall?'#426858':'#954f44');
+     const sx=x+(i-(stripes-1)/2)*stripeWidth;
+     const shade=detailBox(panel,stripeWidth,.075,1.04,cloth,sx,y+h+.12,.49);
+     shade.rotation.x=.25;
+     detailBox(panel,stripeWidth,.17,.052,cloth,sx,y+h-.08,.98);
+    }
    }
    if(!entry)detailBox(panel,w+.22,.13,.36,stone,x,y-.08,.10);
    if(publicFront&&y<1&&lit){

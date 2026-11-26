@@ -1,3 +1,4 @@
+import {quayRoad} from './quay-road.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 
 // From the villa gate to the waterfront bend and north along the first avenue.
@@ -9,7 +10,16 @@ export function waterfrontWalkHeight(x,z){
  return z>=106&&z<=167&&x>=promenade(z)&&x<=roadEdge(z) ? .21 : 0;
 }
 
-export function buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,outdoors,mergeParts}){
+export function waterfrontSurfaceHeight(x,z){
+ if(z<106||z>167||x<promenade(z))return 0;
+ const offset=x-roadEdge(z);
+ if(offset<-.055)return .21;
+ if(offset<=.16)return .222;
+ if(offset<.27)return .222-(offset-.16)*(.09/.11);
+ return z<=160&&x<=45.46?.132:0;
+}
+
+export function buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,outdoors,mergeParts,registerSurface}){
  const stone='#cfc0a3',iron='#29464a',wood='#88674b',sand='#ab9c78';
  const metal=new T.MeshStandardMaterial({color:iron,roughness:.58,metalness:.32});
  const timber=new T.MeshStandardMaterial({color:wood,roughness:.85});
@@ -201,8 +211,14 @@ export function buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,ou
   box('#333938',x,.138,z,.39,.012,.66);
   for(let i=-3;i<=3;i++)box('#737875',x,.147,z+i*.082,.32,.011,.029);
  }
- outdoors.asphalt(56,105,43,11,.133);
- outdoors.asphalt(72,89,11,38,.133);
+ registerSurface(56,105,43,11,.138);
+ registerSurface(72,84.75,11,29.5,.138);
+ quayRoad(scene,56,105,43,11,true);
+ quayRoad(scene,72,84.75,11,29.5,false);
+ for(const z of [81,91,98]){
+  box('#454340',66.78,.149,z,.37,.018,.74);
+  for(let i=-3;i<=3;i++)box('#888278',66.78,.164,z+i*.09,.32,.018,.028);
+ }
  const railing=Array.from({length:32},(_,i)=>{
   const z=106+i*1.94;
   return [promenade(z)+.12,1.04,z];
