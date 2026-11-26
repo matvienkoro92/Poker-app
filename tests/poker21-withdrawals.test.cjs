@@ -23,9 +23,9 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
     if(command[2]===3)files.set(command[5],command[pos+3]);
     state=JSON.parse(command[pos+1]);return [{result:1}];
   });
-  async function call(action,item,clubId='123',receipt,userId='42'){
+  async function call(action,item,clubId='123',receipt,userId='42',ownerOverview=false){
     const res={code:200,setHeader(){},status(n){this.code=n;return this;},json(data){this.data=data;},end(){}};
-    await handle({method:'POST',headers:{authorization:'Bearer test-connection'},body:{action,item,clubId,userId,receipt}},res);
+    await handle({method:'POST',headers:{authorization:'Bearer test-connection'},body:{action,item,clubId,userId,receipt,ownerOverview}},res);
     return res;
   }
   state.entries.push({...state.entries[0],id:randomUUID(),paymentType:'usdt',bank:'USDT'});
@@ -78,6 +78,14 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal(state.entries[0].reservations[1].hasPoker21Receipt,true);
   assert.equal((await call('list')).data.items[0].status,'Ожидает подтверждения');
   assert.equal((await call('paid',second,'123',receipt)).code,409);
+  const overview=async(clubId='758417')=>(await call('list',undefined,clubId,undefined,'42',true)).data.items[0];
+  const ownerCard=await overview();
+  assert.equal(ownerCard.historyOnly,true);
+  assert.equal(ownerCard.availableCents,0);
+  assert.deepEqual(ownerCard.bookings.map(r=>[r.clubId,r.amountCents,r.stage]),[
+    ['123',900000,'Плательщик отметил оплату'],['123',900000,'Бронь отменена']
+  ]);
+  assert.equal((await overview('123')).bookings,undefined);
   const paidState=structuredClone(state);
   assert.equal((await call('telegram-confirm',second,'123')).code,400);
   assert.equal((await call('telegram-confirm',second,'758417')).code,200);
@@ -85,6 +93,7 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal(state.entries[0].payments.filter(p=>p.reservationId===second).length,1);
   assert.deepEqual(state.poker21Credits.map(c=>[c.id,c.clubId,c.amountCents]),[[second,'123',900000]]);
   assert.equal(summary(state.entries[0]).paid,900000);
+  assert.equal((await overview()).bookings[0].stage,'Оплата подтверждена');
   state=paidState;
   assert.equal((await call('remove',second,'123')).code,403);
   assert.equal((await call('remove',second,'123',undefined,'5053253480')).code,200);
@@ -93,6 +102,7 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   state=applyOperation(state,{action:'confirm-reservation',entryId,requestId:randomUUID(),reservationId:second,amount:900000},'admin').state;
   assert.deepEqual(state.poker21Credits.map(c=>[c.id,c.clubId,c.amountCents]),[[second,'123',900000]]);
   assert.equal(summary(state.entries[0]).paid,900000);
+  assert.equal(await overview(),undefined);
   assert.deepEqual((await call('list')).data.items,[]);
 });
 
