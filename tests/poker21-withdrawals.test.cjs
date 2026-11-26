@@ -121,6 +121,11 @@ test('partial withdrawal enforces minimum and keeps independent reservations',()
   run('poker21-split',{offerId:first,clubId:'758417',minimum:1000000});
   for(const amount of [999999,4500000,5000001])assert.throws(()=>run('poker21-take',{offerId:first,clubId:'123',takeCents:amount}));
   const reservationId=run('poker21-take',{offerId:first,clubId:'123',takeCents:2000000});
+  const expiry=state.entries[0].reservations.find(r=>r.id===reservationId).poker21ExpiresAt;
+  assert.throws(()=>run('poker21-extend',{reservationId,clubId:'456'}));
+  run('poker21-extend',{reservationId,clubId:'123'});
+  assert.equal(state.entries[0].reservations.find(r=>r.id===reservationId).poker21ExpiresAt,expiry+3600000);
+  assert.throws(()=>run('poker21-extend',{reservationId,clubId:'123'}));
   assert.equal(offer().amount,3000000);
   assert.throws(()=>run('poker21-take',{offerId:first,clubId:'456',takeCents:2000000}));
   run('poker21-take',{offerId:offer().id,clubId:'456',takeCents:3000000});
