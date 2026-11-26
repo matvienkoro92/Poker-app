@@ -83,6 +83,7 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal((await call('telegram-confirm',second,'758417')).code,200);
   assert.equal((await call('telegram-confirm',second,'758417')).data.alreadyConfirmed,true);
   assert.equal(state.entries[0].payments.filter(p=>p.reservationId===second).length,1);
+  assert.deepEqual(state.poker21Credits.map(c=>[c.id,c.clubId,c.amountCents]),[[second,'123',900000]]);
   assert.equal(summary(state.entries[0]).paid,900000);
   state=paidState;
   assert.equal((await call('remove',second,'123')).code,403);
@@ -90,6 +91,7 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.deepEqual((await call('list')).data.items,[]);
   assert.equal(summary(state.entries[0]).reserved,900000);
   state=applyOperation(state,{action:'confirm-reservation',entryId,requestId:randomUUID(),reservationId:second,amount:900000},'admin').state;
+  assert.deepEqual(state.poker21Credits.map(c=>[c.id,c.clubId,c.amountCents]),[[second,'123',900000]]);
   assert.equal(summary(state.entries[0]).paid,900000);
   assert.deepEqual((await call('list')).data.items,[]);
 });
