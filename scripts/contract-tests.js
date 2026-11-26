@@ -3360,6 +3360,7 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
       name: "@player_public",
       p21Id: "P21-1001",
       telegramUsername: "player_public",
+      ip: "192.0.2.1", deviceId: "test-device",
     }, {
       userId: "legacy_p21_208238",
       name: "Участник",
@@ -3373,6 +3374,7 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
       groupIndex: 0,
       prize: "Ticket",
       telegramUsername: "player_public",
+      ip: "192.0.2.1", deviceId: "test-device",
     }],
     status: "drawn",
     createdAt: new Date(Date.now() - 7200_000).toISOString(),
@@ -3388,6 +3390,10 @@ async function testRaffleTelegramUsernamesAdminOnly(redis) {
   let r = await call(raffles, req("GET", { pwaSession: s.user, id: "contract_raffle_tg_privacy" }));
   assert.strictEqual(r.statusCode, 200, "non-admin can load raffle");
   assert.strictEqual(r.body.isAdmin, false, "non-admin response is not admin");
+  for (const row of [r.body.raffle.participants[0], r.body.raffle.winners[0]]) {
+    assert.strictEqual(row.ip, undefined);
+    assert.strictEqual(row.deviceId, undefined);
+  }
   assert.strictEqual(r.body.raffle.participants[0].telegramUsername, undefined, "non-admin does not receive participant telegram username");
   assert.strictEqual(r.body.raffle.winners[0].telegramUsername, undefined, "non-admin does not receive winner telegram username");
   assert.strictEqual(r.body.raffle.participants[0].name, "Участник", "non-admin does not receive participant telegram login as name");

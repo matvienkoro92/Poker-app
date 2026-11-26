@@ -22,7 +22,8 @@ const monitored = () => ({winnerStatus:'ok',cashSeatingMonitor:{status:'pending'
 test('ten minute deadline, seat confirmation, incomplete snapshots and returned states', () => {
   const start = Date.parse(issuedAt);
   assert.equal(decision(monitored(),[],start+WINDOW_MS-1),'wait');
-  assert.equal(decision(monitored(),[],start+WINDOW_MS),'return');
+  assert.equal(decision(monitored(),[],start+WINDOW_MS),'wait');
+  assert.equal(decision(monitored(),[{leagueId:'184691',playType:'NLH',playerCount:0,pos:{}}],start+WINDOW_MS),'return');
   assert.equal(decision(monitored(),[{leagueId:'184691',playType:'NLH',playerCount:2,pos:null}],start+WINDOW_MS),'wait');
   assert.equal(decision(monitored(),[{leagueId:'184691',playType:'NLH',pos:{pos1:'123'}}],start+100),'seated');
   assert.equal(decision({...monitored(),winnerSeatStatus:'seated'},[],start+WINDOW_MS),'seated');

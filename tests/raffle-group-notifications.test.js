@@ -168,7 +168,9 @@ test('readiness and seating countdowns use deadlines and disappear when resolved
   const cash = { ...winner, winnerReady: true, cashSeatingMonitor: {status:'pending', issuedAt:'2026-10-10T09:58:00Z'} };
   assert.equal(winnerCountdown(cash, now), '⏳ сесть за стол: 8 мин');
   assert.match(buildRaffleCompletedAnnouncement({ winners: [cash] }, now), /✅ Игрок\nГотов · сесть за стол: 8 мин/);
-  for (const status of ['seated', 'returned', 'returning']) {
+  assert.equal(winnerCountdown(cash, now + 480000), '⏳ проверяем посадку');
+  assert.equal(winnerCountdown({...cash, cashSeatingMonitor:{status:'returning'}}, now), '⏳ проверяем возврат бай-ина');
+  for (const status of ['seated', 'returned']) {
     assert.equal(winnerCountdown({ ...cash, cashSeatingMonitor: {...cash.cashSeatingMonitor, status} }, now), '');
   }
   assert.equal(winnerCountdown({ ...winner, winnerReadyDeadlineAt: 'invalid' }, now), '');
@@ -215,4 +217,23 @@ test('completed cash post specifies destination and buy-in amounts', () => {
   const text = buildRaffleCompletedAnnouncement({prizeKind:'cash',title:'Беккинг байины на кеш Бонус гейм 20/40 и 5/10',groups:[{count:3,prize:'200'}]});
   assert.match(text,/Куда: Бонус гейм 20\/40 и 5\/10/);
   assert.match(text,/3 бай-ин\. по 200 ₽/);
+});
+
+test('final cash status stays queued until Telegram accepts the edit', async () => {
+  const raffle = {id:'delivery', status:'drawn', prizeKind:'cash', winners:[{winnerReady:true, winnerSeatStatus:'seated'}]};
+  let removed = false, delivered = false;
+  const notify = createRaffleCompletedGroupNotifier({
+    botToken:'test', eventChatId:async()=>'-1001',
+    pipeline:async commands=>commands.map(([op])=>{
+      if (op === 'GET') return {result:JSON.stringify({chatId:'-1001',messageId:12,text:'ожидаем посадку'})};
+      if (op === 'SREM') removed = true;
+      return {result:'OK'};
+    }),
+    editTelegramMessage:async()=>({ok:delivered}),
+  });
+  await assert.rejects(notify(raffle), /update failed/);
+  assert.equal(removed,false);
+  delivered = true;
+  await notify(raffle);
+  assert.equal(removed,true);
 });

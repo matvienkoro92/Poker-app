@@ -18,6 +18,18 @@ test('only a trusted positive raffle prize bypasses the guard; returns and forge
  for(const patch of [{exemption:'confirmed-raffle-award'},{exemption:f.api.RAFFLE_AWARD,chips:-200}])await assert.rejects(f.api.check({...input,...patch}),e=>e.code==='CASH_APPROVAL_REQUIRED');
  assert.ok(f.messages.every(m=>String(m.chat_id)==='388008256'));
 });
+test('only the internal return token marks a negative change as a raffle return',async()=>{
+ const f=fixture('allowed'),input={action:'change',operationId:'refund',userId:'1',chips:-200};
+ for(const [patch,expected] of [
+  [{exemption:f.api.RAFFLE_RETURN},'raffle-return'],
+  [{exemption:'confirmed-raffle-return'},''],
+  [{exemption:f.api.RAFFLE_RETURN,chips:200},''],
+  [{exemption:f.api.RAFFLE_RETURN,action:'agentTransfer'},'']
+ ]){
+  await f.api.check({...input,...patch});
+  assert.equal(f.calls.at(-1).at(-1),expected);
+ }
+});
 test('cash approval controls ignore managers and groups',async()=>{
  const f=fixture();for(const from of [2144406710,999]){
   assert.equal(await f.api.handle({callback_query:{id:'cb',data:'cash-guard:approve:123',from:{id:from},message:{chat:{id:from,type:'private'}}}}),true);

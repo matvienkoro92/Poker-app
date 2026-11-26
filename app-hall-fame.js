@@ -1982,11 +1982,9 @@ function hallFishRenderHomePlayerMonth(data) {
   root.innerHTML = '<section class="home-reward-table" aria-label="'+heading+'"><header class="home-reward-table__heading"><span>'+heading+'</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
     var knockout = reward.key === 'pokermankiKnockout';
     var hasConditions = knockout || Boolean(reward.condition || reward.standings);
-    var image = reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
+    var heroSrc = reward.leader && window.pokerGetClubNewsPersonalArt?.(reward.leader.nick);
+    var image = heroSrc ? {src:heroSrc,kind:'art'} : reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
     var art = knockout ? '<span class="reward-ace__knockout-art"><img src="./assets/home-reward-pokermanki-boxing-v1.webp" width="720" height="480" alt="ПокерМанки уворачивается от боксёрской перчатки" decoding="async"></span>' : image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
-    var display = reward.key === 'threeRebuys' ? 'aces' : reward.leader && String(reward.leader.nick).toLowerCase() === 'frankl'
-      ? (reward.key === 'dayHero' ? 'seated' : 'standing') : '';
-    if (display) art = '<span class="reward-display"><img src="./assets/home-award-display-'+display+'.webp" alt="" decoding="async"></span>';
     if (reward.standings) {
       art = '<span class="reward-ace__standings"><small>Лидеры · победы</small>'+reward.standings.map(function(day) {
         return '<span><span>'+hallFishEsc(day.label)+'</span><strong>'+(day.leader?hallFishEsc(day.leader.nick):'Нет данных')+'</strong><span>'+(day.leader?.wins ?? '—')+'</span></span>';

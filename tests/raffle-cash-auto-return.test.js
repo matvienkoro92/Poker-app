@@ -17,7 +17,11 @@ function fixture(twoWinners = false) {
     if(op==='SET') {const next=JSON.parse(value);if(failSave && next.winners[0].cashSeatingMonitor.status==='returned'){failSave=false;throw Error('save failed');}raffle=next;}
     return {result:'OK'};
   });
-  const ctx={module:{exports:{}},require:name=>name.includes("penalties") ? penalties : seating,rawRedisPipeline:pipeline,redisPipeline:pipeline,
+  const chips={
+    cancelUnstartedRaffleReturn:async key=>!ledger.has(key),
+    reconcileDirectChange:async key=>ledger.get(key)
+  };
+  const ctx={module:{exports:{}},require:name=>name.includes("pokerplus-chips") ? chips : name.includes("penalties") ? penalties : seating,rawRedisPipeline:pipeline,redisPipeline:pipeline,
     claimRaffleReadySettlement:async()=> 'lock',releaseRaffleReadySettlement:async()=>{},RAFFLE_PREFIX:'raffle:',
     RAFFLE_PUBLIC_LIST_CACHE_KEY:'public',RAFFLE_SUMMARY_CACHE_KEY:'summary',RAFFLE_ARCHIVE_INDEX_CACHE_KEY:'archive',
     currentMoscowWeekRange:()=>({}),currentWeekRaffleIssueTotalsCacheBaseKey:()=> 'week',currentWeekRaffleIssueTotalsCacheGenerationKey:()=> 'generation',
@@ -26,7 +30,7 @@ function fixture(twoWinners = false) {
     raffleWinnerPoker21PayoutSpec:()=>({}),console:{error(){}},
     processPoker21DirectChange:async input=>{if(failPayment && input.idempotencyKey==='fixed-return')throw Error('payment failed');if(!ledger.has(input.idempotencyKey)){transfers++;assert.equal(input.chips,-300);ledger.set(input.idempotencyKey,{status:'completed',completedAt:new Date().toISOString()});}return {operation:ledger.get(input.idempotencyKey)};}};
   vm.runInNewContext('module.exports = '+source,ctx);
-  return {poll:()=>ctx.module.exports([]),get:()=>raffle,transfers:()=>transfers,penalties:()=>penaltyEvents.size,failPayment:v=>failPayment=v,failSave:()=>failSave=true};
+  return {poll:(tables=[{leagueId:"184691", playType:"NLH", playerCount:0, pos:{}}])=>ctx.module.exports(tables),get:()=>raffle,transfers:()=>transfers,penalties:()=>penaltyEvents.size,failPayment:v=>failPayment=v,failSave:()=>failSave=true};
 }
 test('confirmed debit counts as a return once, even if saving after payment fails',async()=>{
   const f=fixture();f.failSave();await f.poll();assert.equal(f.transfers(),1);assert.equal(f.get().winners[0].cashSeatingMonitor.status,'returning');
@@ -45,4 +49,15 @@ test('one failed return does not block other winners in the same raffle', async(
   f.failPayment(false); await f.poll();
   assert.equal(f.get().winners[0].cashSeatingMonitor.status, 'returned');
   assert.equal(f.transfers(), 2);
+});
+
+test('an observed seat cancels an unstarted return, while a completed debit is reconciled',async()=>{
+  const table=[{leagueId:'184691',playType:'NLH',pos:{pos1:'123'}}];
+  const blocked=fixture();blocked.failPayment(true);await blocked.poll();
+  await blocked.poll(table);
+  assert.equal(blocked.get().winners[0].cashSeatingMonitor.status,'seated');
+  assert.equal(blocked.transfers(),0);
+  const paid=fixture();paid.failSave();await paid.poll();await paid.poll(table);
+  assert.equal(paid.get().winners[0].cashSeatingMonitor.status,'returned');
+  assert.equal(paid.transfers(),1);
 });
