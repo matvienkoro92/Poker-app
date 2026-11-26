@@ -670,7 +670,7 @@ html body #app.app:has(#headerAdminShortcuts:not([hidden])) > .card > .card__hea
 }
 .deposits .deposits__usdt-rate input[aria-invalid="true"] { border-color: #ef8585; }
 
-.deposits__online-providers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;align-content:start;min-width:0}
+.deposits__online-providers{display:grid;grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;align-content:start;min-width:0}
 .deposits .deposits__online-providers>.deposits__online-provider{box-sizing:border-box;width:100%;min-height:42px;height:42px;padding:4px 2px;gap:3px;border-radius:9px}
 .deposits .deposits__online-provider strong{font-size:clamp(7px,2vw,10px);line-height:1.15;white-space:nowrap}
 .deposits .deposits__online-provider span{font-size:clamp(7px,1.8vw,9px);line-height:1.15;white-space:nowrap}
