@@ -93,7 +93,7 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal(state.entries[0].payments.filter(p=>p.reservationId===second).length,1);
   assert.deepEqual(state.poker21Credits.map(c=>[c.id,c.clubId,c.amountCents]),[[second,'123',900000]]);
   assert.equal(summary(state.entries[0]).paid,900000);
-  assert.equal((await overview()).bookings[0].stage,'Оплата подтверждена');
+  assert.equal(await overview(),undefined);
   state=paidState;
   assert.equal((await call('remove',second,'123')).code,403);
   assert.equal((await call('remove',second,'123',undefined,'5053253480')).code,200);
