@@ -14,16 +14,16 @@ test('exchange accepts direct private and group commands and its approved callba
 });
 test('exchange renders both lists, safe names and empty states',()=>{
  const text=exchange.render({'42':JSON.stringify({side:'withdraw',name:'<Иван>',amount:500,expiresAt:Date.now()+7200000}),'43':JSON.stringify({side:'deposit',name:'Ольга',expiresAt:Date.now()+7200000}),'44':'broken'});
- assert.match(text,/Хочет сделать вывод/);assert.match(text,/Хочет пополнить/);
+ assert.match(text,/Хотите пополнить[\s\S]*?&lt;Иван&gt;/);assert.match(text,/Хотите вывести[\s\S]*?Ольга/);
  assert.match(text,/tg:\/\/user\?id=42/);assert.match(text,/&lt;Иван&gt;/);assert.match(text,/Ольга/);
- assert.equal((exchange.render({}).match(/Пока нет заявок/g)||[]).length,2);
+ assert.equal(exchange.render({}), '🔄 <b>Обмен между игроками</b>\n\nЗаявок пока нет. Добавьте свою 👇');
  assert.match(exchange.render(['42',JSON.stringify({side:'deposit',name:'Пётр',expiresAt:Date.now()+7200000})]),/Пётр/);
 });
 test('amounts are displayed and requests disappear at the two hour boundary',()=>{
  const entry={'42':JSON.stringify({side:'withdraw',name:'Иван',amount:750,expiresAt:7200000})};
- assert.match(exchange.render(entry,7199999),/Иван<\/a> — 750 ₽/);
+ assert.match(exchange.render(entry,7199999),/<b>750 ₽<\/b> · <a [^>]+>Иван<\/a>/);
  assert.doesNotMatch(exchange.render(entry,7200000),/Иван/);
- assert.match(exchange.render(entry,0),/на 2 часа/);
+ assert.doesNotMatch(exchange.render(entry,0),/Эти игроки пополняют/);
 });
 function fixture(options={}){
  const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},sent=[],commands=[];
@@ -40,7 +40,7 @@ test('selection prompts for amount without publishing a request',async()=>{
  assert.equal(f.sent[1].body.message_id,message.message_id);
  assert.ok(!f.sent.some(s=>s.url.endsWith('/sendMessage')));
  assert.match(f.sent[1].body.text,/2 часа/);
- assert.match(f.sent[1].body.text,/введите сумму для пополнения от 1 до 10000 ₽/);
+ assert.match(f.sent[1].body.text,/введите сумму для пополнения от 1 до 10\s000 ₽/);
  assert.ok(f.commands.some(c=>c[0]==='SET'&&c[1].includes(':pending:42')));
  assert.ok(!f.commands.some(c=>c[0]==='HSET'||c[0]==='EVAL'));
 });
@@ -57,13 +57,13 @@ test('remove deletes only the clicking player and cancels pending amount input',
  const f=fixture();await f.service.handle({callback_query:{id:'remove',data:'exchange:remove',from:message.from,message}},'test');
  assert.ok(f.commands.some(c=>c[0]==='HDEL'&&c[1]==='poker_app:telegram:exchange:-123'&&c[2]==='42'));
  assert.ok(f.commands.some(c=>c[0]==='DEL'&&c[1].endsWith(':pending:42')));
- assert.equal(f.sent[0].body.text,'Вы удалены из списка');
+ assert.equal(f.sent[0].body.text,'Ваша заявка снята');
 });
 test('expiry worker cleans expired requests and refreshes published lists',async()=>{
  const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},commands=[],sent=[];
  vm.runInNewContext(fs.readFileSync(require.resolve('../lib/telegram-exchange'),'utf8'),{module:mod,AbortSignal,require:id=>id==='./redis'?{pipeline:async batch=>batch.map(c=>{commands.push(c);return {result:c[0]==='ZRANGEBYSCORE'?(c[1].endsWith(':due')?['-123:42']:['7']):c[0]==='EVAL'&&c[1].includes('HGETALL')?{}:1};})}:{guardedFetch:async(url,options)=>{sent.push(JSON.parse(options.body));return {json:async()=>({ok:true})};}}});
  assert.equal(await mod.exports.expire('test'),1);
- assert.equal(sent[0].chat_id,'-123');assert.equal(sent[0].message_id,7);assert.match(sent[0].text,/Пока нет заявок/);
+ assert.equal(sent[0].chat_id,'-123');assert.equal(sent[0].message_id,7);assert.match(sent[0].text,/Заявок пока нет/);
  assert.ok(commands.some(c=>c[0]==='EVAL'&&c[1].includes('p.expiresAt<=tonumber(ARGV[1])')));
  assert.ok(commands.some(c=>c[0]==='EVAL'&&c[1].includes("'ZSCORE'")));
 });
@@ -76,7 +76,7 @@ test('group exchange command and its reply expire after ten minutes without shor
  const permits=f.commands.filter(c=>c[0]==='SET'&&c[1].includes(':delete-permit:'));
  assert.deepEqual(permits.map(c=>JSON.parse(c[2]).type),['group-command','group-board']);
  assert.doesNotMatch(f.sent[0].body.text,/Это сообщение удаляется|список можно снова открыть|Чтобы уйти раньше/);
- assert.match(f.sent[0].body.text,/на 2 часа/);
+ assert.deepEqual(f.sent[0].body.reply_markup.inline_keyboard.flat().map(b=>b.text), ['Заявка на пополнение','Заявка на вывод','Снять мою заявку']);
 });
 test('cleanup cancels legacy board deletion timers without deleting the board',async()=>{
  const fs=require('node:fs'),vm=require('node:vm'),mod={exports:{}},sent=[],commands=[];
