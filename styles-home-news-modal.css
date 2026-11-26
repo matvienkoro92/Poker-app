@@ -3266,3 +3266,224 @@ body .home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-
   .home-week-cup { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
   .home-week-cup img { min-height: 0; min-width: 0; }
 }
+
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__item.home-friend-news-event--featured-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 176px;
+  border: 1px solid #ddaa65;
+  border-radius: 15px;
+  background: radial-gradient(ellipse at 78% 82%, #57412f, transparent 49%), linear-gradient(155deg,#322a29,#151418 41%,#201c1c 84%,#382a20);
+  box-shadow: inset 0 1px 3px #ffdfaa75, 0 2px 9px #0007;
+  > .home-friend-news-modal__icon {
+    inset: 0 0 auto auto;
+    height: 100%;
+    width: 45%;
+  }
+  > .home-friend-news-modal__copy {
+    position: relative;
+    width: 58%;
+    margin-left: 0;
+    padding: 4px 0 3px 5px;
+  }
+  .home-friend-news-modal__player-name { color: #ff819b; font-size: clamp(18px,5vw,26px); }
+  .home-news-hero-tag { border: 1px solid #a97430; background: linear-gradient(#72461c,#3c2818); }
+  .home-news-hero-tag::before { content: '♛ '; }
+  .home-news-reward-actions {
+    float: none;
+    display: contents;
+  }
+  [data-home-news-read-id]:has(.home-news-reward-actions) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .home-news-reward-actions > .home-friend-news-modal__title-amount {
+    order: 1;
+    margin: 4px 0;
+    color: #ffcf70;
+    font-size: clamp(22px,6.6vw,38px);
+    line-height: 1.1;
+    text-shadow: 0 1px 10px #e9842159;
+  }
+  .home-news-reward-actions .home-news-portrait-tools { order: 3; }
+  .home-friend-news-modal__event-lines { order: 2; }
+}
+
+.home-friend-news-modal--club .home-friend-news-modal__day-events { container-type: inline-size; }
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__item:has(.home-news-reward-actions) {
+  --scene-gold: #ffc265;
+  border-radius: 12px;
+  border: 1px solid #716768;
+  background: linear-gradient(118deg,#242124,#131317 48%,#201e22 85%,#332c29);
+  box-shadow: inset 0 1px 3px #e1c9b644, inset 0 -2px 5px #000a;
+  .home-news-scene-art { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .home-news-reward-actions .home-news-portrait-tools {
+    position: absolute; right: 4px; bottom: 3px; top: auto; left: auto;
+    opacity: 0; z-index: 4;
+  }
+  &:hover .home-news-portrait-tools, &:focus-within .home-news-portrait-tools { opacity: 1; }
+  .home-friend-news-modal__title-amount { color: #ffce68; }
+  .home-news-honors-slot :is(.home-week-cup,button.home-news-honor) {
+    border: 1px solid #66554888; border-radius: 4px; background: #100f12a8;
+  }
+  &:not(.home-friend-news-event--featured-hero) .home-news-reward-actions > .home-friend-news-modal__title-amount {
+    padding: 1px 5px 2px 18px;
+    background: linear-gradient(110deg,#99541d55,transparent);
+    clip-path: polygon(10% 0,100% 0,100% 100%,0 100%);
+    font-size: clamp(15px,4.5cqw,24px);
+  }
+  &:has(.home-news-scene-art) > .home-friend-news-modal__icon { bottom: 0; top: 0; height: 100%; }
+  &.home-friend-news-event--featured-hero {
+    min-height: clamp(156px,47cqw,280px);
+    border-color: #efa54f;
+    background: radial-gradient(ellipse at 72% 83%,#6b4a31,transparent 35%), linear-gradient(160deg,#332925,#131317 45%,#211d1f 84%,#342820);
+    box-shadow: inset 0 1px 3px #ffdbacaa,inset 0 -1px 3px #ff8a28aa,0 1px 6px #ffa13c44;
+    > .home-friend-news-modal__icon { width: 51%; right: 0; left: auto; }
+    > .home-friend-news-modal__copy { width: 59%; padding-left: 2.5%; }
+    .home-news-reward-actions > .home-friend-news-modal__title-amount {
+      display: inline-flex; align-items: center; font-size: clamp(21px,8.7cqw,54px); letter-spacing: -.045em;
+      margin: 3px 0;
+    }
+    .home-news-reward-actions > .home-friend-news-modal__title-amount::before,
+    .home-news-reward-actions > .home-friend-news-modal__title-amount::after {
+      content: ''; width: .45em; height: 1.1em; background: url('./assets/club-news-personal/news-laurel.webp') center / 100% 100% no-repeat;
+    }
+    .home-news-reward-actions > .home-friend-news-modal__title-amount::after { transform: scaleX(-1); }
+  }
+}
+
+body .home-friend-news-modal--club .home-friend-news-event--featured-hero .garage-showcase--inline .garage-showcase__news-art {
+  inset: auto 2% 7% auto;
+  width: 96%;
+  height: 68%;
+  object-fit: contain;
+  object-position: center bottom;
+  transform: none;
+}
+
+/* Tournament-day results share a burgundy awards board. */
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__day-events:has(.home-news-reward-actions) {
+  background: radial-gradient(ellipse at 12% 12%,#571327 0,transparent 34%),linear-gradient(115deg,#210911,#10070c 50%,#380e1b);
+  gap: 0;
+  padding: 4px;
+  border-radius: 10px;
+  .home-friend-news-modal__item:has(.home-news-reward-actions) {
+    border: 0;
+    border-bottom: 1px solid #af8155;
+    border-radius: 0;
+    box-shadow: none;
+    background: radial-gradient(ellipse at 90% 5%,#78193055,transparent 54%);
+    font-family: Georgia, 'Times New Roman', serif;
+    .home-friend-news-modal__player-name, .home-friend-news-modal__title-amount, .home-friend-news-modal__event-lines strong {
+      font-family: inherit;
+    }
+    .home-friend-news-modal__event-lines { color: #f5e3cd; }
+    .home-news-honors-slot { padding: 2px; border: 1px solid #a8754c99; border-radius: 6px; background: #250b1380; }
+    .home-news-honors-slot :is(.home-week-cup,button.home-news-honor) { border: 0; border-radius: 0; background: transparent; }
+    .home-news-reward-actions > .home-friend-news-modal__title-amount { background: none; clip-path: none; }
+    &.home-friend-news-event--featured-hero {
+      min-height: clamp(155px,42cqw,275px);
+      > .home-friend-news-modal__icon { left: 0; right: auto; width: 35%; }
+      > .home-friend-news-modal__copy { width: 65%; margin-left: 35%; padding: 0 2px; }
+      .home-friend-news-modal__player-name { color: #f06987; font-size: clamp(17px,5.2cqw,34px); }
+      .home-news-hero-tag { background: #e9b763; color: #311523; border: 0; }
+      .home-news-hero-tag::before { content: none; }
+      .home-news-reward-actions > .home-friend-news-modal__title-amount { font-size: clamp(23px,8.5cqw,56px); }
+      .home-news-reward-actions > .home-friend-news-modal__title-amount::before,
+      .home-news-reward-actions > .home-friend-news-modal__title-amount::after { content: none; }
+      .home-news-hero-identity { max-width: 45cqw; }
+      &::after { content: ''; pointer-events: none; position: absolute; inset: 2% 0 auto auto; width: 19%; height: 45%; background: url('./assets/club-news-personal/day-hero-gold-cup.webp') center / contain no-repeat; mask-image: radial-gradient(ellipse,#000 55%,transparent 83%); }
+    }
+  }
+  .home-friend-news-modal__item.home-friend-news-event--last-longer:nth-child(n) {
+    background: linear-gradient(100deg,#f2dab7,#fff0d3 48%,#e7ccaa);
+    border: 3px double #916444; border-radius: 4px;
+    .home-friend-news-modal__last-longer-line, .home-friend-news-modal__last-longer-line b { color:#5d1622; font-family: Georgia,serif; font-style:italic; }
+  }
+}
+
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__day-events:has(.home-news-reward-actions) {
+  background: radial-gradient(ellipse 65% 140px at 16% 4%,#6c152a99,transparent),repeating-linear-gradient(165deg,#220812 0,#320b19 90px,#170810 200px);
+  .home-friend-news-modal__item:has(.home-news-reward-actions) {
+    padding-block: 5px;
+    .home-friend-news-modal__event-lines strong { font: 600 clamp(11px,2.85cqw,18px)/1.14 Georgia,serif; text-shadow:none; }
+    .home-friend-news-modal__player-name { font-family:Georgia,serif; letter-spacing:-.045em; }
+    .home-news-honors-slot { flex-wrap:nowrap; background:linear-gradient(#260b14,#12090c); }
+    .home-news-reward-actions .home-news-portrait-tools { bottom:auto; top:2px; right:auto; left:2px; opacity:0; }
+    .home-news-portrait-tools:focus-within { opacity:1; }
+    .home-friend-news-modal__icon:has(img[src*="frankl-news-flame"]) img { mask-image:radial-gradient(ellipse closest-side,#000 65%,transparent 100%); }
+    &:not(.home-friend-news-event--featured-hero) .home-friend-news-modal__player-title { border-bottom:1px solid #ab805552; }
+    &.home-friend-news-event--featured-hero {
+      background:radial-gradient(ellipse at 12% 90%,#90233d77,transparent 32%),radial-gradient(ellipse at 85% 15%,#68132988,transparent 45%);
+      &::before { content:"1"; display:block; position:absolute; inset:0 auto auto 1%; background:none; width:auto;height:auto; font:italic bold clamp(58px,22cqw,136px)/1 Georgia,serif; color:#bc2e4660; pointer-events:none; }
+      .home-news-hero-meta { padding-bottom:3px;border-bottom:1px solid #bc986399;width:65%; }
+      .home-friend-news-modal__title-amount { font-family:Georgia,serif;font-weight:700;line-height:1; }
+    }
+  }
+}
+
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__day-events:has(.home-news-reward-actions) {
+  background: #200912;
+  .home-friend-news-modal__item:has(.home-news-reward-actions) {
+    background:
+      radial-gradient(ellipse at 15% 86%,#9f29474a,transparent 21%),
+      radial-gradient(ellipse at 19% 51%,#79183158,transparent 36%),
+      linear-gradient(103deg,#250910,#12060c 55%,#300b18);
+    border-image:linear-gradient(90deg,transparent,#ae8052 12%,#715444 91%,transparent) 1;
+    .home-friend-news-modal__player-title,
+    .home-friend-news-modal__event-lines strong { background:none; box-shadow:none; text-shadow:none; }
+    .home-friend-news-modal__player-name { font:bold clamp(18px,5.3cqw,36px)/1 Georgia,serif; }
+    .home-friend-news-modal__player-meta {font:600 clamp(10px,2.4cqw,15px)/1.1 Georgia,serif;color:#c6b5a3;}
+    .home-friend-news-modal__event-lines strong {font:600 clamp(11px,2.9cqw,18px)/1.12 'Times New Roman',serif;color:#f8ead6;}
+    .home-news-honors-slot { gap:0; border-color:#805044; padding:2px 1px; background:#220a1066; }
+    .home-news-honors-slot :is(.home-week-cup,button.home-news-honor) { border-radius:0; border:0; border-right:1px solid #91644752; box-shadow:none; background:transparent; }
+    .home-news-honors-slot > :last-child { border-right:0; }
+    .home-friend-news-modal__icon:has(img[src*="award-frankl-stage"]) img {object-fit:contain;mask-image:linear-gradient(90deg,transparent,#000 8% 87%,transparent);}
+    &:not(.home-friend-news-event--featured-hero) {
+      .home-friend-news-modal__copy {border:0; padding-left:2%; }
+      .home-friend-news-modal__title-amount { font:bold clamp(17px,4.9cqw,30px)/1 Georgia,serif; color:#f5cd86; }
+      .home-friend-news-modal__player-title { border:0; }
+      .home-friend-news-modal__event-lines { border-top:1px solid #92704b88; padding-top:3px; margin-top:2px; }
+      .home-friend-news-modal__player-name {color:#f2dec4;}
+      &[data-home-news-player-name="FrankL"] .home-friend-news-modal__player-name {color:#ef6d92;}
+      .home-friend-news-modal__copy::before {content:"";position:absolute; height:40%; width:1px; top:9%; left:0; background:linear-gradient(transparent,#e5bc7d,transparent);transform:skew(-16deg);}
+    }
+    &.home-friend-news-event--featured-hero {
+      min-height:43cqw;
+      &::before {content:"";width:15%;height:43%;inset:0 auto auto 0;background:url('./assets/club-news-personal/award-rank-one.webp') top left / contain no-repeat;mask-image:linear-gradient(90deg,#000 77%,transparent);box-shadow:none;border:0;transform:none;}
+      &::after {inset:2% 0 auto auto;width:21%;height:53%;background:url('./assets/club-news-personal/award-cup-stage.webp') right top / contain no-repeat;mask-image:linear-gradient(90deg,transparent,#000 9%);}
+      .home-news-reward-actions > .home-friend-news-modal__title-amount {font:bold clamp(29px,9.4cqw,62px)/1 Georgia,serif;letter-spacing:-.055em;color:#ffdaa0;margin:2px 0 4px;text-shadow:0 2px 3px #180608;}
+      .home-news-hero-tag {font:700 clamp(9px,2.2cqw,14px)/1 Georgia,serif;border-radius:9px;background:linear-gradient(#ffe5a1,#d99b4e);padding:2px 7px;}
+    }
+  }
+  .home-friend-news-modal__item.home-friend-news-event--last-longer:nth-child(n) {
+    background: url('./assets/club-news-personal/award-ticket.webp') center / 100% 100% no-repeat;
+    display:flex; align-items:center; padding:3px 0; min-height:clamp(42px,11.4cqw,74px); border:0;box-shadow:none;
+    .home-friend-news-modal__icon { display:none; }
+    .home-friend-news-modal__copy { margin-left:21%;width:78%;padding:0; }
+    .home-friend-news-modal__last-longer-line {white-space:normal; font: bold italic clamp(10px,2.55cqw,16px)/1.12 Georgia,serif;}
+  }
+}
+
+body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-modal__day-events .home-friend-news-modal__item:has(.home-news-reward-actions) {
+  --stage-width: 33%;
+  --stage-inset: clamp(4px,1.25cqw,8px);
+  &.home-friend-news-event--featured-hero { --stage-width: 36%; }
+  > .home-friend-news-modal__icon {
+    position:absolute; inset:0 auto 0 0; width:var(--stage-width); height:auto;
+    padding:var(--stage-inset); box-sizing:border-box;
+    background:radial-gradient(ellipse 41% 5% at 49% 92%,#0009,transparent),radial-gradient(ellipse 70% 19% at 55% 95%,#a54b594a,transparent);
+  }
+  > .home-friend-news-modal__copy {
+    position:relative; margin-left:var(--stage-width); width:calc(100% - var(--stage-width)); padding:0 var(--stage-inset) 0 2px; box-sizing:border-box;
+  }
+  > .home-friend-news-modal__icon img.home-friend-news__avatar--personal-art {
+    width:100%;height:100%;object-fit:contain;object-position:center bottom;transform:none;
+    filter:drop-shadow(0 2px 2px #10050aa8);
+  }
+  .garage-showcase--inline .garage-showcase__news-stage { width:100%!important;height:94cqh!important; }
+  .garage-showcase--inline .garage-showcase__news-character {inset:2% auto auto 3%;width:63%;height:93%;object-fit:contain;object-position:center bottom;transform:none;filter:drop-shadow(0 2px 2px #10050abe);}
+  .garage-showcase--inline .garage-showcase__news-art {inset:auto 2% 9% auto;width:96%;height:62%;transform:none;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2px 2px #140610cc);}
+  background-image:radial-gradient(ellipse at 13% 91%,#99344760,transparent 29%),url('./assets/club-news-personal/awards-grain.png'),linear-gradient(108deg,#350e1b,#1b0910 48%,#310c18);
+}

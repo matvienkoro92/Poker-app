@@ -2685,7 +2685,16 @@
     if (personalArt.indexOf("/cooler-news-cutout.webp") !== -1) visualFallbackUrl = avatar;
     if (visualFallbackUrl === visualUrl) visualFallbackUrl = avatar && avatar !== visualUrl ? avatar : "";
     var inlineLook = !ticker && !isLastLonger && typeof window.pokerGarageNewsShowcaseHtml === "function"
-      ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId, {featured:isDayHero,inline:true}) : "";
+      ? window.pokerGarageNewsShowcaseHtml(row, eventPlayerId, {featured:isDayHero,inline:true,nick:row.actorNick}) : "";
+    if (!ticker && newsModalMode === "club" && row.tournamentName && !isLastLonger) {
+      var portrait = {
+        "покерманки": isDayHero && "./assets/personal-character-poses/pokermanki-standing-v1.webp",
+        "ярый": "./assets/player-hall/standing-monkey-underwear-v1.webp",
+        "😈777😈": "./assets/player-hall/standing-monkey-underwear-v1.webp",
+        "frankl": "./assets/club-news-personal/award-frankl-stage.webp"
+      }[friendProfileKey];
+      if (portrait) personalArt = visualUrl = portrait;
+    }
     var visual = inlineLook || (visualUrl
       ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '"' +
         (visualFallbackUrl ? ' data-news-image-fallback="' + esc(visualFallbackUrl) + '"' : '') +
@@ -2746,6 +2755,7 @@
     return '<span class="' + (ticker ? "home-friend-news__slide" : "home-friend-news-modal__item") +
       ' home-friend-news-event--' + esc(row.type) +
       (isDisqualified ? " home-friend-news-event--disqualified" : "") +
+      (heroHeader ? " home-friend-news-event--featured-hero" : "") +
       (isLastLonger ? " home-friend-news-event--last-longer" : "") +
       (!ticker && eventCommentsOpen[feedbackId] ? " home-friend-news-modal__item--comments-open" : "") +
       '" data-home-news-target="' + esc(!ticker && (eventPlayerId || canResolveClubPlayer) ? "" : row.target || "") + '"' +
