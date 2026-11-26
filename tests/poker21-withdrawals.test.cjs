@@ -7,6 +7,8 @@ const {applyOperation,summary}=require('../lib/admin-deposits');
 const handle=require('../lib/api-handlers/poker21-withdrawals');
 
 test('non-USDT withdrawals automatically enter the cabinet and share the admin reservation balance',async t=>{
+  let clock=Date.parse('2026-11-26T12:00:00Z');
+  t.mock.method(Date,'now',()=>clock);
   const entryId=randomUUID();
   let offerId=randomUUID();
   const entry={room:'P21',playerId:'123456',recipient:'Тест',bank:'Тест',phone:'+79990000000',total:900000};
@@ -41,6 +43,14 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   state=applyOperation(state,{action:'void',entryId,requestId:randomUUID(),paymentId},'admin').state;
   const items=(await call('list')).data.items;
   assert.equal(items.length,1);
+  const daytime=clock;
+  for(const [time,paused] of [['22:59:59',false],['23:00:00',true],['02:59:59',true],['03:00:00',false]]){
+    clock=Date.parse('2026-11-26T'+time+'Z');
+    const card=(await call('list')).data.items[0];
+    assert.equal(card.bookingPaused,paused);
+    if(paused)assert.equal((await call('take',card.id.slice(11))).code,409);
+  }
+  clock=daytime;
   offerId=items[0].id.slice('withdrawal:'.length);
   assert.equal(summary(state.entries[0]).available,900000);
   assert.equal((await call('list')).data.items[0].amount,9000);
@@ -74,6 +84,7 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal((await call('paid',reservationId,'123',receipt)).code,409);
   assert.equal(files.size,0);
   assert.equal((await call('paid',second,'123',receipt)).code,200);
+  assert.throws(()=>applyOperation(state,{action:'release-reservation',entryId,reservationId:second,requestId:randomUUID()},'manager'),/Клуб уже отметил оплату/);
   assert.equal(files.get('poker21:withdrawal-receipt:'+second),receipt);
   assert.equal(state.entries[0].reservations[1].hasPoker21Receipt,true);
   assert.equal((await call('list')).data.items[0].status,'Ожидает подтверждения');
@@ -106,7 +117,8 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.deepEqual((await call('list')).data.items,[]);
 });
 
-test('partial withdrawal enforces minimum and keeps independent reservations',()=>{
+test('partial withdrawal enforces minimum and keeps independent reservations',t=>{
+  t.mock.method(Date,'now',()=>Date.parse('2026-11-26T12:00:00Z'));
   const {availablePoker21Offer}=require('../lib/admin-deposits');
   const entryId=randomUUID(),now=Date.now();
   let state=applyOperation(null,{action:'create',requestId:entryId,entry:{room:'P21',playerId:'123456',recipient:'Тест',bank:'Тест',phone:'+79990000000',total:5000000}},'admin',now).state;
