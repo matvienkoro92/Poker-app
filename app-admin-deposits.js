@@ -137,35 +137,53 @@
   function counterpartyLabel(value){return {allfriends:'All friends',sergeyMarina:'Сергей/Марина',romaPpc:'Рома PPC',owner:'Владельцу',zp:'ЗП'}[value]||'';}
   function allFriendsField(id,value){if(id!=='other')return '';var choices=[['allfriends','All friends'],['sergeyMarina','Сергей/Марина'],['romaPpc','Рома PPC'],['owner','Владельцу']];return '<fieldset class="deposits__rooms deposits__destinations"><legend>Куда отправляем</legend>'+choices.map(function(item){return '<label><input type="radio" name="counterparty" value="'+item[0]+'"'+(value===item[0]?' checked':'')+'><span>'+item[1]+'</span></label>';}).join('')+(!choices.some(function(item){return item[0]===value;})?'<input type="hidden" name="counterparty" value="'+(value==='zp'?'zp':'other')+'" data-counterparty-fallback>':'')+'</fieldset>';}
   function paymentFormsTotals(forms){
+    var clubs=new Map();
+    function settlement(id,name){
+      id=String(id);
+      if(!clubs.has(id))clubs.set(id,{name:(data.clubNames||{})[id]||'Клуб '+id,received:0,sent:0});
+      var item=clubs.get(id);
+      if(name)item.name=name;
+      return item;
+    }
     var sources={player:0,owner:0,allfriends:0,sergeyMarina:0,romaPpc:0};
     (data.entries||[]).forEach(function(entry){(entry.payments||[]).forEach(function(p){
       if(p.voidedAt||p.channelId==='exchip'||p.createdAt<forms.period.start||p.createdAt>=forms.period.end)return;
       var reservation=p.reservationId&&(entry.reservations||[]).find(function(r){return r.id===p.reservationId;});
+      if(p.channelId==='poker21'&&reservation&&reservation.poker21Club){
+        if(matchesPaymentManager(p))settlement(reservation.poker21Club).received+=p.amount;
+        return;
+      }
       if(!matchesPaymentManager(reservation||p))return;
       var source=Object.prototype.hasOwnProperty.call(sources,p.paymentSource)?p.paymentSource:'player';
       sources[source]+=p.amount;
     });});
     var withdrawals=Object.values(sources).reduce(function(sum,n){return sum+n;},0);
+    clubs.forEach(function(item){withdrawals+=item.received;});
     var tipDeposits=(data.tipCashouts||[]).filter(function(r){return !r.voidedAt&&r.createdAt>=forms.period.start&&r.createdAt<forms.period.end&&matchesPaymentManager({createdBy:r.managerId});}).reduce(function(n,r){return n+r.amount;},0);
     var settlements={};
     ['owner','allfriends','sergeyMarina','romaPpc'].forEach(function(key){settlements[key]={received:sources[key],sent:0};});
     (data.channelOperations||[]).forEach(function(r){
       if(r.voidedAt||r.createdAt<forms.period.start||r.createdAt>=forms.period.end||!matchesPaymentManager(r))return;
+      if(r.channelId==='clubs'&&r.clubId&&r.direction==='income'){
+        settlement(r.clubId,r.clubName).sent+=r.amount;
+        return;
+      }
       var key=isAllFriendsOperation(r)?'allfriends':r.channelId==='other'?r.counterparty:'';
       if(!settlements[key])return;
       if(r.direction==='income')settlements[key].received+=r.amount;
       else if(r.direction==='outgoing')settlements[key].sent+=r.amount;
     });
     var af=settlements.allfriends;
-    return {allfriendsSent:af.sent,allfriendsReceived:af.received,allfriendsBalance:af.received-af.sent,settlements:settlements,withdrawals:withdrawals,sources:sources,deposits:tipDeposits+sources.player+forms.providers.filter(function(p){return p.id!=='transfer'&&p.id!=='bonuses';}).reduce(function(sum,p){return sum+(p.total||0);},0)};
+    return {clubs:Array.from(clubs.values()),allfriendsSent:af.sent,allfriendsReceived:af.received,allfriendsBalance:af.received-af.sent,settlements:settlements,withdrawals:withdrawals,sources:sources,deposits:tipDeposits+sources.player+forms.providers.filter(function(p){return p.id!=='transfer'&&p.id!=='bonuses';}).reduce(function(sum,p){return sum+(p.total||0);},0)};
   }
   function paymentFormsTotalsHtml(forms){
     var totals=paymentFormsTotals(forms),format=new Intl.DateTimeFormat('ru-RU',{timeZone:forms.period.timeZone||'Europe/Moscow',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),periodLabel=format.format(forms.period.start)+' — '+format.format(forms.period.end);
     var sources='<span><span>От игроков</span><b>'+money(totals.sources.player)+'</b></span>';
     sources+=[['owner','Владелец'],['allfriends','AllFriends'],['sergeyMarina','Сергей/Марина'],['romaPpc','Рома PPC']].map(function(row){
-      var item=totals.settlements[row[0]];
+      return Object.assign({name:row[1]},totals.settlements[row[0]]);
+    }).concat(totals.clubs).map(function(item){
       if(!item.received&&!item.sent)return '';
-      return '<div class="deposits__allfriends"><span><span>'+row[1]+'</span><b>'+money(item.received)+'</b></span><span class="deposits__allfriends-out"><span>Уход им</span><b>−'+money(item.sent)+'</b></span><span class="deposits__allfriends-total"><span>Итого</span><b>'+money(item.received-item.sent)+'</b></span></div>';
+      return '<div class="deposits__allfriends"><span><span>'+esc(item.name)+'</span><b>'+money(item.received)+'</b></span><span class="deposits__allfriends-out"><span>Уход им</span><b>−'+money(item.sent)+'</b></span><span class="deposits__allfriends-total"><span>Итого</span><b>'+money(item.received-item.sent)+'</b></span></div>';
     }).join('');
     return '<dl class="deposits__payment-summary"><div><dt>Итого депозитов за '+esc(periodLabel)+'</dt><dd>'+money(totals.deposits)+'</dd></div><div><dt>Пришло на выводы</dt><dd>'+money(totals.withdrawals)+'<div class="deposits__payment-sources" aria-label="Состав поступлений на выводы">'+sources+'</div></dd></div></dl>';
   }
