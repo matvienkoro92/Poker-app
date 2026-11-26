@@ -5954,4 +5954,231 @@ var SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE = {
       ]
     }
   ]
+,
+  "25.11.2026": [
+    {
+      "time": "00:00",
+      "name": "Super KO 2/3 120K",
+      "buyin": 1500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "odna.pluha",
+          "place": 1,
+          "reward": 49101,
+          "points": 135
+        },
+        {
+          "nick": "Бабник",
+          "place": 2,
+          "reward": 13766,
+          "points": 110
+        }
+      ]
+    },
+    {
+      "time": "08:00",
+      "name": "Турбина 200с ПКО 2/3",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Monfokon",
+          "place": 1,
+          "reward": 7350.85,
+          "points": 135
+        },
+        {
+          "nick": "Юрий_77",
+          "place": 2,
+          "reward": 2239.14,
+          "points": 110
+        },
+        {
+          "nick": "FreshMeat",
+          "place": 5,
+          "reward": 263.32,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "10:00",
+      "name": "OK🎰",
+      "buyin": 200,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Baldendi",
+          "place": 2,
+          "reward": 2719.37,
+          "points": 110
+        },
+        {
+          "nick": "FreshMeat",
+          "place": 5,
+          "reward": 660,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "12:00",
+      "name": "DV Rebuy",
+      "buyin": 800,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Porquinho",
+          "place": 5,
+          "reward": 4100,
+          "points": 60
+        }
+      ]
+    },
+    {
+      "time": "17:00",
+      "name": "МОК🎰",
+      "buyin": 300,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 5,
+          "reward": 1360,
+          "points": 60
+        },
+        {
+          "nick": "Annie",
+          "place": 4,
+          "reward": 1130,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "18:00",
+      "name": "Боевой Косарь",
+      "buyin": 1000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Rifa",
+          "place": 2,
+          "reward": 30420.3,
+          "points": 110
+        },
+        {
+          "nick": "GUCCI",
+          "place": 6,
+          "reward": 11156.25,
+          "points": 50
+        },
+        {
+          "nick": "Coo1er91",
+          "place": 7,
+          "reward": 6987.5,
+          "points": 40
+        },
+        {
+          "nick": "Odna.pluha",
+          "place": 10,
+          "reward": 4550,
+          "points": 0
+        },
+        {
+          "nick": "@Felix",
+          "place": 9,
+          "reward": 1802.34,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Tournament PLO6",
+      "buyin": 100,
+      "league": 2,
+      "players": [
+        {
+          "nick": "Юрий_77",
+          "place": 1,
+          "reward": 3360,
+          "points": 135
+        },
+        {
+          "nick": "GUCCI",
+          "place": 3,
+          "reward": 610,
+          "points": 90
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "СУПЕР ПЯТИХАТКА",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Ksuha🐉",
+          "place": 2,
+          "reward": 20190,
+          "points": 110
+        },
+        {
+          "nick": "CD_u_Dymau",
+          "place": 3,
+          "reward": 3207.5,
+          "points": 90
+        },
+        {
+          "nick": "MilkyWay77",
+          "place": 5,
+          "reward": 1920,
+          "points": 60
+        },
+        {
+          "nick": "ПокерМанки",
+          "place": 4,
+          "reward": 1680,
+          "points": 70
+        }
+      ]
+    },
+    {
+      "time": "20:00",
+      "name": "Lucky Slot 150K",
+      "buyin": 2000,
+      "league": 1,
+      "players": [
+        {
+          "nick": "Бабник",
+          "place": 1,
+          "reward": 52680.99999999999,
+          "points": 135
+        },
+        {
+          "nick": "Khalil",
+          "place": 10,
+          "reward": 1240,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "time": "22:00",
+      "name": "Турбина 500с ПКО 2/3",
+      "buyin": 500,
+      "league": 1,
+      "players": [
+        {
+          "nick": "WiNifly",
+          "place": 1,
+          "reward": 19292.86,
+          "points": 135
+        }
+      ]
+    }
+  ]
 };

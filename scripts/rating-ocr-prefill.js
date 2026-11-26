@@ -92,6 +92,7 @@ function normalizeName(raw) {
   if (/Black\s+Magic/i.test(raw) && /60K/i.test(raw)) return "Black Magic 60K";
   if (/Prime\s+Magic/i.test(raw) && /500K/i.test(raw)) return "Prime Magic 500K";
   if (/Lucky\s+Slot/i.test(raw) && /177K/i.test(raw)) return "Lucky Slot 177K";
+  if (/Lucky\s+Slot/i.test(raw) && /150K/i.test(raw)) return "Lucky Slot 150K";
   if (/First\s+Blood/i.test(raw) && /15K/i.test(raw)) return "First Blood 15K";
   if (/BLACKOUT/i.test(raw) && /300K/i.test(raw)) return "BLACKOUT 300K";
   if (/Hyper\s+Turbo/i.test(raw) && /40K/i.test(raw)) return "Hyper Turbo 40K";
@@ -556,10 +557,7 @@ async function parseOcrFile(file) {
       title = "Phoenix 300K";
       buyin = 2500;
     }
-    if (time === "20:00" && /150K.*Lucky Slot/i.test(title)) {
-      title = "Lucky Slot 150K";
-      buyin = 2000;
-    }
+    if (time === "20:00" && title === "Lucky Slot 150K") buyin = 2000;
   }
   if (blue && date === "22.11.2026") {
     if (time === "14:00" && title === "[H]eadshot 400K") buyin = 1200;
