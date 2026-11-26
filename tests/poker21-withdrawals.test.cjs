@@ -95,3 +95,26 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
   assert.equal(summary(state.entries[0]).paid,900000);
   assert.deepEqual((await call('list')).data.items,[]);
 });
+
+test('partial withdrawal enforces minimum and keeps independent reservations',()=>{
+  const {availablePoker21Offer}=require('../lib/admin-deposits');
+  const entryId=randomUUID(),now=Date.now();
+  let state=applyOperation(null,{action:'create',requestId:entryId,entry:{room:'P21',playerId:'123456',recipient:'Тест',bank:'Тест',phone:'+79990000000',total:5000000}},'admin',now).state;
+  const offer=()=>availablePoker21Offer(summary(state.entries[0]));
+  function run(action,params){
+    const requestId=randomUUID();
+    state=applyOperation(state,{action,entryId,requestId,...params},'test',now,'test',{poker21:true}).state;
+    return requestId;
+  }
+  const first=offer().id;
+  assert.throws(()=>run('poker21-split',{offerId:first,clubId:'123',minimum:1000000}));
+  run('poker21-split',{offerId:first,clubId:'758417',minimum:1000000});
+  for(const amount of [999999,4500000,5000001])assert.throws(()=>run('poker21-take',{offerId:first,clubId:'123',takeCents:amount}));
+  const reservationId=run('poker21-take',{offerId:first,clubId:'123',takeCents:2000000});
+  assert.equal(offer().amount,3000000);
+  assert.throws(()=>run('poker21-take',{offerId:first,clubId:'456',takeCents:2000000}));
+  run('poker21-take',{offerId:offer().id,clubId:'456',takeCents:3000000});
+  assert.equal(offer(),null);
+  run('poker21-cancel',{reservationId,clubId:'123'});
+  assert.equal(offer().amount,2000000);
+});
