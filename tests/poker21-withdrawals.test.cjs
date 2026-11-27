@@ -146,7 +146,7 @@ test('partial withdrawal enforces minimum and keeps independent reservations',t=
   const first=offer().id;
   assert.throws(()=>run('poker21-split',{offerId:first,clubId:'123',minimum:1000000}));
   run('poker21-split',{offerId:first,clubId:'758417',minimum:1000000});
-  for(const amount of [999999,4500000,5000001])assert.throws(()=>run('poker21-take',{offerId:first,clubId:'123',takeCents:amount}));
+  for(const amount of [999999,5000001])assert.throws(()=>run('poker21-take',{offerId:first,clubId:'123',takeCents:amount}));
   const reservationId=run('poker21-take',{offerId:first,clubId:'123',takeCents:2000000});
   const expiry=state.entries[0].reservations.find(r=>r.id===reservationId).poker21ExpiresAt;
   assert.throws(()=>run('poker21-extend',{reservationId,clubId:'456'}));
@@ -155,8 +155,56 @@ test('partial withdrawal enforces minimum and keeps independent reservations',t=
   assert.throws(()=>run('poker21-extend',{reservationId,clubId:'123'}));
   assert.equal(offer().amount,3000000);
   assert.throws(()=>run('poker21-take',{offerId:first,clubId:'456',takeCents:2000000}));
-  run('poker21-take',{offerId:offer().id,clubId:'456',takeCents:3000000});
+  run('poker21-take',{offerId:offer().id,clubId:'456',takeCents:2500000});
+  assert.equal(offer().amount,500000);
+  assert.throws(()=>run('poker21-take',{offerId:offer().id,clubId:'789',takeCents:499999}));
+  run('poker21-take',{offerId:offer().id,clubId:'789'});
   assert.equal(offer(),null);
   run('poker21-cancel',{reservationId,clubId:'123'});
   assert.equal(offer().amount,2000000);
+});
+
+test('two clubs see the latest remainder and cancellation restores only the first booking',async t=>{
+  let clock=Date.parse('2026-11-26T12:00:00Z');
+  t.mock.method(Date,'now',()=>clock);
+  const entryId=randomUUID();
+
+  const entry={room:'P21',playerId:'123456',recipient:'Тест',bank:'Тест',phone:'+79990000000',total:1500000};
+  let state=applyOperation(null,{action:'create',requestId:entryId,entry},'admin').state;
+  const original=process.env.POKER21_WITHDRAWALS_SYNC_KEY;
+  process.env.POKER21_WITHDRAWALS_SYNC_KEY='test-connection';
+  t.after(()=>{if(original===undefined)delete process.env.POKER21_WITHDRAWALS_SYNC_KEY;else process.env.POKER21_WITHDRAWALS_SYNC_KEY=original;});
+  const files=new Map();
+  t.mock.method(redis,'pipeline',async ([command])=>{
+    if(command[0]==='GET')return [{result:JSON.stringify(state)}];
+    const pos=3+command[2];
+    assert.equal(command[pos],JSON.stringify(state));
+
+    if(command[2]===3)files.set(command[5],command[pos+3]);
+    state=JSON.parse(command[pos+1]);return [{result:1}];
+  });
+  async function call(action,item,clubId='123',receipt,userId='42',ownerOverview=false,options={}){
+    const res={code:200,setHeader(){},status(n){this.code=n;return this;},json(data){this.data=data;},end(){}};
+    await handle({method:'POST',headers:{authorization:'Bearer test-connection'},body:{action,item,clubId,userId,receipt,ownerOverview,...options}},res);
+    return res;
+  }
+  const list=async club=>(await call('list',undefined,club,undefined,'42',club==='758417')).data.items;
+  const initial=(await list('123'))[0];
+  const id=initial.id.slice(11);
+  assert.equal((await call('split',id,'758417',undefined,'42',false,{minimum:1000000})).code,200);
+  const take=(club,id,amount)=>call('take',id,club,undefined,'42',false,{takeCents:amount});
+  const a=await take('123',id,1000000);
+  assert.equal(a.code,200);
+  assert.equal((await take('456',id,1000000)).code,409);
+  const rest=(await list('456'))[0];
+  assert.equal(rest.amount,5000);assert.equal(rest.offerGroup,initial.offerGroup);
+  assert.equal((await list('123')).find(x=>x.taker).amount,10000);
+  const b=await take('456',rest.id.slice(11),500000);assert.equal(b.code,200);
+  const cancelled=await call('cancel',a.data.notice.id,'123');
+  assert.equal(cancelled.data.notice.kind,'withdrawal-cancelled');
+  assert.equal(cancelled.data.notice.amountCents,1000000);
+  const owner=(await list('758417'))[0];
+  assert.equal(owner.availableCents,1000000);
+  assert.deepEqual(owner.bookings.map(r=>[r.clubId,r.stage]),[['456','Забронировано'],['123','Бронь отменена']]);
+  assert.equal((await list('456')).find(x=>x.taker).amount,5000);
 });
