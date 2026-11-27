@@ -1,10 +1,10 @@
 // Ground-floor businesses share one plan between architecture, furniture and walking collision.
 export const VENUE_DEPTH=4.6;
 export const VENUES=[
- {x:-43,z:30,type:'cafe',name:'CHECK / COFFEE',subtitle:'КОФЕ · ВЫПЕЧКА',color:'#365f54',patio:true},
- {x:-17,z:29,type:'bistro',name:'RIVER BISTRO',subtitle:'ЗАВТРАКИ · КУХНЯ',color:'#8c5240',patio:true},
- {x:29,z:28,type:'records',name:'ALL IN RECORDS',subtitle:'ВИНИЛ · МУЗЫКА',color:'#395266',patio:true},
- {x:54,z:33,type:'market',name:'CORNER MARKET',subtitle:'ЦВЕТЫ · ФРУКТЫ',color:'#637044',patio:true},
+ {x:-43,z:18,type:'cafe',name:'CHECK / COFFEE',subtitle:'КОФЕ · ВЫПЕЧКА',color:'#365f54',patio:true},
+ {x:-17,z:18,type:'bistro',name:'RIVER BISTRO',subtitle:'ЗАВТРАКИ · КУХНЯ',color:'#8c5240',patio:true},
+ {x:31,z:18,type:'records',name:'ALL IN RECORDS',subtitle:'ВИНИЛ · МУЗЫКА',color:'#395266',patio:true},
+ {x:54,z:18,type:'market',name:'CORNER MARKET',subtitle:'ЦВЕТЫ · ФРУКТЫ',color:'#637044',patio:true},
  {x:49,z:-48,type:'barber',name:'ACE BARBER',subtitle:'BARBER SHOP',color:'#4b5254',patio:false},
  {x:-43,z:-53,type:'hotel',name:'RIVER HOTEL',subtitle:'LOBBY · RECEPTION',color:'#78604d',patio:false}
 ];
@@ -36,5 +36,5 @@ export function buildingSolids(b){
  return [rectangle(b.x,b.z-depth/2,b.w,b.d-depth,b.h),rectangle(b.x-b.w/2+.12,front-depth/2,.24,depth,4),rectangle(b.x+b.w/2-.12,front-depth/2,.24,depth,4),rectangle(b.x-1.2-wing/2,front,wing,.18,3.7),rectangle(b.x+1.2+wing/2,front,wing,.18,3.7),...items.map(f=>rectangle(f.x,f.z,f.w,f.d,f.h))];
 }
 export function insideVenue(point,buildings){return buildings.some(b=>{if(!venueForBuilding(b)||Math.abs(point.x-b.x)>=b.w/2)return false;const front=b.z+b.d/2;return point.z<front+.4&&point.z>front-VENUE_DEPTH;});}
-export function districtDriveways(buildings){return buildings.flatMap(b=>{const p=venuePlan(b);if(!p||!['cafe','records'].includes(p.venue.type))return [];return [{x:p.venue.type==='records'?b.x:b.x+b.w/2+2.4,start:p.front+1.6,end:64.2,width:3.2}];});}
-export const districtTrees=[[-55,45],[-55.5,60],[16,57],[43,57],[-8.5,60],[61.5,61]];
+export function districtDriveways(buildings){return buildings.flatMap(b=>{const p=venuePlan(b);if(!p||!['cafe','records'].includes(p.venue.type))return [];return [{x:p.venue.type==='records'?b.x:b.x+b.w/2+2.4,start:p.front+1.6,end:39.1,width:3.2}];});}
+export const districtTrees=[[-55,45],[-55.5,60],[18.6,57],[43,57],[-8.5,60],[61.5,61]];

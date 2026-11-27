@@ -1,3 +1,4 @@
+import {districtBlocks,districtRoads,westRoads} from './voskhod-survey.mjs';
 import {drivingDirections,navigationText} from './navigation.mjs';
 import {thumbstick} from '../shared/thumbstick.mjs';
 import {mapPoint,mapPercent,lighthouseShore,shores,lagoon,parks,lots,roads,landmarks,lunaSite,metroNearest,missionSites} from './metropolis.mjs';
@@ -112,6 +113,7 @@ function destinations(label,spots){
 destinations('Миссии Poker21',missionSites);
 destinations('Город',[...landmarks,{...GATE,name:'ВИЛЛА'},{...HOME,name:'TWO ACES'},{...PICKUP,name:'ПОРТ'},{...lunaSite,approach:metroNearest(lunaSite)}]);
 on(destinationSelect,'change',()=>{destination=destinationSelect.value?JSON.parse(destinationSelect.value):null;drawMap($('cityFullMap'),true);});
+const surveyedRoads=[...districtRoads,...westRoads];
 const cityAtlas=new Image();
 cityAtlas.onload=()=>{if($('cityMapDialog').open)drawMap($('cityFullMap'),true);};
 cityAtlas.src='assets/last-buy-in/optimized/poker21-city-map-locations-v5.webp';
@@ -127,6 +129,13 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();lighthouseShore.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(lunaSite.x),Z(lunaSite.z),9*k,0,Math.PI*2);ctx.stroke();}
  // Draw the local street network over the campaign illustration too.
  const rect=(x,z,w,d)=>ctx.fillRect(X(x-w/2),Z(z-d/2),w*k,d*k);
+ ctx.fillStyle='#77787a';
+ for(const cz of [39.1,47.35])rect(38,cz,69,4.3);
+ for(const [a,b,width] of surveyedRoads){
+  if(!full&&(Math.abs(a[0]-cx)>span*.6||Math.abs(a[1]-cz)>span*.6))continue;
+  ctx.strokeStyle='#a2a798';ctx.lineWidth=Math.max(.6,width*k);ctx.beginPath();
+  ctx.moveTo(X(a[0]),Z(a[1]));ctx.lineTo(X(b[0]),Z(b[1]));ctx.stroke();
+ }
  const basin=waterfrontBasin;ctx.fillStyle='#286171';ctx.beginPath();
  for(let z=basin.minZ;z<=basin.maxZ;z+=2)ctx.lineTo(X(waterfrontWaterEdges(z).east),Z(z));
  for(let z=basin.maxZ;z>=basin.minZ;z-=2)ctx.lineTo(X(waterfrontWaterEdges(z).west),Z(z));
@@ -138,6 +147,10 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  rect(48,160,16,10);rect(87,160,16,15);rect(40,132.5,11,55);rect(56,105,43,11);rect(72,89,11,38);
  ctx.fillRect(X(55),Z(155),32*k,10*k);
  {ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[PORT,'#4d686c'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}}
+ ctx.fillStyle='#c6b4a0';
+ for(const [,ring] of districtBlocks){
+  ctx.beginPath();ring.forEach(([x,z],i)=>i?ctx.lineTo(X(x),Z(z)):ctx.moveTo(X(x),Z(z)));ctx.closePath();ctx.fill();
+ }
  const o=navigationObjective(),p=subject(state);if(o.target){const route=navigationFrom(p,o.target).path;ctx.strokeStyle=full?'#102e39':'#ffda8d';ctx.lineWidth=full?6:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();if(full){ctx.lineWidth=3;ctx.strokeStyle='#ffda8d';ctx.stroke();}ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
  ctx.fillStyle='#364955';for(const vehicle of [...state.traffic,...state.metroTraffic]){ctx.save();ctx.translate(X(vehicle.x),Z(vehicle.z));ctx.rotate(-vehicle.yaw);ctx.fillRect(-Math.max(1,1.1*k),-2.3*k,Math.max(2,2.2*k),4.6*k);ctx.restore();}
  ctx.fillStyle='#a8e8d5';ctx.beginPath();ctx.arc(X(state.car.x),Z(state.car.z),full?5:3.5,0,Math.PI*2);ctx.fill();if(state.heat){ctx.fillStyle='#f79778';ctx.font='bold '+(full?20:13)+'px Arial';ctx.fillText('★',X(state.police.x)-5,Z(state.police.z)+5);}

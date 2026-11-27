@@ -1,12 +1,14 @@
+import {districtBlocks} from './voskhod-survey.mjs';
+import {library,squareFixtures} from './pimenov-plan.mjs';
 import {quayShopPlan} from './quay-shop-plan.mjs';
 import {streetFences,litterBins,quayCrossings} from './quay-crossings.mjs';
-import {quayHouses,quayRails,quayKiosk,quayBenches} from './quayside-block.mjs';
+import {mayakTerraceTables,quayHouses,quayRails,quayKiosk,quayBenches} from './quayside-block.mjs';
 import {onLighthouseShore,mapPoint,bounds,metroLand,nearbyLots,metroNearest,metroRoute,gateways} from './metropolis.mjs';
 import {buildingSolids,districtTrees} from './district-plan.mjs';
 import {estateFeatures} from './estate-plan.mjs';
 // Metres. Shared by collision, rendering, route guidance and tests.
 export const CLUB={x:-24,z:-23,w:30,d:24};
-export const PORT={x:86,z:-70,w:22,d:24};
+export const PORT={x:85,z:-96,w:13,d:9};
 export const VILLA={x:98,z:147,w:32,d:44};
 export const GARAGE_RADIO={x:95.8,z:159.2};
 export const VILLA_ENTRY={x:81,z:147};
@@ -36,7 +38,7 @@ export function waterfrontWaterEdges(z){
 }
 export const GATE={x:53,z:160,width:10};
 export const BRIDGE={minX:110,maxX:162,minZ:63,maxZ:77};
-export function landAt(x,z){if(z>waterfrontBasin.minZ&&z<waterfrontBasin.maxZ){const edge=waterfrontWaterEdges(z);if(x>edge.west&&x<edge.east)return false;}return metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||onLighthouseShore(x,z)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
+export function landAt(x,z){if(z>waterfrontBasin.minZ&&z<waterfrontBasin.maxZ){const edge=waterfrontWaterEdges(z);if(x>edge.west&&x<edge.east)return false;}return (x>=-143&&x<=0&&z>=13&&z<=75)||(x>=28&&x<=126&&z>=-255&&z<=-99)||(x>=109&&x<=124&&z>=23&&z<=60)||metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||onLighthouseShore(x,z)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
 export function islandExitRoute(point){return [{x:157,z:point.z},{x:157,z:70},{x:72,z:70}];}
 export function estateExitRoute(){return [{x:61,z:160},{x:40,z:160},{x:40,z:105},{x:72,z:105},{x:72,z:70}];}
 export const ROAD_X=[-64,0,72],ROAD_Z=[-75,0,70];
@@ -48,17 +50,16 @@ export const BUILDINGS=[
  {x:30,z:-96,w:36,d:17,h:22,color:'#aac4c8'},
  {x:-31,z:-97,w:42,d:16,h:18,color:'#c2ae9e'},
  {x:-83,z:-43,w:15,d:39,h:28,color:'#a0b7b4'},
- {x:-83,z:24,w:15,d:32,h:22,color:'#dcba97'},
- {x:-43,z:30,w:22,d:34,h:19,color:'#e2bd93',name:'CHECK / COFFEE'},
- {x:-17,z:29,w:18,d:32,h:25,color:'#9bbcb4'},
- {x:29,z:28,w:30,d:28,h:23,color:'#d4a590',name:'ALL IN RECORDS'},
- {x:54,z:33,w:15,d:34,h:16,color:'#b2bbcd'},
+ {x:-83,z:19,w:15,d:24,h:22,color:'#dcba97'},
+ {x:-43,z:18,w:22,d:15,h:19,color:'#e2bd93',name:'CHECK / COFFEE'},
+ {x:-17,z:18,w:18,d:15,h:25,color:'#9bbcb4'},
+ {x:31,z:18,w:25,d:15,h:23,color:'#d4a590',name:'ALL IN RECORDS'},
+ {x:54,z:18,w:15,d:15,h:16,color:'#b2bbcd'},
  {x:-33,z:84,w:41,d:14,h:20,color:'#b6c9c3'},
  {x:32,z:85,w:42,d:14,h:18,color:'#cbb59d'},
  // The east side of the avenue backs onto a small waterfront neighbourhood.
- {x:105,z:16,w:17,d:15,h:12,color:'#d7b498'},
- {x:107,z:35,w:20,d:17,h:19,color:'#afc0b5'},
- {x:104,z:55,w:18,d:14,h:16,color:'#d7c1a5'}
+
+ library
 ];
 const villaRect=(x,z,w,d,h=5.4)=>{const p=villaPoint(x,z);return {...rect(p.x,p.z,d,w),h};};
 const rect=(x,z,w,d)=>({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});
@@ -69,12 +70,12 @@ for(let i=0;i<8;i++){
  const depth=chamfer/8,cut=chamfer-(i+.5)*depth;
  cafeSolids.push({minX:right-cafe.w,maxX:right-cut,minZ:front+i*depth,maxZ:front+(i+1)*depth,h:cafe.h});
 }
-export const SOLIDS=[...cafeSolids,...quayCrossings.flatMap(c=>c.poles.map(([x,z])=>({...rect(x,z,.18,.18),h:3.5}))),...quayHouses.slice(1).flatMap(b=>quayShopPlan(b).solids),...[...quayRails,quayKiosk,...quayBenches,...streetFences,...litterBins].map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
+export const SOLIDS=[...squareFixtures.map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...mayakTerraceTables.map(({x,z})=>({...rect(x,z,1.95,.96),h:1.21})),...cafeSolids,...quayCrossings.map(c=>({...rect(...c.pole,.18,.18),h:3.5})),...quayHouses.slice(1).flatMap(b=>quayShopPlan(b).solids),...[...quayRails,quayKiosk,...quayBenches,...streetFences,...litterBins].map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
  {...rect(68,133,6.8,6.8),h:1.8},
  // Mainland estate fence, with one ten-metre opening towards the promenade.
  {...rect(53,136,.65,38),h:3.1},{...rect(53,169,.65,8),h:3.1},
  {...rect(86,117,66,.65),h:3.1},{...rect(77.25,173,48.5,.45),h:2.7},{...rect(111.75,173,14.5,.45),h:2.7},{...rect(119,145,.45,56),h:2.2},
-...BUILDINGS.flatMap(buildingSolids),rect(PORT.x,PORT.z,PORT.w,PORT.d),
+...BUILDINGS.filter(b=>b!==library).flatMap(buildingSolids),rect(PORT.x,PORT.z,PORT.w,PORT.d),
  // Club is a traversable room, with a six-metre opening towards the street.
  rect(-39,-23,.65,24),rect(-9,-23,.65,24),rect(-24,-35,30,.65),rect(-33,-11,12,.65),rect(-15,-11,12,.65),
  rect(-32,-28,9,2),rect(-17,-27,4,5),
@@ -91,7 +92,24 @@ export const SOLIDS=[...cafeSolids,...quayCrossings.flatMap(c=>c.poles.map(([x,z
  villaRect(8,-18,14,4,.3),villaRect(0,9.6,2.6,2.6,1.15),villaRect(0,-4.6,3.4,3.4,.8),
  ...Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return villaRect(-14+Math.sin(a)*5.1,9+Math.cos(a)*3.7,1.6,1.6,1.2);})
 ];
-export function blocked(x,z,r=.45){return ![[x,z],[x-r,z],[x+r,z],[x,z-r],[x,z+r]].every(p=>landAt(...p))||x-r<LIMITS.minX||x+r>LIMITS.maxX||z-r<LIMITS.minZ||z+r>LIMITS.maxZ||nearbyLots(x,z).some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ)||SOLIDS.some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ);}
+const surveyedBuildings=districtBlocks.map(([,ring])=>({
+ ring,minX:Math.min(...ring.map(p=>p[0])),maxX:Math.max(...ring.map(p=>p[0])),
+ minZ:Math.min(...ring.map(p=>p[1])),maxZ:Math.max(...ring.map(p=>p[1]))
+}));
+function touchesSurveyedBuilding(x,z,r){
+ return surveyedBuildings.some(b=>{
+  if(x+r<b.minX||x-r>b.maxX||z+r<b.minZ||z-r>b.maxZ)return false;
+  let inside=false;
+  for(let i=1;i<b.ring.length;i++){
+   const [ax,az]=b.ring[i-1],[bx,bz]=b.ring[i],dx=bx-ax,dz=bz-az;
+   const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz||1)));
+   if((x-ax-dx*t)**2+(z-az-dz*t)**2<=r*r)return true;
+   if((az>z)!==(bz>z)&&x<ax+(z-az)*dx/dz)inside=!inside;
+  }
+  return inside;
+ });
+}
+export function blocked(x,z,r=.45){return touchesSurveyedBuilding(x,z,r)||![[x,z],[x-r,z],[x+r,z],[x,z-r],[x,z+r]].every(p=>landAt(...p))||x-r<LIMITS.minX||x+r>LIMITS.maxX||z-r<LIMITS.minZ||z+r>LIMITS.maxZ||nearbyLots(x,z).some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ)||SOLIDS.some(b=>x+r>b.minX&&x-r<b.maxX&&z+r>b.minZ&&z-r<b.maxZ);}
 export function move(body,dx,dz,r){let hit=false;if(!blocked(body.x+dx,body.z,r))body.x+=dx;else hit=true;if(!blocked(body.x,body.z+dz,r))body.z+=dz;else hit=true;return hit;}
 const inMetropolis=p=>p.z<-109||p.x< -98||p.x>246||p.z>200;
 export function nearestRoad(p){if(inMetropolis(p))return metroNearest(p);if(p.z>98&&p.x<130)return {x:40,z:Math.max(105,Math.min(160,p.z))};if(p.x>130)return {x:157,z:Math.max(70,Math.min(105,p.z))};const x=ROAD_X.reduce((a,b)=>Math.abs(p.x-a)<Math.abs(p.x-b)?a:b),z=ROAD_Z.reduce((a,b)=>Math.abs(p.z-a)<Math.abs(p.z-b)?a:b);return Math.abs(x-p.x)<Math.abs(z-p.z)?{x,z:Math.max(-100,Math.min(84,p.z))}:{x:Math.max(-92,Math.min(90,p.x)),z};}

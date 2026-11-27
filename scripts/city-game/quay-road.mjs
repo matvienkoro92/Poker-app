@@ -24,15 +24,20 @@ export function quayRoad(scene,x,z,width,length,across){
   for(let i=0;i<w*d*65;i++)ctx.fillRect(cx-w/2+random()*w,cz-d/2+random()*d,.018+random()*.07,.025);
  };
  const localX=n=>n-x+width/2,localZ=n=>n-z+length/2;
- for(let i=-4;i<=4;i++)across?paint(localX(48),localZ(105+i*1.16),2.85,.62):paint(localX(72+i*1.16),localZ(96),.62,2.85);
- const crossing=quayCrossings[across?1:0];
- for(const [i,stop] of crossing.stops.entries()){
-  const lane=crossing.lanes[i]+(crossing.lanes[i]-(across?105:72))*.375;
-  if(across)paint(localX(stop),localZ(lane),.21,4.95);
-  else paint(localX(lane),localZ(stop),4.95,.21);
+ const axis=across?'x':'z';
+ const roadCenter=across?z:x;
+ for(const crossing of quayCrossings.filter(c=>c.axis===axis && c.roadCenter===roadCenter)){
+  for(let i=-4;i<=4;i++){
+   const stripe=roadCenter+i*1.16;
+   if(across)paint(localX(crossing.center),localZ(stripe),2.85,.62);
+   else paint(localX(stripe),localZ(crossing.center),.62,2.85);
+  }
+  const laneCenter=roadCenter+(crossing.lane-roadCenter)*1.375;
+  if(across)paint(localX(crossing.stop),localZ(laneCenter),.21,4.95);
+  else paint(localX(laneCenter),localZ(crossing.stop),4.95,.21);
  }
- if(across){for(const n of [52,58,64])paint(localX(n),localZ(105),2.3,.1);}
- else{for(const n of [75,81,87])paint(localX(72),localZ(n),.1,2.3);}
+ if(across)paint(localX(56),localZ(105),2.3,.1);
+ else if(x===72){for(const n of [75,81,87])paint(localX(72),localZ(n),.1,2.3);}
  for(let i=0;i<7;i++){
   let px=random()*width,pz=random()*length;
   ctx.beginPath();ctx.moveTo(px,pz);

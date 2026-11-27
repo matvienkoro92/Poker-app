@@ -5,12 +5,13 @@ import {createTraffic, advanceTraffic} from '../scripts/city-game/traffic.mjs';
 
 test('each stop line controls only vehicles approaching it in the matching lane',()=>{
  for(const c of quayCrossings){
-  for(const [i,line] of c.stops.entries()){
-   const direction=i===0?1:-1;
+  {
+   const {direction,stop:line}=c;
+   assert((c.center-line)*direction>2);
    const position=line-direction*5;
    const car=c.axis==='z'
-    ? {x:c.lanes[i],z:position,yaw:i===0?0:Math.PI}
-    : {x:position,z:c.lanes[i],yaw:direction*Math.PI/2};
+    ? {x:c.lane,z:position,yaw:direction===1?0:Math.PI}
+    : {x:position,z:c.lane,yaw:direction*Math.PI/2};
    car.id=0;
    assert(Math.abs(signalGap(car,24)-2.65)<1e-6);
    assert.equal(signalGap(car,3),Infinity);

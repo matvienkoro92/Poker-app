@@ -73,8 +73,8 @@ export function buildUpperShop(b,florist,skin,scene,mergeParts){
   mergeParts(group);group.children.forEach(m=>{if(m.material===glass)m.castShadow=false;});scene.add(group);
  }
  const rows=florist?2:4;
- elevation(b.x,b.z+b.d/2,0,b.w,florist?2:3,rows);
- elevation(b.x,b.z-b.d/2,Math.PI,b.w,florist?2:3,rows);
+ elevation(b.x,b.z+b.d/2,0,b.w,3,rows);
+ elevation(b.x,b.z-b.d/2,Math.PI,b.w,3,rows);
  elevation(b.x+b.w/2,b.z,Math.PI/2,b.d,florist?2:5,rows);
  elevation(b.x-b.w/2,b.z,-Math.PI/2,b.d,florist?2:5,rows);
  const roof=new T.Mesh(new T.BoxGeometry(b.w,.18,b.d),shadowStone);roof.position.set(b.x,b.h-.09,b.z);

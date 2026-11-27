@@ -7,7 +7,7 @@ function wallFinish(florist,textures){
  const g=c.getContext('2d');
  let seed=23;
  const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
- g.fillStyle=florist?'#cbc1a5':'#a29889';g.fillRect(0,0,384,384);
+ g.fillStyle=florist?'#aeb297':'#a29889';g.fillRect(0,0,384,384);
  if(!florist)for(let row=0;row<16;row++)for(let col=-1;col<6;col++){
   const v=Math.floor(random()*20);
   g.fillStyle='rgb('+(157+v)+','+(134+v)+','+(111+v)+')';
@@ -135,6 +135,41 @@ export function buildQuayShop(b,{scene,box,cylinder,batch,label,glaze,textures,m
   contactShadow(f.x,.324,f.inset,f.w*1.18,f.d*1.26);
  }
  if(florist){
+  // Wrap the sage facade in dressed corner stones and a continuous string course.
+  for(const side of [-1,1]){
+   for(const end of [-1,1]){
+    for(let row=0;row<14;row++){
+     const width=row%2?.34:.51;
+     box('#c9c3a7',b.x+side*(b.w-width)/2,3.94+row*.54,b.z+end*(b.d-.27)/2,width+.06,.47,.35);
+    }
+   }
+   const rear=b.z+b.d/2+.12,x=b.x+side*(b.w/2-.22);
+   cylinder('#68766b',x,b.h/2,rear,.074,b.h-.6);
+   for(const h of [1.3,4.6,7.8,10.5])box(frame,x,h,rear,.2,.055,.22);
+  }
+  box(trim,b.x,6.94,b.z,b.w+.18,.12,b.d+.18);
+  for(const x of [-2.8,0,2.8]){
+   part(frame,x,4.02,-.22,1.48,.27,.4);
+   for(let i=0;i<9;i++){
+    const bx=x+(i-4)*.15, by=4.23+.06*Math.sin(i*2);
+    ball('#526c4c',bx,by,-.24,.14,.16,.12);
+    ball(i%3?'#bb7374':'#e4bf89',bx,by+.12,-.31,.067,.064,.07);
+   }
+  }
+  // Potting supplies on the rear counter, opposite the flower display.
+  for(let i=0;i<3;i++){
+   const x=2+i*.44;
+   part(wood,x,1.05,depth-.52,.38,1.46,.61);
+   post('#c29473',x,1.88,depth-.51,.14,.19);
+   post('#9f765c',x,1.98,depth-.51,.16,.055);
+  }
+  for(let i=0;i<13;i++)part(trim,-3.84+i*.64,b.h-.18,-.18,.21,.28,.29);
+  // Raised planting beds flank the glass roof lantern.
+  for(const end of [-1,1]){
+   const cz=b.z+end*1.78;
+   box(wood,b.x,b.h+.26,cz,5.2,.3,.55);
+   for(let i=0;i<15;i++)batch('ball',i%2?'#718460':'#506e59',b.x-2.35+i*.335,b.h+.48,cz,.22,.18+i%3*.055,.19);
+  }
   // The exposed return faces the waterfront. Continue the sash and sill around the corner.
   const ex=b.x-b.w/2;
   // Wall-trained climbing plant on an oak lattice, inside the width of the footing.

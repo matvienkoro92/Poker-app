@@ -12,6 +12,7 @@ export function quayShopPlan(b){
    rect(b.x+side*(b.w/2-.11),front-sign*depth/2,.22,depth,3.6),
    rect(b.x+side*(.9+wing/2),front,wing,.16,3.6)
   ]),
+  ...(florist?[rect(b.x+2.44,front-sign*(depth-.52),1.26,.61,1.78)]:[]),
   ...fixtures.map(f=>rect(b.x+f.x,front-sign*f.inset,f.w,f.d,f.h))
  ]};
 }

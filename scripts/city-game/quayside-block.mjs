@@ -4,6 +4,7 @@ export const quayHouses=[
  {x:54.7,z:114.4,w:8.4,d:4.6,h:11.6,wall:'#a5ae98',trim:'#ddd4b8',shop:'ЦВЕТЫ'},
  {x:57.6,z:89,w:9,d:16,h:16.6,wall:'#b9a88f',trim:'#e0d1b4',shop:'АТЕЛЬЕ'}
 ];
+export const mayakTerraceTables=[61.5,65,68.5].map(x=>({x,z:111.45}));
 export const quayRails=[{x:56.5,z:97.6,w:.09,d:1.2,h:1.1},{x:58.7,z:97.6,w:.09,d:1.2,h:1.1}];
 export const quayKiosk={x:84,z:98,w:4.2,d:6,h:3.3};
 export const quayBenches=[{x:81.9,z:91,w:.64,d:2.2,h:.94},{x:81.9,z:106,w:.64,d:2.2,h:.94}];
@@ -32,8 +33,21 @@ export function quayWheelRise(x,z,yaw){
  }
  return sum*.25;
 }
-export function buildQuayBlock({box,label,outdoors,glaze,cafeModel,buildShop}){
+export function buildQuayBlock({box,label,outdoors,glaze,cylinder,cafeModel,buildShop}){
  const iron='#313638',glass='#374d54';
+ for(const {x,z} of mayakTerraceTables){
+  cylinder('#39423e',x,.36,z,.26,.09);
+  cylinder('#39423e',x,.77,z,.055,.78);
+  cylinder('#b88254',x,1.17,z,.48,.08);
+  for(const side of [-1,1]){
+   const chair=x+side*.72;
+   cylinder('#385248',chair,.75,z,.24,.09);
+   for(const dx of [-.15,.15])for(const dz of [-.15,.15])
+    box('#413b32',chair+dx,.53,z+dz,.044,.42,.044);
+   box('#385248',chair+side*.2,.95,z,.07,.36,.41);
+   cylinder('#eee2cd',x+side*.23,1.27,z,.073,.12);
+  }
+ }
  for(const b of quayHouses){
   if(b!==quayHouses[0]){
    buildShop(b);

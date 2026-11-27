@@ -213,6 +213,8 @@ export function buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,ou
  }
  registerSurface(56,105,43,11,.138);
  registerSurface(72,84.75,11,29.5,.138);
+ registerSurface(40,116,10.9,11,.138);
+ quayRoad(scene,40,116,10.9,11,false);
  quayRoad(scene,56,105,43,11,true);
  quayRoad(scene,72,84.75,11,29.5,false);
  for(const z of [81,91,98]){
@@ -253,14 +255,15 @@ export function buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,ou
  roadSign(33.4,107,[['ГОРОД','right']],{width:1.42,center:1.62});
  // The retaining garden and repeated curb lamps carry the view into town.
  strip(-25,71,z=>79.9+.28*Math.cos(z*.2),z=>86.5+1.5*Math.sin(z*.105),.093,limestone);
- for(const z of [64,48,30,12,-8,-23]){
+ for(const z of [64,12,-8,-23]){
   lamp(84.8,z);
   cylinder(stone,87.2,.19,z,1.55,.38);
   cylinder('#655944',87.2,.4,z,1.38,.035);
-  outdoors.coastalPalm(87.2,z,6.4+(Math.abs(z)%4)*.36,.42);
+  if(z>0)outdoors.tree(87.2,z,5.8);
+  else outdoors.coastalPalm(87.2,z,6.4+(Math.abs(z)%4)*.36,.42);
   outdoors.shrub(87.2,z+1.1,.8,.45);
  }
- for(const z of [45,13,-19])bench(84.1,z,.093);
+ for(const z of [13,-19])bench(84.1,z,.093);
  for(let z=-23;z<78;z+=5)box('#adad93',79.14,.043,z,.085,.012,2.2);
  // A line of road studs leads uphill into the bend.
  for(let z=109;z<159;z+=4.8){

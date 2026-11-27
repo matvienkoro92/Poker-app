@@ -43,8 +43,9 @@ export function furnishCrossings({scene,box,cylinder}){
   const map=new T.CanvasTexture(c);return map;
  }
  const icons=[pedestrianIcon(false),pedestrianIcon(true)];
- for(const c of quayCrossings)for(const [i,[x,z]] of c.poles.entries()){
-  const alongZ=c.axis==='z',sign=i===0?-1:1;
+ for(const c of quayCrossings){
+  const [x,z]=c.pole;
+  const alongZ=c.axis==='z',sign=-c.direction;
   cylinder(iron,x,1.86,z,.077,3.38);
   cylinder(cap,x,.45,z,.14,.32);
   box('#292e2b',x,3.13,z,alongZ?.36:.25,.91,alongZ?.25:.36);
@@ -70,7 +71,7 @@ export function furnishCrossings({scene,box,cylinder}){
    scene.add(light);lenses.push({phase,m});
   }
   // Face the opposite landing so walkers can see their indication across the road.
-  const walkSign=i===0?1:-1,wx=alongZ?walkSign:0,wz=alongZ?0:-walkSign;
+  const walkSign=c.direction,wx=alongZ?walkSign:0,wz=alongZ?0:-walkSign;
   box(iron,x,2.04,z,alongZ?.22:.31,.54,alongZ?.31:.22);
   for(const [index,walk] of [false,true].entries()){
    const m=new T.MeshStandardMaterial();
