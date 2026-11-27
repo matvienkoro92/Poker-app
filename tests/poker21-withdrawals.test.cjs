@@ -97,6 +97,9 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
     ['123',900000,'Плательщик отметил оплату'],['123',900000,'Бронь отменена']
   ]);
   assert.equal((await overview('123')).bookings,undefined);
+  clock=state.entries[0].reservations[1].poker21ExpiresAt+3600000;
+  assert.equal((await overview()).availableCents,0);
+  assert.equal(files.get('poker21:withdrawal-receipt:'+second),receipt);
   const paidState=structuredClone(state);
   assert.equal((await call('telegram-confirm',second,'123')).code,400);
   assert.equal((await call('telegram-confirm',second,'758417')).code,200);
