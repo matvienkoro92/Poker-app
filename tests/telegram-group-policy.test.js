@@ -156,8 +156,10 @@ test('exchange permits its board and blocks separate amount prompts',async t=>{
  const send=body=>policy.guardedFetch('https://api.telegram.org/bottest/sendMessage',{body:JSON.stringify(body)},'exchange-command');
  const prompt={chat_id:-123,reply_parameters:{message_id:7},text:'🔄 Обмен: введите сумму от 1 до 1000 ₽',reply_markup:{force_reply:true,selective:true}};
  assert.equal((await send(prompt)).ok,false);
- const board={...prompt,reply_markup:{inline_keyboard:[[{callback_data:'exchange:withdraw'},{callback_data:'exchange:deposit'},{callback_data:'exchange:remove'}]]}};
+ const board={...prompt,reply_markup:{inline_keyboard:[[{callback_data:'exchange:deposit'}],[{callback_data:'exchange:withdraw'}],[{callback_data:'exchange:remove'}]]}};
  assert.equal((await send(board)).ok,true);
+ const extra={...board,reply_markup:{inline_keyboard:[...board.reply_markup.inline_keyboard,[{callback_data:'exchange:other'}]]}};
+ assert.equal((await send(extra)).ok,false);
  assert.equal((await send({...prompt,text:'Привет всем'})).ok,false);
  assert.equal((await send({...prompt,chat_id:123})).ok,false);
  assert.equal((await send({...prompt,reply_parameters:undefined})).ok,false);
