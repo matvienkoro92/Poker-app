@@ -130,6 +130,12 @@ function pokerInitHomeDeepLinks(opts) {
       var refSplit = pokerSplitReferralStartParam(startParam);
       if (refSplit && refSplit.routeStartParam) startParam = refSplit.routeStartParam;
     }
+    var statsGrant = /^link_stats_([a-f0-9]{64})(?:_([a-f0-9]{64}))?$/.exec(startParam);
+    if (statsGrant) {
+      var token = statsGrant[1] + (statsGrant[2] ? "." + statsGrant[2] : "");
+      window.location.replace("./link-stats.html#" + token);
+      return;
+    }
     var tableAlertsLink = /^table_alerts_(game|player)$/.exec(startParam);
     if (tableAlertsLink) {
       openHomeModalDeepLink(function () {

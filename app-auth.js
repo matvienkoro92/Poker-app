@@ -78,19 +78,12 @@ function getWebsiteOriginBaseForLinks() {
   }
 }
 
-/**
- * Базовый URL для ссылок "в это же приложение" (добавляйте ?startapp=…).
- * - По умолчанию — канонический t.me (`POKER_DEFAULT_TELEGRAM_MINI_APP_URL`), не HTTPS сайта (шаринг и приглашения).
- * - Только в установленной PWA (standalone) — origin сайта, чтобы ?startapp= открывался в той же сессии PWA.
- */
 function getAppBaseUrlForLinks() {
-  try {
-    if (typeof pokerIsPwaStandaloneForShare === "function" && pokerIsPwaStandaloneForShare()) {
-      var web = getWebsiteOriginBaseForLinks();
-      if (web) return web;
-    }
-  } catch (ePwaBase) {}
-  return String(POKER_DEFAULT_TELEGRAM_MINI_APP_URL || "").replace(/\/$/, "");
+  return POKER_DEFAULT_TELEGRAM_MINI_APP_URL;
+}
+
+function buildMiniAppStartLink(startParam) {
+  return getAppBaseUrlForLinks() + "?startapp=" + encodeURIComponent(pokerBuildReferralStartParam(startParam));
 }
 
 /** Нормализация start_param / ?startapp= (декодирование, префикс startapp=). */
@@ -328,14 +321,7 @@ function pokerReferralRouteFromCurrentLocation(fallback) {
 }
 
 function pokerBuildPersonalInviteLink(startParam) {
-  var start = pokerBuildReferralStartParam(startParam || "home");
-  if (typeof buildMiniAppStartLink === "function") return buildMiniAppStartLink(start);
-  var appUrl = "";
-  if (typeof getAppBaseUrlForLinks === "function") appUrl = getAppBaseUrlForLinks();
-  if (!appUrl && typeof location !== "undefined") appUrl = String(location.origin || "") + "/";
-  appUrl = String(appUrl || "").trim().replace(/\/+$/, "");
-  if (!appUrl) return "";
-  return appUrl + (appUrl.indexOf("?") >= 0 ? "&" : "?") + "startapp=" + encodeURIComponent(start);
+  return buildMiniAppStartLink(startParam || "home");
 }
 
 function pokerReadReferralStartParam() {

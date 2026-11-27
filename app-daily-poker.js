@@ -897,9 +897,7 @@
     var button = document.createElement("button");
     button.type = "button"; button.className = "daily-poker__win-share";
     button.textContent = "Готовим картинку…"; button.disabled = true; host.appendChild(button);
-    var link = new URL("/daily-poker-invite.html", typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() || location.origin : location.origin);
-    link.searchParams.set("startapp", "daily_poker");
-    var text = dailyPokerWinShareText(result) + "\n" + link.href, file = null;
+    var text = dailyPokerWinShareText(result) + "\n" + buildDailyPokerInviteLink(), file = null;
     function prepare() {
       button.disabled = true; button.textContent = "Готовим картинку…";
       createDailyPokerWinImage().then(function (image) {
@@ -1095,7 +1093,7 @@
     if (link) {
       var original = new URL(link, location.href);
       var start = original.searchParams.get("startapp") || "daily_poker";
-      var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : location.origin;
+      var base = location.origin;
       link = new URL("/daily-poker-invite.html", base || location.origin).href + "?startapp=" + encodeURIComponent(start);
     }
     if (!link) {
@@ -1175,12 +1173,6 @@
     if (evt && typeof evt.stopPropagation === "function") evt.stopPropagation();
     var btn = evt && evt.currentTarget ? evt.currentTarget : $("dailyPokerCopyLinkBtn");
     var link = buildDailyPokerInviteLink();
-    if (link) {
-      var original = new URL(link, location.href);
-      var start = original.searchParams.get("startapp") || "daily_poker";
-      var base = typeof getAppBaseUrlForLinks === "function" ? getAppBaseUrlForLinks() : location.origin;
-      link = new URL("/daily-poker-invite.html", base || location.origin).href + "?startapp=" + encodeURIComponent(start);
-    }
     if (!link) {
       showMessage("Не удалось подготовить ссылку. Попробуйте обновить приложение.", true);
       return;

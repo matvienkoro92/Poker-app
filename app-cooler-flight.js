@@ -404,8 +404,7 @@
     catch(e){if(g!==generation||!active())return;ready();status(e.message);}
   }
   function invitationUrl() {
-    var base=typeof getApiBase==='function'?getApiBase():location.origin;
-    var url=new URL(base);url.searchParams.set('coolerDuel',room.roomId);url.searchParams.set('startapp','cooler_duel_'+room.roomId);return url.toString();
+    return buildMiniAppStartLink('cooler_duel_' + room.roomId);
   }
   function resultCard() {
     var c = document.createElement('canvas'); c.width = 900; c.height = 1100;
@@ -427,7 +426,7 @@
   }
   async function share(invite) {
     var text=invite?'Летим на Кулерах? Одна трасса, два игрока. Код: '+room.roomId:'Кулершан: мой результат — '+state.score+' фишек! Побьёшь?';
-    var url=invite?invitationUrl():(typeof getApiBase==='function'?getApiBase():location.origin)+'/?startapp=cooler_flight';
+    var url=invite?invitationUrl():buildMiniAppStartLink('cooler_flight');
     try {
       if(navigator.share) {
         if(!invite&&navigator.canShare){var blob=await resultCard();if(blob){var file=new File([blob],'cooler-record-'+state.score+'.png',{type:'image/png'});if(navigator.canShare({files:[file]})){await navigator.share({title:'Кулершан',text:text+'\n'+url,files:[file]});return;}}}

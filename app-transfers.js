@@ -337,10 +337,6 @@
   }
 
   function transfersDeepLink() {
-    if (typeof pokerBuildWebsiteStartLink === "function") {
-      var webLink = pokerBuildWebsiteStartLink("transfers");
-      if (webLink) return webLink;
-    }
     if (typeof pokerBuildPersonalInviteLink === "function") {
       var inviteLink = pokerBuildPersonalInviteLink("transfers");
       if (inviteLink) return inviteLink;

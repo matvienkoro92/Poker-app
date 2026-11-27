@@ -22,7 +22,7 @@ function setup() {
     document:{getElementById:get,querySelector:()=>({}),querySelectorAll:()=>[],addEventListener(){}},
     setTimeout:fn=>{timers.set(++timerId,fn);return timerId;},clearTimeout:id=>timers.delete(id),
     setInterval:fn=>{timers.set(++timerId,fn);return timerId;},clearInterval:id=>timers.delete(id),
-    fetch:()=>{throw new Error('Unexpected network');},getAppBaseUrlForLinks:()=> 'https://test.invalid',alert:()=>{}};
+    fetch:()=>{throw new Error('Unexpected network');},buildMiniAppStartLink:start=>'https://t.me/Poker_dvatuza_bot/DvaTuza?startapp='+start,alert:()=>{}};
   vm.createContext(ctx);vm.runInContext(source,ctx);
   return {ctx,get,timers};
 }

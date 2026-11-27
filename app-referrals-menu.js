@@ -55,7 +55,6 @@
   }
 
   function buildRaffleLink() {
-    if (typeof pokerBuildRaffleShareLink === "function") return pokerBuildRaffleShareLink("r_1");
     return buildStartLink("r_1");
   }
 

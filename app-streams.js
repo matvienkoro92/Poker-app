@@ -70,24 +70,6 @@ function getStreamsAppUrl() {
   return getAppBaseUrlForLinks();
 }
 
-function buildMiniAppStartLink(startParam) {
-  var start = String(startParam || "");
-  if (typeof pokerBuildReferralStartParam === "function") start = pokerBuildReferralStartParam(start);
-  var appUrl = String(getAppBaseUrlForLinks() || "")
-    .trim()
-    .replace(/\/+$/, "");
-  if (!appUrl) return "";
-  var sep = appUrl.indexOf("?") >= 0 ? "&" : "?";
-  var needSlash = sep === "?" && /^https?:\/\/[^/?#]+$/i.test(appUrl);
-  return (
-    appUrl +
-    (needSlash ? "/" : "") +
-    sep +
-    "startapp=" +
-    encodeURIComponent(start)
-  );
-}
-
 function streamsGetLiveKitClient() {
   return window.LivekitClient || window.LiveKitClient || null;
 }
@@ -1528,7 +1510,7 @@ function initStreams() {
     openBrowserBtn.__streamsOpenBrowserHandlerAttached = true;
     openBrowserBtn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var urlOpen = browserLinkInput && browserLinkInput.value ? browserLinkInput.value : directAppUrl;
+      var urlOpen = pokerBuildWebsiteStartLink("streams");
       if (tg && tg.openLink) tg.openLink(urlOpen);
       else window.open(urlOpen, "_blank", "noopener");
     });
@@ -1540,7 +1522,7 @@ function initStreams() {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
       copyTextToClipboard(
         browserLinkInput,
-        "Ссылка скопирована. Вставьте её в адресную строку Chrome и откройте.",
+        "Ссылка на трансляции в Telegram скопирована.",
         "Не удалось скопировать ссылку. Скопируйте её вручную."
       );
     });

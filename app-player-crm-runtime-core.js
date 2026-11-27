@@ -2521,9 +2521,7 @@
   }
 
   function crmAccessLinkUrl(token) {
-    var url = new URL("./link-stats.html?v=20261123-table", window.location.href);
-    url.hash = token;
-    return url.href;
+    return buildCrmLinkUrl("link_stats_" + token.replace(".", "_"), "telegram");
   }
 
   var crmAccessListSeq = 0;
@@ -5925,7 +5923,9 @@
       }
       var linkCopy = e.target.closest("[data-crm-link-copy]");
       if (linkCopy) {
-        copyCrmLinkText(linkCopy.getAttribute("data-crm-link-copy") || "");
+        var copiedUrl = new URL(linkCopy.getAttribute("data-crm-link-copy"), window.location.href);
+        var startParam = copiedUrl.searchParams.get("startapp");
+        copyCrmLinkText(startParam ? buildCrmLinkUrl(startParam, "telegram") : copiedUrl.href);
         return;
       }
       var linkDelete = e.target.closest("[data-crm-link-delete]");

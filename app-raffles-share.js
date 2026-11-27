@@ -128,7 +128,7 @@ function pokerInitRafflesHeroShare() {
     btn.setAttribute("data-share-bound", "1");
     btn.addEventListener("click", function () {
       if (typeof window.tryTelegramWebAppExpandBurst === "function") window.tryTelegramWebAppExpandBurst();
-      var link = rafflesDeepLink();
+      var link = buildMiniAppStartLink(currentRaffleStartParam());
       copyRafflesLinkText(link).then(function (copied) {
         showRafflesCopyResult(link, copied);
         if (typeof recordShareButtonClick === "function") recordShareButtonClick(trackingName || "raffle_hero_copy");
