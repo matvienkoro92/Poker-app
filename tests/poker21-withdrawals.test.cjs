@@ -50,6 +50,18 @@ test('non-USDT withdrawals automatically enter the cabinet and share the admin r
     assert.equal(card.bookingPaused,paused);
     if(paused)assert.equal((await call('take',card.id.slice(11))).code,409);
   }
+  const beforeResume=structuredClone(state);
+  clock=Date.parse('2026-11-27T00:00:00Z');
+  const pausedId=(await call('list')).data.items[0].id.slice(11);
+  assert.equal((await call('resume',pausedId,'321')).code,403);
+  assert.equal((await call('resume',pausedId,'758417')).code,200);
+  assert.equal((await call('list')).data.items[0].bookingPaused,false);
+  assert.equal((await call('take',pausedId)).code,200);
+  state=beforeResume;
+  assert.equal((await call('resume',pausedId,'758417')).code,200);
+  clock+=86400000;
+  assert.equal((await call('list')).data.items[0].bookingPaused,true);
+  state=structuredClone(beforeResume);
   clock=daytime;
   offerId=items[0].id.slice('withdrawal:'.length);
   assert.equal(summary(state.entries[0]).available,900000);
