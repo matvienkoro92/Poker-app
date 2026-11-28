@@ -1487,7 +1487,10 @@ function applyProfileAchievementsResultContent(result) {
   if (total) total.innerHTML = result.totalRewardHtml
     ? renderProfileRatingTotalCards(profileRatingTotalTextFromHtml(result.totalRewardHtml))
     : renderProfileRatingTotalState("empty");
-  if (achievements) achievements.innerHTML = result.achievementsHtml || "";
+  if (achievements) {
+    achievements.innerHTML = result.achievementsHtml || "";
+    window.pokerHydrateEveningCupRings?.(achievements);
+  }
   if (ranks) ranks.innerHTML = result.ranksHtml || "";
   if (showcase) showcase.hidden = false;
   return true;

@@ -11,6 +11,8 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tour
   background: #100c08 !important;
 }
 .play-card-layout {
+  --play-shelf-top-inset: max(32px, env(safe-area-inset-top, 0px) + 12px);
+  box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -18,11 +20,13 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tour
   width: min(100%, 590px);
   flex: none;
   margin-inline: auto;
-  padding-bottom: 12px;
+  padding-block: var(--play-shelf-top-inset) 12px;
   container-type: inline-size;
   font-family: Georgia, serif;
   color: #fff0d0;
 }
+/* Telegram reserves the native toolbar area on #app. */
+html.app--telegram-miniapp .play-card-layout { --play-shelf-top-inset: 32px; }
 .play-card-layout * { box-sizing: border-box; }
 .play-card-layout #playCardTitle {
   position: absolute;
@@ -34,15 +38,9 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tour
 }
 .play-card-shelf {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  column-gap: 1.5cqw;
-  row-gap: 2.4cqw;
-  padding: 8.1% 7.9% 2.8%;
   height: calc(69.82cqw + clamp(0px, (100cqh - 142cqw) * .37, 88px));
   flex-shrink: 0;
-  background: url('./assets/play-card/green-trophy-shelf-clean.webp') center / 100% 100% no-repeat;
+  background: url('./assets/play-card/green-trophy-shelf-v3.webp') center / 100% 100% no-repeat;
 }
 .play-card-shelf .play-card-exhibit {
   display: grid;
@@ -66,30 +64,58 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tour
   inset: 12% 7% 43% 71%;
   width: auto;
 }
-.play-card-shelf [data-weekday="4"] { grid-area: 2 / 1; }
-.play-card-shelf [data-weekday="5"] { grid-area: 2 / 2; }
-.play-card-shelf [data-weekday="6"] { grid-area: 2 / 3; }
-.play-card-shelf [data-weekday="0"] { grid-area: 2 / 4; }
+/* Percentages use the plinths in green-trophy-shelf-v3.webp. */
+.play-card-shelf [data-weekday] {
+  position: absolute;
+  isolation: isolate;
+  display: block;
+  top: 12%;
+  left: var(--plinth-x);
+  transform: translateX(-50%);
+  width: 17%;
+  height: 41%;
+}
+.play-card-shelf [data-weekday="1"] { --plinth-x: 17.9%; }
+.play-card-shelf [data-weekday="2"] { --plinth-x: 38.7%; --plinth-text-width: 85%; }
+.play-card-shelf [data-weekday="3"] { --plinth-x: 59.8%; }
+.play-card-shelf [data-weekday="4"] { --plinth-x: 18.4%; }
+.play-card-shelf [data-weekday="5"] { --plinth-x: 39.3%; }
+.play-card-shelf [data-weekday="6"] { --plinth-x: 60.9%; }
+.play-card-shelf [data-weekday="0"] { --plinth-x: 82.3%; }
+.play-card-shelf [data-weekday]:nth-child(n+4) { top: 57.6%; height: 33%; }
 
 @container play-screen (min-height: 680px) {
   /* Give most of the extra height to the trophy shelves. */
   .play-card-shelf {
-    height: calc(69.82cqw + clamp(0px, (100cqh - 142cqw) * .76, 182px));
-  }
-  .play-card-shelf [data-weekday]:nth-child(-n+3) {
-    position: relative;
-    top: clamp(0px, (100cqh - 142cqw) * .065, 15px);
+    height: calc(69.82cqw + clamp(0px, (100cqh - 142cqw) * .76 - 32px - var(--play-shelf-top-inset), 138px));
   }
 }
-.play-card-exhibit img {
+.play-card-shelf [data-weekday]::before {
+  content: "";
+  position: absolute;
+  inset: 0 -4% auto;
+  height: 82%;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(ellipse 50% 39% at 50% 13%, #07130aad, transparent);
+}
+
+.play-card-shelf .play-card-exhibit--evening::before {
+  background: radial-gradient(ellipse 62% 70% at 50% 10%, #ffc36b80, #e7a54729 55%, transparent 83%);
+}
+.play-card-shelf [data-weekday] img {
+  position: absolute;
   display: block;
-  width: 88%;
-  height: 90%;
+  left: 5%;
+  bottom: 20.5%;
+  width: 90%;
+  height: 79%;
   object-fit: contain;
   object-position: bottom;
   transform-origin: center bottom;
-  filter: brightness(.89) drop-shadow(0 2px 2px #0009);
+  filter: brightness(.74) saturate(.86) drop-shadow(0 2px 2px #0009);
 }
+.play-card-shelf [data-weekday]:nth-child(n+4) img { bottom: 27%; height: 73%; }
 .play-card-shelf .play-card-exhibit--ring img {
   position: absolute;
   bottom: 36%;
@@ -99,24 +125,27 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tour
   transform: translateX(-50%);
   filter: drop-shadow(0 2px 2px #0009);
 }
-.play-card-exhibit--evening img {
+.play-card-shelf .play-card-exhibit--evening[data-weekday] img {
   transform: scale(1.20);
-  filter: brightness(1.24) saturate(1.12) drop-shadow(0 0 1.45cqw #ffbf64cc);
+  filter: brightness(1.30) saturate(1.14) drop-shadow(0 0 1.8cqw #ffbf64dd);
 }
 .play-card-exhibit__label {
-  align-self: center;
+  position: absolute;
+  left: 50%;
+  top: 90%;
+  transform: translate(-50%, -50%);
   display: grid;
-  gap: .25cqw;
-  width: 92%;
+  gap: 1px;
+  width: var(--plinth-text-width, 70%);
   text-align: center;
   line-height: 1;
   text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
 }
-.play-card-exhibit__label small { font: 700 clamp(8px, 2.2cqw, 13px)/1 Arial, sans-serif; color: #e8c486; }
-.play-card-exhibit__label strong {
-  font-size: clamp(9px, 2.65cqw, 16px);
-  overflow-wrap: anywhere;
-}
+.play-card-shelf [data-weekday]:nth-child(n+4) .play-card-exhibit__label { top: 85.5%; }
+.play-card-exhibit__label small { font: 700 clamp(6px, 1.85cqw, 11px)/1 Arial, sans-serif; color: #e8c486; }
+.play-card-exhibit__label strong { font-size: clamp(8px, 2.5cqw, 15px); }
+.play-card-exhibit__label strong[data-compact] { font-size: clamp(6px, 1.75cqw, 10px); }
 .play-card-exhibit--evening .play-card-exhibit__label small { color: #fff4ac; }
 .play-card-exhibit[aria-pressed="true"] .play-card-exhibit__label strong { color: #ffe09a; }
 .play-card-layout .play-card {
@@ -167,6 +196,8 @@ body[data-view="download"] #app.app:not(#evening-unused) .play-flow__panel--tour
 .play-card-games__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  min-height: calc(27cqw + 36px);
   flex: 1;
   gap: 5px;
   padding: 0 5px;

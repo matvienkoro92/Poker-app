@@ -139,6 +139,20 @@
  let publicData,publicAt=0,publicPending;
  function loadPublic(){if(publicData&&Date.now()-publicAt<60000)return Promise.resolve(publicData);if(publicPending)return publicPending;publicPending=window.pokerSocialRequest('club-honors',{action:'get'}).then(d=>{if(!d.ok)throw Error(d.error);publicData=d;publicAt=Date.now();return d;}).finally(()=>{publicPending=null;});return publicPending;}
  const nickKey=v=>String(typeof window.normalizeWinterNick==='function'?window.normalizeWinterNick(v):v||'').trim().toLowerCase();
+ window.pokerHydrateEveningCupRings=function(root){
+  const slots=[...root.querySelectorAll('[data-evening-ring-nick]:not([data-evening-ring-nick=""])')];
+  if(!slots.length||typeof window.pokerSocialRequest!=='function')return;
+  loadPublic().then(d=>{
+   const winners=new Set(d.issues.filter(issue=>issue.final).flatMap(issue=>issue.winners.map(winner=>nickKey(winner.nick))));
+   for(const slot of slots){
+    if(!slot.isConnected)continue;
+    const earned=winners.has(nickKey(decodeURIComponent(slot.dataset.eveningRingNick)));
+    slot.classList.toggle('evening-cups__item--earned',earned);
+    slot.title='Перстень «Игрок месяца» — '+(earned?'получен':'пока не получен');
+    slot.querySelector('img').alt=slot.title;
+   }
+  }).catch(()=>{});
+ };
  const weeklyCups=[
   [1,'Турнир Понедельника'],[2,'Турнир Вторника'],[3,'Счастливый Косарь'],
   [4,'Турнир Четверга'],[5,'Пятница Прогрессив'],[6,'Big Boss'],[0,'Воскресный турнир']

@@ -2577,6 +2577,7 @@ if (chatUserModalEl) {
     var monthChampionRows = chatUserModalMonthChampionRows(tournamentStats && tournamentStats.monthlyChampions);
     var viceMonthChampionRows = chatUserModalMonthChampionRows(tournamentStats && tournamentStats.viceMonthlyChampions);
     var cupsHtml =
+      (typeof window.pokerEveningCupsHtml === "function" ? window.pokerEveningCupsHtml(ratingNick, "Кубки вечера") : "") +
       chatUserModalAchievementCardHtml("🏆", "Кубок зимы", chatUserModalSeasonCupRows("winter", results && results[2]), {
         extraClass: "chat-user-modal__achievement--season-cup",
       }) +
@@ -2764,6 +2765,7 @@ if (chatUserModalEl) {
     if (!modalAchievements || !modalAchievementsList) return;
     var html = chatUserModalAchievementsHtml(results, ratingNick, metrics);
     modalAchievementsList.innerHTML = html;
+    window.pokerHydrateEveningCupRings?.(modalAchievementsList);
     modalAchievements.hidden = !html;
   }
   function chatUserAchievementInfoLines(text) {

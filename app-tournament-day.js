@@ -2494,6 +2494,50 @@ var PLAY_TROPHY_ART = [
   "thursday-v2", "friday-v1", "saturday-v1"
 ];
 
+function pokerEveningCupsHtml(nick, title) {
+  var normalize = function (value) {
+    var name = typeof normalizeWinterNick === "function" ? normalizeWinterNick(value) : String(value || "").trim();
+    return name.normalize("NFKC").toLowerCase();
+  };
+  var player = normalize(nick);
+  var known = !!player && typeof HOME_EVENING_CUP_WINNERS !== "undefined";
+  var earnedCount = 0;
+  var cups = HOME_TOURNAMENT_WEEK_ORDER.map(function (weekday) {
+    var earned = known && HOME_EVENING_CUP_WINNERS[weekday].some(function (winner) {
+      return normalize(winner) === player;
+    });
+    if (earned) earnedCount++;
+    var day = HOME_TOURNAMENT_WEEK_DAY_LABELS[weekday];
+    var label = day + (earned ? " — кубок получен" : known ? " — кубок пока не получен" : " — прогресс неизвестен");
+    return '<li class="evening-cups__item' + (earned ? ' evening-cups__item--earned' : '') + '" title="' + label + '">' +
+      '<img src="./assets/player-hall/trophy-' + PLAY_TROPHY_ART[weekday] + '-thumb-v2.webp" alt="' + label + '" loading="lazy" decoding="async"><small aria-hidden="true">' + day + '</small></li>';
+  }).join("");
+  return '<div class="evening-cups"><div class="evening-cups__heading"><strong>' + title + '</strong><span>' +
+    (known ? earnedCount + ' / 7' : '— / 7') + '</span></div><ul class="evening-cups__list">' + cups +
+    '<li class="evening-cups__item evening-cups__item--ring" data-evening-ring-nick="' + encodeURIComponent(nick || "") + '" title="Перстень «Игрок месяца»">' +
+    '<img src="./assets/play-card/month-champion-ring.webp" alt="Перстень «Игрок месяца»" loading="lazy" decoding="async"><small aria-hidden="true">МЕС</small></li></ul></div>';
+}
+
+function renderPlayPersonalCups() {
+  var host = document.querySelector("[data-play-personal-cups]");
+  if (!host || host.dataset.cupsReady === "true") return;
+  if (typeof loadCurrentProfileUserInfo !== "function") return;
+  host.dataset.cupsReady = "true";
+  host.innerHTML = pokerEveningCupsHtml("", "Ваши кубки");
+  loadCurrentProfileUserInfo().then(function (profile) {
+    if (host.isConnected && profile && profile.ok) {
+      host.innerHTML = pokerEveningCupsHtml(profile.pokerPlusNickname || profile.poker21Nickname || profile.ratingNick, "Ваши кубки");
+      window.pokerHydrateEveningCupRings?.(host);
+    }
+  }).catch(function () {});
+}
+
+window.addEventListener("poker-telegram-auth", function () {
+  var host = document.querySelector("[data-play-personal-cups]");
+  if (host) delete host.dataset.cupsReady;
+  renderPlayPersonalCups();
+});
+
 function renderPlayTrophyShelf(now, eveningWeekday, selectedWeekday) {
   var shelf = document.querySelector("[data-play-trophy-shelf]");
   if (!shelf) return;
@@ -2530,14 +2574,17 @@ function renderPlayTrophyShelf(now, eveningWeekday, selectedWeekday) {
     var weekday = Number(button.dataset.weekday);
     var tournament = pokerGetHomeTournamentItem(weekday, now);
     var caption = button.querySelector("strong");
-    if (caption.textContent !== tournament.name) caption.textContent = tournament.name;
+    var title = tournament.name.startsWith("Турнир месяца") ? "Месячный" : tournament.name;
+    if (caption.textContent !== title) caption.textContent = title;
+    caption.toggleAttribute("data-compact", title !== tournament.name || title.length > 10);
     var isEvening = weekday === eveningWeekday;
     button.classList.toggle("play-card-exhibit--evening", isEvening);
     button.setAttribute("aria-pressed", String(weekday === selectedWeekday));
     var day = button.querySelector("small");
     var dayLabel = HOME_TOURNAMENT_WEEK_DAY_LABELS[weekday];
-    var label = isEvening ? eveningLabel + " · " + dayLabel : dayLabel;
+    var label = isEvening ? eveningLabel : dayLabel;
     if (day.textContent !== label) day.textContent = label;
+    button.setAttribute("aria-label", (isEvening ? label + " · " + dayLabel : label) + " — " + tournament.name);
   });
 }
 
@@ -2721,6 +2768,7 @@ function updateTournamentDayBlock() {
         ? state
         : getNextWeekdayFreerollSlot(n, selectedWeekday, pokerGetHomeTournamentItem(selectedWeekday, n));
     renderPlayTrophyShelf(n, state.weekday, selectedWeekday);
+    renderPlayPersonalCups();
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");

@@ -10704,3 +10704,32 @@ html:is(.app--telegram-miniapp,.poker-telegram-miniapp) body:has(> .player-hall-
 .villa-loading[aria-busy=false] .villa-loading__indicator{display:none}
 @keyframes villa-loader-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.villa-loading__spinner::before{animation:none;border-color:#ebd39a55;border-top-color:#f7dfa4}}
+
+.evening-cups {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 1px solid #9b753c;
+  border-radius: 8px;
+  background: linear-gradient(140deg, #17372a, #0d2119);
+  color: #ffe6b0;
+}
+[data-play-personal-cups] { margin: 0 5px 7px; }
+.chat-user-modal__achievement-group-list > .evening-cups { grid-column: 1 / -1; }
+.evening-cups__heading { display: grid; gap: 2px; font: 700 11px/1.1 system-ui, sans-serif; }
+.evening-cups__heading span { color: #f4cf83; font-size: 10px; font-variant-numeric: tabular-nums; }
+.evening-cups__list {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.evening-cups__item { display: grid; justify-items: center; color: #c2c8b5; font: 700 8px/1 system-ui, sans-serif; }
+.evening-cups__item img { display: block; width: 100%; height: 26px; object-fit: contain; filter: grayscale(1); opacity: .45; }
+.evening-cups__item--ring img { width: 88%; }
+.evening-cups__item--earned { color: #ffdd91; }
+.evening-cups__item--earned img { filter: drop-shadow(0 0 3px #eac36982); opacity: 1; }
