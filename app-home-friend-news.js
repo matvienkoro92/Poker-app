@@ -186,9 +186,9 @@
     try {
       var stored = localStorage.getItem(CLUB_EVENTS_CACHE_KEY) || sessionStorage.getItem(CLUB_EVENTS_CACHE_KEY) || "[]";
       var rows = JSON.parse(stored);
-      return arrangeClubWinEvents((Array.isArray(rows) ? rows : []).filter(function (row) {
+      return arrangeClubWinEvents(dedupeClubBirthdays((Array.isArray(rows) ? rows : []).filter(function (row) {
         return row && row.id && row.id !== "club-empty" && row.id !== "club-loading" && isCurrentClubEvent(row);
-      })).slice(0, MAX_EVENTS);
+      }))).slice(0, MAX_EVENTS);
     } catch (error) {
       return [];
     }
@@ -2196,12 +2196,23 @@
     }).filter(Boolean);
   }
 
+  function dedupeClubBirthdays(rows) {
+    var seen = new Set();
+    return rows.filter(function (row) {
+      if (row.type !== "birthday") return true;
+      var keys = nicknameMatchKeys(row.actorNick).map(function (alias) { return "nick:" + alias; });
+      if (row.actorId) keys.push("id:" + row.actorId);
+      var duplicate = keys.some(function (key) { return seen.has(key); });
+      keys.forEach(function (key) { seen.add(key); });
+      return !duplicate;
+    });
+  }
+
   function clubBirthdayEvents(players, dayKey) {
     var parts = String(dayKey || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!parts) return [];
     var year = Number(parts[1]);
     var monthDay = parts[2] + "-" + parts[3];
-    var seen = {};
     return (players || []).map(function (player) {
       var birth = String(player && (player.profileBirthDate || player.birthDate) || "").trim();
       var match = birth.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -2218,8 +2229,7 @@
       var actorId = friendId(player);
       var name = friendName(player);
       var key = actorId || matchKey(name);
-      if (!key || seen[key]) return null;
-      seen[key] = true;
+      if (!key) return null;
       return {
         id: "birthday:club:" + key + ":" + year,
         type: "birthday",
@@ -4646,14 +4656,9 @@
     var todayDay = clubTodayDayKey();
     // Unlike tournament results, birthdays are not tied to the reporting day:
     // only people whose birthday is today should appear in the news feed.
-    var birthdays = clubBirthdayEvents(allPlayers, todayDay);
-    clubNewsStaticBirthdayEvents(todayDay).forEach(function (row) {
-      var key = matchKey(row && row.actorNick);
-      var alreadyLoaded = birthdays.some(function (birthday) {
-        return matchKey(birthday && birthday.actorNick) === key;
-      });
-      if (!alreadyLoaded) birthdays.push(row);
-    });
+    var birthdays = dedupeClubBirthdays(
+      clubBirthdayEvents(allPlayers, todayDay).concat(clubNewsStaticBirthdayEvents(todayDay))
+    );
     return arrangeClubWinEvents(placeSelfBetNewsAfterWinner(attachFriendAvatars(
       recentTournamentEvents(allPlayers, snapshots).concat(
         winnerEvents(allPlayers, Array.isArray(winners) ? winners : []),
