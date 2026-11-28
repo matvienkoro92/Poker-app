@@ -3,22 +3,22 @@
               <div class="play-flow" data-play-flow data-play-panel="tournament" aria-label="Раздел Играть">
                 <div class="play-flow__track">
                   <div class="play-flow__panel play-flow__panel--tournament">
-<section class="play-card-layout" aria-label="Турнир вечера и игры клуба">
-  <article class="play-card" aria-labelledby="playCardTitle">
-    <img class="play-card__portal" src="./assets/play-card/portal-480.webp" srcset="./assets/play-card/portal-480.webp 480w, ./assets/play-card/portal-800.webp 800w" sizes="(min-width:700px) 560px, 96vw" width="800" height="1200" alt="" decoding="async" fetchpriority="high" />
-    <header class="play-card__header"><h1 id="playCardTitle">ТУРНИР ВЕЧЕРА</h1><div class="play-card__session"><strong id="tournamentDayHomeName">Мэджик</strong><time data-home-ticket-time>18:00 МСК</time></div><nav class="play-card-extras" aria-label="Ещё о турнире"><button type="button" data-tournament-bet-open><span class="play-card-extras__icon" aria-hidden="true">♠</span><span>Ластлонгер</span></button><button type="button" id="homeTournamentHistoryOpen"><span class="play-card-extras__icon" aria-hidden="true">♛</span><span data-home-tournament-history-label>Победители</span></button></nav></header>
-    <img class="play-card__manki" src="./assets/play-card/manki-480.webp" srcset="./assets/play-card/manki-480.webp 480w, ./assets/play-card/manki-800.webp 800w" sizes="(min-width:700px) 230px, 39vw" alt="" decoding="async" />
-    <div class="play-card__cooler" aria-hidden="true" style="pointer-events:none"><img src="./assets/play-card/cooler-480.webp" srcset="./assets/play-card/cooler-480.webp 480w, ./assets/play-card/cooler-800.webp 800w" sizes="(min-width:700px) 280px, 47vw" width="480" height="720" alt="" decoding="async" /></div>
-    <dl class="play-card__terms"><div><dt>Вход</dt><dd id="tournamentDayBuyin">—</dd></div><div><dt>Призы</dt><dd id="tournamentDayGuarantee">—</dd></div></dl>
-    <button type="button" class="play-card__play" data-play-next aria-label="Сыграть турнир"><span>СЫГРАТЬ ТУРНИР <b aria-hidden="true">→</b></span></button>
+<section class="play-card-layout" aria-labelledby="playCardTitle">
+  <h1 id="playCardTitle">Турниры вечера</h1>
+  <div class="play-card-shelf" data-play-trophy-shelf>
+    <a class="play-card-exhibit play-card-exhibit--ring" href="#" data-view-target="hall-of-fame" aria-label="Игрок месяца"></a>
+  </div>
+  <article class="play-card" aria-labelledby="tournamentDayHomeName">
+    <div class="play-card__session"><strong id="tournamentDayHomeName">Турнир вечера</strong></div>
+    <dl class="play-card__terms"><div><dt>Начало</dt><dd><time data-home-ticket-time>18:00 МСК</time></dd></div><div><dt>Вход</dt><dd id="tournamentDayBuyin">—</dd></div><div><dt>Призы</dt><dd id="tournamentDayGuarantee">—</dd></div></dl>
+    <button type="button" class="play-card__play" data-play-next aria-label="Сыграть турнир">Сыграть</button>
+    <nav class="play-card-extras" aria-label="Ещё о турнире"><button type="button" data-tournament-bet-open>Ластлонгер</button><button type="button" id="homeTournamentHistoryOpen" hidden><span data-home-tournament-history-label>Победители</span></button></nav>
   </article>
-  <section class="play-card-games" aria-labelledby="playCardGamesTitle"><h2 id="playCardGamesTitle">ДРУГИЕ ИГРЫ В КЛУБЕ</h2>
-    <nav class="play-card-games__grid" aria-label="Игры клуба">
-      <button type="button" data-evening-villa-game="billiards" aria-label="Бильярд"><span class="play-card-games__art"><img data-play-art-slot="billiards" src="./assets/play-card/billiards-240.webp" srcset="./assets/play-card/billiards-240.webp 240w, ./assets/play-card/billiards-400.webp 400w" sizes="(min-width:700px) 180px, 31vw" alt="Бильярд" width="240" height="360" loading="lazy" decoding="async" /></span><span class="play-card-games__label">Бильярд</span></button>
-      <button type="button" data-evening-villa-game="nards" aria-label="Нарды"><span class="play-card-games__art"><img data-play-art-slot="nards" src="./assets/play-card/nards-240.webp" srcset="./assets/play-card/nards-240.webp 240w, ./assets/play-card/nards-400.webp 400w" sizes="(min-width:700px) 180px, 31vw" alt="Нарды" width="240" height="360" loading="lazy" decoding="async" /></span><span class="play-card-games__label">Нарды</span></button>
-      <button type="button" data-evening-villa-game="chess" aria-label="Шахматы"><span class="play-card-games__art"><img data-play-art-slot="chess" src="./assets/play-card/chess-240.webp" srcset="./assets/play-card/chess-240.webp 240w, ./assets/play-card/chess-400.webp 400w" sizes="(min-width:700px) 180px, 31vw" alt="Шахматы" width="240" height="360" loading="lazy" decoding="async" /></span><span class="play-card-games__label">Шахматы</span></button>
-    </nav>
-  </section>
+  <nav class="play-card-games play-card-games__grid" aria-label="Игры клуба">
+    <button type="button" data-evening-villa-game="nards"><img src="./assets/play-card/green-nards.webp" alt="" width="301" height="208" loading="lazy" decoding="async" /><span class="play-card-games__label">Нарды</span></button>
+    <button type="button" data-evening-villa-game="chess"><img src="./assets/play-card/green-chess.webp" alt="" width="301" height="208" loading="lazy" decoding="async" /><span class="play-card-games__label">Шахматы</span></button>
+    <button type="button" data-evening-villa-game="billiards"><img src="./assets/play-card/green-billiards.webp" alt="" width="301" height="208" loading="lazy" decoding="async" /><span class="play-card-games__label">Бильярд</span></button>
+  </nav>
   <span id="tournamentDayTimer" hidden></span><span id="tournamentDayTimerLabel" hidden></span>
 </section>
 
@@ -40,7 +40,7 @@
                   </div>
                 </div>
                 <nav class="play-flow__nav" aria-label="Экраны раздела Играть">
-                  <button type="button" class="play-flow__dot" data-play-panel-target="tournament" aria-label="Турнир, стол и бонусы" aria-current="true"></button>
+                  <button type="button" class="play-flow__dot" data-play-panel-target="tournament" aria-label="Турниры вечера и игры клуба" aria-current="true"></button>
                   <button type="button" class="play-flow__dot" data-play-panel-target="poker21" aria-label="Вход в Poker21"></button>
                 </nav>
               </div>

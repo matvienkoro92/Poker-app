@@ -2489,6 +2489,63 @@ function closePlayerStickersModal() {
   });
 })();
 
+var PLAY_TROPHY_ART = [
+  "sunday-v1", "monday-v1", "tuesday-v1", "wednesday-v1",
+  "thursday-v2", "friday-v1", "saturday-v1"
+];
+
+function renderPlayTrophyShelf(now, eveningWeekday, selectedWeekday) {
+  var shelf = document.querySelector("[data-play-trophy-shelf]");
+  if (!shelf) return;
+
+  if (!shelf.firstElementChild.matches("button")) {
+    var ring = shelf.firstElementChild;
+    HOME_TOURNAMENT_WEEK_ORDER.forEach(function (weekday) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "play-card-exhibit";
+      button.dataset.weekday = String(weekday);
+
+      var art = document.createElement("img");
+      art.src = "./assets/player-hall/trophy-" + PLAY_TROPHY_ART[weekday] + "-thumb-v2.webp";
+      art.alt = "";
+      art.decoding = "async";
+
+      var caption = document.createElement("span");
+      caption.className = "play-card-exhibit__label";
+      var day = document.createElement("small");
+      day.textContent = HOME_TOURNAMENT_WEEK_DAY_LABELS[weekday];
+      caption.append(day, document.createElement("strong"));
+      button.append(art, caption);
+      button.addEventListener("click", function () {
+        window._homeTournamentSelectedWeekday = weekday;
+        updateTournamentDayBlock();
+      });
+      shelf.insertBefore(button, ring);
+    });
+  }
+
+  var eveningLabel = eveningWeekday === getPlayMskWeekday(now) ? "Сегодня" : "Завтра";
+  shelf.querySelectorAll("button").forEach(function (button) {
+    var weekday = Number(button.dataset.weekday);
+    var tournament = pokerGetHomeTournamentItem(weekday, now);
+    var caption = button.querySelector("strong");
+    if (caption.textContent !== tournament.name) caption.textContent = tournament.name;
+    var isEvening = weekday === eveningWeekday;
+    button.classList.toggle("play-card-exhibit--evening", isEvening);
+    button.setAttribute("aria-pressed", String(weekday === selectedWeekday));
+    var day = button.querySelector("small");
+    var dayLabel = HOME_TOURNAMENT_WEEK_DAY_LABELS[weekday];
+    var label = isEvening ? eveningLabel + " · " + dayLabel : dayLabel;
+    if (day.textContent !== label) day.textContent = label;
+  });
+}
+
+function getPlayMskWeekday(now) {
+  var date = pokerGetMskDatePartsAt(now);
+  return new Date(Date.UTC(date.y, date.m, date.d)).getUTCDay();
+}
+
 function updateTournamentDayBlock() {
   try {
     initHomeFreerollModal();
@@ -2662,7 +2719,8 @@ function updateTournamentDayBlock() {
     var detailState =
       selectedWeekday === state.weekday
         ? state
-        : getNextWeekdayFreerollSlot(n, selectedWeekday, TOURNAMENT_OF_DAY_BY_WEEKDAY[selectedWeekday]);
+        : getNextWeekdayFreerollSlot(n, selectedWeekday, pokerGetHomeTournamentItem(selectedWeekday, n));
+    renderPlayTrophyShelf(n, state.weekday, selectedWeekday);
     var detailNameStr = detailState.t ? detailState.t.name : "";
     var detailBuyinStr = detailState.t ? detailState.t.buyin : "";
     var tournamentScene = document.querySelector(".tournament-day-home-dual--tournament-focus");
