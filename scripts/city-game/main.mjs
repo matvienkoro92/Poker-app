@@ -1,10 +1,13 @@
+import {kremsDestination,kremsNavigation} from './krems-navigation.mjs';
+import {bahetle,kremsEntrance,kremsDriveways,kremsGround,kremsNeighbours,kremsParking,kremsStreets,legacyCrossStreetEast} from './krems-plan.mjs';
+import {library} from './pimenov-plan.mjs';
 import {districtBlocks,districtRoads,westRoads} from './voskhod-survey.mjs';
 import {drivingDirections,navigationText} from './navigation.mjs';
 import {thumbstick} from '../shared/thumbstick.mjs';
 import {mapPoint,mapPercent,lighthouseShore,shores,lagoon,parks,lots,roads,landmarks,lunaSite,metroNearest,missionSites} from './metropolis.mjs';
 import {createRenderScheduler} from '../shared/render-scheduler.mjs';
 import {create,step,interact,rescue,subject,prompt,objective,checkpoint,notice} from './engine.mjs';
-import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,PORT,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,roadRoute,waterfrontBasin,waterfrontWaterEdges} from './world.mjs';
+import {BUILDINGS,ROAD_X,ROAD_Z,CLUB,HOME,PICKUP,VILLA,ISLAND,GARAGE_RADIO,GATE,ESTATE,roadRoute,waterfrontBasin,waterfrontWaterEdges} from './world.mjs';
 import {loadCityGarage} from './garage.mjs';
 import {createCityScene} from './scene.mjs';
 import {createAwardInspector} from './award-inspector.mjs';
@@ -13,7 +16,7 @@ function syncCityRadio(active){if(radioActive===active)return;radioActive=active
 const $=id=>document.getElementById(id),SAVE='poker21-city:v1';
 let saved={};try{saved=JSON.parse(localStorage.getItem(SAVE)||'{}')||{};}catch(_){}
 let state=create(saved),view=null,started=false,paused=true,disposed=false,last=0,acc=0,savePhase=state.phase,showedResult=false,quality='standard',soundEnabled=saved.sound===true,lastMapTime=-Infinity;
-const keys=new Set(),stick={x:0,y:0,id:null},held={gas:false,brake:false,left:false,right:false},controls=new Map(),listeners=[];let cameraDrag=null,lastCameraDrag=-10,lastHealth=100;
+const keys=new Set(),stick={x:0,y:0,id:null},held={gas:false,brake:false},controls=new Map(),listeners=[];let cameraDrag=null,lastCameraDrag=-10,lastHealth=100;
 function on(target,event,fn,opts){target.addEventListener(event,fn,opts);listeners.push(()=>target.removeEventListener(event,fn,opts));}
 function save(){try{localStorage.setItem(SAVE,JSON.stringify({...checkpoint(state),sound:soundEnabled,best:saved.best||null}));}catch(_){}}
 function clearInput(){keys.clear();controls.clear();for(const [id,key] of driveButtons){held[key]=false;$(id).removeAttribute('data-held');}stick.x=stick.y=0;stick.id=null;cameraDrag=null;$('cityStick').querySelector('i').style.transform='translate(-50%,-50%)';}
@@ -48,7 +51,7 @@ const joy=$('cityStick');
 on(joy,'pointerdown',e=>{if(paused||stick.id!==null)return;stick.origin={x:e.clientX,y:e.clientY};stick.id=e.pointerId;joy.setPointerCapture(e.pointerId);joyMove(e);e.preventDefault();});
 function joyMove(e){if(stick.id!==e.pointerId)return;const v=thumbstick(stick.origin,e,joy.clientWidth*.34);stick.x=v.x;stick.y=v.y;joy.querySelector('i').style.transform='translate(calc(-50% + '+v.px+'px),calc(-50% + '+v.py+'px))';}
 on(joy,'pointermove',joyMove);function joyEnd(e){if(e.pointerId!==stick.id)return;stick.id=null;stick.x=stick.y=0;joy.querySelector('i').style.transform='translate(-50%,-50%)';}on(joy,'pointerup',joyEnd);on(joy,'pointercancel',joyEnd);on(joy,'lostpointercapture',joyEnd);
-const driveButtons=[['cityGas','gas'],['cityBrake','brake'],['cityLeft','left'],['cityRight','right']];
+const driveButtons=[['cityGas','gas'],['cityBrake','brake']];
 for(const [id,key] of driveButtons){
  const button=$(id);
  on(button,'pointerdown',event=>{
@@ -83,23 +86,25 @@ function rememberCityPosition(){
 }
 on(window,'pagehide',()=>{rememberCityPosition();save();dispose();});
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
-function input(){const f=(keys.has('KeyW')||keys.has('ArrowUp')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(state.driving?0:stick.y),r=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0)+(state.driving?Number(held.right)-Number(held.left):stick.x);const forward=Math.max(-1,Math.min(1,f+(state.driving&&held.gas?1:0))),turn=Math.max(-1,Math.min(1,r));const yaw=view.orbit.yaw;return {forward,turn,brake:keys.has('Space'),pedalBrake:state.driving&&held.brake,x:Math.sin(yaw)*forward-Math.cos(yaw)*turn,z:Math.cos(yaw)*forward+Math.sin(yaw)*turn,run:held.gas||keys.has('ShiftLeft')||keys.has('ShiftRight')};}
+function input(){const f=(keys.has('KeyW')||keys.has('ArrowUp')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')?1:0)-stick.y,r=(keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0)+stick.x;const forward=Math.max(-1,Math.min(1,f+(state.driving&&held.gas?1:0))),turn=Math.max(-1,Math.min(1,r));const yaw=view.orbit.yaw;return {forward,turn,brake:held.brake||keys.has('Space'),x:Math.sin(yaw)*forward-Math.cos(yaw)*turn,z:Math.cos(yaw)*forward+Math.sin(yaw)*turn,run:held.gas||keys.has('ShiftLeft')||keys.has('ShiftRight')};}
 let lastUI='';
-function navigationObjective(){return destination?{title:destination.title||destination.name,detail:destination.detail||(destination.approach?'Подъезд · '+destination.name:'Маршрут на карте · можно сменить пункт назначения'),target:destination.approach||destination}:objective(state);}
+function navigationObjective(){
+ if(destination?.id===kremsDestination.id)return {title:destination.title,...kremsNavigation(subject(state),state.driving)};
+ return destination?{title:destination.title||destination.name,detail:destination.detail||(destination.approach?'Подъезд · '+destination.name:'Маршрут на карте · можно сменить пункт назначения'),target:destination.approach||destination}:objective(state);}
 let cachedNavigation=null;
-function navigationFrom(p,target){
+function navigationFrom(p,{target,path:plannedPath}){
  if(cachedNavigation&&cachedNavigation.tx===target.x&&cachedNavigation.tz===target.z&&Math.hypot(p.x-cachedNavigation.x,p.z-cachedNavigation.z)<1)return cachedNavigation;
- const path=roadRoute(p,target);
+ const path=plannedPath??roadRoute(p,target);
  cachedNavigation={x:p.x,z:p.z,tx:target.x,tz:target.z,path,text:navigationText(drivingDirections(p,path,target))};
  return cachedNavigation;
 }
 function updateUI(){const o=navigationObjective(),p=subject(state);
  $('cityMission').hidden=!o.target&&!state.heat&&!state.failed;
- const d=o.target?Math.round(Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,distanceText=!o.target?'':state.driving?navigationFrom(p,o.target).text:'◆ '+d+' м до цели',key=[o.title,o.detail,distanceText,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
- $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ПРИЧАЛ / ОСТРОВ ВИЛЛЫ':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ПРИЧАЛ ВИЛЛЫ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=distanceText;$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
+ const d=o.target?Math.round(o.path?drivingDirections(p,o.path,o.target).distance:Math.hypot(p.x-o.target.x,p.z-o.target.z)):0,distanceText=!o.target?'':state.driving?navigationFrom(p,o).text:'◆ '+d+' м до цели',key=[o.title,o.detail,distanceText,state.driving,Math.round(state.health),Math.round(Math.abs(state.car.speed)),state.heat,Math.floor(state.escape),(awardInspector.near()?.item.id||prompt(state)),Math.ceil(state.noticeTime)].join('|');if(key===lastUI)return;lastUI=key;
+ $('cityObjective').textContent=o.title;$('cityObjectiveDetail').textContent=o.detail;$('cityDistrict').textContent=p.x>=kremsGround.minX&&p.x<=kremsGround.maxX&&p.z>=kremsGround.minZ&&p.z<=kremsGround.maxZ?'ВОСХОД / МОСКОВСКАЯ':p.z<-109?landmarks.reduce((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)<Math.hypot(b.x-p.x,b.z-p.z)?a:b).name:p.z>98&&p.x<130?'ВАША ВИЛЛА / ПРИБРЕЖНЫЙ САД':p.x>140?'ПРИЧАЛ / ОСТРОВ ВИЛЛЫ':p.x>118?'МОСТ / ДОРОГА В ГОРОД':p.x>59&&p.z<0?'ПРИЧАЛ ВИЛЛЫ / НАБЕРЕЖНАЯ':p.x>59?'\u041d\u0410\u0411\u0415\u0420\u0415\u0416\u041d\u0410\u042f / POKER21':p.z>20?'ЮЖНЫЙ КВАРТАЛ / ПРОМЕНАД':'TWO ACES / КЛУБНЫЙ КВАРТАЛ';$('cityDistance').textContent=distanceText;$('cityHeat').hidden=!state.heat;$('cityHeat').querySelector('progress').value=state.escape;
  const radio=$('cityRadio');radio.classList.toggle('is-hidden',state.noticeTime<=0);radio.querySelector('p').textContent=state.notice;radio.style.bottom=state.driving?'350px':'';
  const info=document.querySelector('.city-drive-info');info.hidden=!state.driving;$('citySpeed').textContent=Math.round(Math.abs(state.car.speed)*3.6);$('cityCondition').style.width=state.health+'%';$('cityCondition').style.background=state.health<35?'#ed9a74':'#d3d9ad';$('cityConditionText').textContent='КУЗОВ '+Math.round(state.health)+'%';
- const actionText=awardInspector.near()?'Рассмотреть награду · E':prompt(state),actionButton=$('cityAction');actionButton.classList.toggle('is-ready',!!actionText);actionButton.disabled=!actionText||Math.abs(state.driving?state.car.speed:0)>2;actionButton.querySelector('span').textContent=actionText?(actionText.includes('награду')?'Осмотреть':actionText.includes('Магнитофон')?'Музыка':actionText.includes('Выйти')?'Выйти':actionText.includes('руль')?'В машину':actionText.includes('Ромой')?'Рома':actionText.includes('виллу')?'Домой':actionText.includes('Вернуть')?'Передать':actionText.includes('кейс')?'Кейс':'Действие'):'Действие';actionButton.setAttribute('aria-label',actionText||'Действие недоступно');$('cityGas').querySelector('span').textContent=state.driving?'Газ':'Бежать';$('cityBrake').hidden=!state.driving;$('cityStick').hidden=state.driving;$('citySteering').hidden=!state.driving;$('cityControls').classList.toggle('city-controls-driving',state.driving);
+ const actionText=awardInspector.near()?'Рассмотреть награду · E':prompt(state),actionButton=$('cityAction');actionButton.classList.toggle('is-ready',!!actionText);actionButton.disabled=!actionText||Math.abs(state.driving?state.car.speed:0)>2;actionButton.querySelector('span').textContent=actionText?(actionText.includes('награду')?'Осмотреть':actionText.includes('Магнитофон')?'Музыка':actionText.includes('Выйти')?'Выйти':actionText.includes('руль')?'В машину':actionText.includes('Ромой')?'Рома':actionText.includes('виллу')?'Домой':actionText.includes('Вернуть')?'Передать':actionText.includes('кейс')?'Кейс':'Действие'):'Действие';actionButton.setAttribute('aria-label',actionText||'Действие недоступно');$('cityGas').querySelector('span').textContent=state.driving?'Газ':'Бежать';$('cityBrake').hidden=!state.driving;$('cityStick').setAttribute('aria-label',state.driving?'Джойстик управления машиной':'Джойстик движения');
  if(state.phase!==savePhase){savePhase=state.phase;save();}
  if((state.win||state.failed)&&!showedResult){showedResult=true;freeze();const won=state.win;$('cityResultBadge').textContent=won?'ДОСТАВКА / ВЫПОЛНЕНО':'ДОСТАВКА / ЕЩЁ ПОПЫТКА';$('cityResultTitle').textContent=won?'Все свои на месте.':'Рома уже выезжает.';const time=Math.floor(state.elapsed);if(won){saved.best=Math.min(saved.best||Infinity,time);save();}$('cityResultText').textContent=won?'Кейс с билетами вернулся в TWO ACES. Время: '+Math.floor(time/60)+' мин '+time%60+' с. Можно остаться в городе и свободно покататься.':'Машина повреждена. Продолжение вернёт тебя к последнему этапу доставки с целой машиной.';$('cityResultContinue').textContent=won?'Остаться в городе':'Продолжить доставку';document.body.classList.toggle('city-failed',!won);$('cityResult').showModal();audio.beep(won?880:180);}
 }
@@ -111,13 +116,22 @@ function destinations(label,spots){
  destinationSelect.append(group);
 }
 destinations('Миссии Poker21',missionSites);
-destinations('Город',[...landmarks,{...GATE,name:'ВИЛЛА'},{...HOME,name:'TWO ACES'},{...PICKUP,name:'ПОРТ'},{...lunaSite,approach:metroNearest(lunaSite)}]);
+destinations('Город',[kremsDestination,...landmarks,{...GATE,name:'ВИЛЛА'},{...HOME,name:'TWO ACES'},{...PICKUP,name:'ПОРТ'},{...lunaSite,approach:metroNearest(lunaSite)}]);
 on(destinationSelect,'change',()=>{destination=destinationSelect.value?JSON.parse(destinationSelect.value):null;drawMap($('cityFullMap'),true);});
 const surveyedRoads=[...districtRoads,...westRoads];
 const cityAtlas=new Image();
 cityAtlas.onload=()=>{if($('cityMapDialog').open)drawMap($('cityFullMap'),true);};
 cityAtlas.src='assets/last-buy-in/optimized/poker21-city-map-locations-v5.webp';
-function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canvas.width,focus=subject(state),span=full?3760:370,k=size/span,cx=full?mapPoint(320,320).x:focus.x,cz=full?mapPoint(320,320).z:focus.z,X=x=>size/2+(x-cx)*k,Z=z=>size/2+(z-cz)*k;ctx.fillStyle='#153c43';ctx.fillRect(0,0,size,size);ctx.fillStyle='#6b8275';const illustrated=full&&cityAtlas.complete&&cityAtlas.naturalWidth>0;
+function drawMap(canvas,full=false){
+ const ctx=canvas.getContext('2d'),size=canvas.width,focus=subject(state);
+ const route=full&&destination?.id===kremsDestination.id?kremsNavigation(focus,state.driving).path:null;
+ const routePoints=route?[focus,...route]:null;
+ const xs=routePoints?.map(point=>point.x),zs=routePoints?.map(point=>point.z);
+ const span=route?Math.max(110,Math.max(...xs)-Math.min(...xs)+50,Math.max(...zs)-Math.min(...zs)+50):full?3760:370;
+ const k=size/span,cx=route?(Math.min(...xs)+Math.max(...xs))/2:full?mapPoint(320,320).x:focus.x;
+ const cz=route?(Math.min(...zs)+Math.max(...zs))/2:full?mapPoint(320,320).z:focus.z;
+ const X=x=>size/2+(x-cx)*k,Z=z=>size/2+(z-cz)*k;
+ ctx.fillStyle='#153c43';ctx.fillRect(0,0,size,size);ctx.fillStyle='#6b8275';const illustrated=full&&!route&&cityAtlas.complete&&cityAtlas.naturalWidth>0;
  if(illustrated){const corner=mapPoint(0,0);ctx.drawImage(cityAtlas,X(corner.x),Z(corner.z),640*5.6*k,640*5.6*k);}
  else for(const poly of shores){ctx.beginPath();poly.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();}
  if(!illustrated){
@@ -126,7 +140,7 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  ctx.fillStyle='#9eaa9d';for(const lot of lots){if(!full&&(Math.abs(lot.x-cx)>220||Math.abs(lot.z-cz)>220))continue;ctx.fillRect(X(lot.minX),Z(lot.minZ),lot.w*k,lot.d*k);}
  }ctx.fillStyle='#6b8275';ctx.strokeStyle=illustrated?'rgba(245,225,175,.42)':'#ccc5aa';ctx.lineWidth=Math.max(1,15*k);ctx.beginPath();
  for(const {a,b,width} of roads){if(!full&&(Math.max(a.x,b.x)<cx-span/2||Math.min(a.x,b.x)>cx+span/2||Math.max(a.z,b.z)<cz-span/2||Math.min(a.z,b.z)>cz+span/2))continue;ctx.beginPath();ctx.lineWidth=Math.max(1,width*k);ctx.moveTo(X(a.x),Z(a.z));ctx.lineTo(X(b.x),Z(b.z));ctx.stroke();}
- if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();lighthouseShore.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(lunaSite.x),Z(lunaSite.z),9*k,0,Math.PI*2);ctx.stroke();}
+ if(!illustrated){ctx.fillStyle='#6b8275';ctx.fillRect(X(-100),Z(-110),218*k,201*k);ctx.fillRect(X(kremsGround.minX),Z(kremsGround.minZ),(kremsGround.maxX-kremsGround.minX)*k,(kremsGround.maxZ-kremsGround.minZ)*k);ctx.beginPath();ctx.ellipse(X(ISLAND.x),Z(ISLAND.z),ISLAND.rx*k,ISLAND.rz*k,0,0,Math.PI*2);ctx.fill();ctx.beginPath();lighthouseShore.forEach((p,i)=>i?ctx.lineTo(X(p.x),Z(p.z)):ctx.moveTo(X(p.x),Z(p.z)));ctx.closePath();ctx.fill();ctx.fillRect(X(20),Z(85),98*k,61*k);ctx.fillStyle='#8da778';ctx.fillRect(X(ESTATE.minX),Z(ESTATE.minZ),(ESTATE.maxX-ESTATE.minX)*k,(ESTATE.maxZ-ESTATE.minZ)*k);ctx.strokeStyle='#d5ba7d';ctx.lineWidth=1;ctx.strokeRect(X(53),Z(117),66*k,56*k);ctx.fillStyle='#d7b76b';ctx.beginPath();ctx.arc(X(lunaSite.x),Z(lunaSite.z),9*k,0,Math.PI*2);ctx.stroke();}
  // Draw the local street network over the campaign illustration too.
  const rect=(x,z,w,d)=>ctx.fillRect(X(x-w/2),Z(z-d/2),w*k,d*k);
  ctx.fillStyle='#77787a';
@@ -142,16 +156,27 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
  ctx.closePath();ctx.fill();
  ctx.fillStyle=illustrated?'#abae9c':'#819085';
  for(const x of ROAD_X)rect(x,-9,14,208);
- for(const z of ROAD_Z)rect(-1,z,192,14);
+ for(const z of ROAD_Z){
+  const end=z===-75?legacyCrossStreetEast:95;
+  rect((end-97)/2,z,end+97,14);
+ }
+ ctx.fillStyle='#918b7f';
+ for(const ring of kremsParking){
+  ctx.beginPath();for(const [x,z] of ring)ctx.lineTo(X(x),Z(z));ctx.fill();
+ }
+ for(const [points,width] of [...kremsDriveways,...kremsStreets]){
+  ctx.strokeStyle='#a2a798';ctx.lineWidth=Math.max(.6,width*k);ctx.beginPath();
+  for(const [x,z] of points)ctx.lineTo(X(x),Z(z));ctx.stroke();
+ }
  ctx.fillStyle='#c6b690';rect(136,70,52,14);rect(157,67,10,74);
  rect(48,160,16,10);rect(87,160,16,15);rect(40,132.5,11,55);rect(56,105,43,11);rect(72,89,11,38);
  ctx.fillRect(X(55),Z(155),32*k,10*k);
- {ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[PORT,'#4d686c'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}}
+ {ctx.fillStyle='#d6c8ac';for(const b of BUILDINGS)ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);for(const [b,c]of [[CLUB,'#315d52'],[VILLA,'#e3c992']]){ctx.fillStyle=c;ctx.fillRect(X(b.x-b.w/2),Z(b.z-b.d/2),b.w*k,b.d*k);}}
  ctx.fillStyle='#c6b4a0';
- for(const [,ring] of districtBlocks){
+ for(const [,ring] of [...districtBlocks,...kremsNeighbours]){
   ctx.beginPath();ring.forEach(([x,z],i)=>i?ctx.lineTo(X(x),Z(z)):ctx.moveTo(X(x),Z(z)));ctx.closePath();ctx.fill();
  }
- const o=navigationObjective(),p=subject(state);if(o.target){const route=navigationFrom(p,o.target).path;ctx.strokeStyle=full?'#102e39':'#ffda8d';ctx.lineWidth=full?6:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();if(full){ctx.lineWidth=3;ctx.strokeStyle='#ffda8d';ctx.stroke();}ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
+ const o=navigationObjective(),p=subject(state);if(o.target){const route=navigationFrom(p,o).path;ctx.strokeStyle=full?'#102e39':'#ffda8d';ctx.lineWidth=full?6:2;ctx.setLineDash(full?[5,4]:[3,3]);ctx.beginPath();ctx.moveTo(X(p.x),Z(p.z));for(const v of route)ctx.lineTo(X(v.x),Z(v.z));ctx.lineTo(X(o.target.x),Z(o.target.z));ctx.stroke();if(full){ctx.lineWidth=3;ctx.strokeStyle='#ffda8d';ctx.stroke();}ctx.setLineDash([]);ctx.fillStyle='#ffe6a4';ctx.save();ctx.translate(X(o.target.x),Z(o.target.z));ctx.rotate(Math.PI/4);ctx.fillRect(-4,-4,8,8);ctx.restore();}
  ctx.fillStyle='#364955';for(const vehicle of [...state.traffic,...state.metroTraffic]){ctx.save();ctx.translate(X(vehicle.x),Z(vehicle.z));ctx.rotate(-vehicle.yaw);ctx.fillRect(-Math.max(1,1.1*k),-2.3*k,Math.max(2,2.2*k),4.6*k);ctx.restore();}
  ctx.fillStyle='#a8e8d5';ctx.beginPath();ctx.arc(X(state.car.x),Z(state.car.z),full?5:3.5,0,Math.PI*2);ctx.fill();if(state.heat){ctx.fillStyle='#f79778';ctx.font='bold '+(full?20:13)+'px Arial';ctx.fillText('★',X(state.police.x)-5,Z(state.police.z)+5);}
 
@@ -167,6 +192,22 @@ function drawMap(canvas,full=false){const ctx=canvas.getContext('2d'),size=canva
    ctx.fillStyle='#fff2af';ctx.fillText(glyph,X(p.x),Z(p.z));
   }
   ctx.textBaseline='alphabetic';
+ }
+ if(route){
+  const landmarks=[
+   [library,'ГПНТБ',13,7],
+   [bahetle,'Бахетле',13,23],
+   [{x:kremsEntrance.x,z:kremsEntrance.frontZ},'Кремс · Chicago',12,0]
+  ];
+  ctx.font='bold 19px Arial';ctx.lineWidth=4;ctx.strokeStyle='#263c38';ctx.fillStyle='#fff3ce';
+  for(const [landmark,label,dx,dz] of landmarks){
+   const x=X(landmark.x),z=Z(landmark.z);
+   if(x<4||z<8||x>size-4||z>size-8)continue;
+   ctx.beginPath();ctx.arc(x,z,4,0,Math.PI*2);ctx.fill();
+   ctx.textAlign=dx<0?'right':'left';
+   const labelY=Math.max(23,Math.min(size-10,z+dz));
+   ctx.strokeText(label,x+dx,labelY);ctx.fillText(label,x+dx,labelY);
+  }
  }
  const markerX=X(p.x),markerZ=Z(p.z);
  ctx.save();ctx.fillStyle='#00768a';ctx.strokeStyle='#fff';ctx.lineWidth=full?3:2;

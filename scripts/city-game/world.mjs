@@ -1,3 +1,6 @@
+import {streetRouteSolids} from './street-route-details.mjs';
+import {kremsStreetFurniture} from './krems-details.mjs';
+import {kremsEntrance,kremsGround,kremsNeighbours,kremsParkedCars,kremsParkedCarSize} from './krems-plan.mjs';
 import {districtBlocks} from './voskhod-survey.mjs';
 import {library,squareFixtures} from './pimenov-plan.mjs';
 import {quayShopPlan} from './quay-shop-plan.mjs';
@@ -8,7 +11,6 @@ import {buildingSolids,districtTrees} from './district-plan.mjs';
 import {estateFeatures} from './estate-plan.mjs';
 // Metres. Shared by collision, rendering, route guidance and tests.
 export const CLUB={x:-24,z:-23,w:30,d:24};
-export const PORT={x:85,z:-96,w:13,d:9};
 export const VILLA={x:98,z:147,w:32,d:44};
 export const GARAGE_RADIO={x:95.8,z:159.2};
 export const VILLA_ENTRY={x:81,z:147};
@@ -38,7 +40,7 @@ export function waterfrontWaterEdges(z){
 }
 export const GATE={x:53,z:160,width:10};
 export const BRIDGE={minX:110,maxX:162,minZ:63,maxZ:77};
-export function landAt(x,z){if(z>waterfrontBasin.minZ&&z<waterfrontBasin.maxZ){const edge=waterfrontWaterEdges(z);if(x>edge.west&&x<edge.east)return false;}return (x>=-143&&x<=0&&z>=13&&z<=75)||(x>=28&&x<=126&&z>=-255&&z<=-99)||(x>=109&&x<=124&&z>=23&&z<=60)||metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||onLighthouseShore(x,z)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
+export function landAt(x,z){if(z>waterfrontBasin.minZ&&z<waterfrontBasin.maxZ){const edge=waterfrontWaterEdges(z);if(x>edge.west&&x<edge.east)return false;}return (x>=kremsGround.minX&&x<=kremsGround.maxX&&z>=kremsGround.minZ&&z<=kremsGround.maxZ)||(x>=-143&&x<=0&&z>=13&&z<=75)||(x>=28&&x<=126&&z>=-255&&z<=-99)||(x>=109&&x<=124&&z>=23&&z<=60)||metroLand(x,z)|| (x>=100&&x<=114&&z>=176&&z<=186)||(x>=20&&x<=118&&z>=85&&z<=146)||onLighthouseShore(x,z)||(x>=-98&&x<=118&&z>=-109&&z<=91)||(x>=BRIDGE.minX&&x<=BRIDGE.maxX&&z>=BRIDGE.minZ&&z<=BRIDGE.maxZ)||((x-ISLAND.x)**2/ISLAND.rx**2+(z-ISLAND.z)**2/ISLAND.rz**2<=1);}
 export function islandExitRoute(point){return [{x:157,z:point.z},{x:157,z:70},{x:72,z:70}];}
 export function estateExitRoute(){return [{x:61,z:160},{x:40,z:160},{x:40,z:105},{x:72,z:105},{x:72,z:70}];}
 export const ROAD_X=[-64,0,72],ROAD_Z=[-75,0,70];
@@ -70,17 +72,17 @@ for(let i=0;i<8;i++){
  const depth=chamfer/8,cut=chamfer-(i+.5)*depth;
  cafeSolids.push({minX:right-cafe.w,maxX:right-cut,minZ:front+i*depth,maxZ:front+(i+1)*depth,h:cafe.h});
 }
-export const SOLIDS=[...squareFixtures.map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...mayakTerraceTables.map(({x,z})=>({...rect(x,z,1.95,.96),h:1.21})),...cafeSolids,...quayCrossings.map(c=>({...rect(...c.pole,.18,.18),h:3.5})),...quayHouses.slice(1).flatMap(b=>quayShopPlan(b).solids),...[...quayRails,quayKiosk,...quayBenches,...streetFences,...litterBins].map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
+export const SOLIDS=[...streetRouteSolids.map(({x,z,w,d,h})=>({...rect(x,z,w,d),h})),...kremsStreetFurniture.map(({x,z,w,d,h})=>({...rect(x,z,w,d),h})),{...rect(108,kremsEntrance.frontZ-.105,18.8,.26),h:2.2},...kremsParkedCars.map(([x,z])=>({...rect(x,z,kremsParkedCarSize.w,kremsParkedCarSize.d),h:kremsParkedCarSize.h})),...squareFixtures.map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...mayakTerraceTables.map(({x,z})=>({...rect(x,z,1.95,.96),h:1.21})),...cafeSolids,...quayCrossings.map(c=>({...rect(...c.pole,.18,.18),h:3.5})),...quayHouses.slice(1).flatMap(b=>quayShopPlan(b).solids),...[...quayRails,quayKiosk,...quayBenches,...streetFences,...litterBins].map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})),...districtTrees.map(([x,z])=>({...rect(x,z,.65,.65),h:4})),...estateFeatures.map(f=>({...rect(f.x,f.z,f.w,f.d),h:f.h})),...[[100.7,176.7],[113.3,176.7],[100.7,185.3],[113.3,185.3]].map(([x,z])=>({...rect(x,z,.35,.35),h:3.7})),{...rect(94.5,178.5,3.6,1.5),h:1.1},{...rect(94.5,183.5,3.6,1.5),h:1.1},{...rect(108,178,5.6,1.6),h:1.4},{...rect(108,184,5.6,1.6),h:1.4},{...rect(107,181,2.8,1.5),h:.6},
  {...rect(68,133,6.8,6.8),h:1.8},
  // Mainland estate fence, with one ten-metre opening towards the promenade.
  {...rect(53,136,.65,38),h:3.1},{...rect(53,169,.65,8),h:3.1},
  {...rect(86,117,66,.65),h:3.1},{...rect(77.25,173,48.5,.45),h:2.7},{...rect(111.75,173,14.5,.45),h:2.7},{...rect(119,145,.45,56),h:2.2},
-...BUILDINGS.filter(b=>b!==library).flatMap(buildingSolids),rect(PORT.x,PORT.z,PORT.w,PORT.d),
+...BUILDINGS.filter(b=>b!==library).flatMap(buildingSolids),
  // Club is a traversable room, with a six-metre opening towards the street.
  rect(-39,-23,.65,24),rect(-9,-23,.65,24),rect(-24,-35,30,.65),rect(-33,-11,12,.65),rect(-15,-11,12,.65),
  rect(-32,-28,9,2),rect(-17,-27,4,5),
  // Planters and the container yard leave the pickup and sidewalks reachable.
- rect(89,-33,10,10),rect(88,-14,12,12),// Villa perimeter, open front door and garage door; an interior passage joins hall and garage.
+ rect(88,-14,12,12),// Villa perimeter, open front door and garage door; an interior passage joins hall and garage.
  villaRect(-22,0,.5,32),villaRect(22,0,.5,32),
  villaRect(-13,-16,18,.5),villaRect(13,-16,18,.5),
  villaRect(-12.5,16,19,.5),villaRect(5,16,4,.5),villaRect(21,16,2,.5),
@@ -92,7 +94,7 @@ export const SOLIDS=[...squareFixtures.map(b=>({...rect(b.x,b.z,b.w,b.d),h:b.h})
  villaRect(8,-18,14,4,.3),villaRect(0,9.6,2.6,2.6,1.15),villaRect(0,-4.6,3.4,3.4,.8),
  ...Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return villaRect(-14+Math.sin(a)*5.1,9+Math.cos(a)*3.7,1.6,1.6,1.2);})
 ];
-const surveyedBuildings=districtBlocks.map(([,ring])=>({
+const surveyedBuildings=[...districtBlocks,...kremsNeighbours].map(([,ring])=>({
  ring,minX:Math.min(...ring.map(p=>p[0])),maxX:Math.max(...ring.map(p=>p[0])),
  minZ:Math.min(...ring.map(p=>p[1])),maxZ:Math.max(...ring.map(p=>p[1]))
 }));

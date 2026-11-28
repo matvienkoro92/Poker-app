@@ -1,3 +1,5 @@
+import {buildStreetRouteDetails,finishStreetRoute} from './street-route-details.mjs';
+import {legacyCrossStreetEast,kremsGround} from './krems-plan.mjs';
 import {buildVoskhodDistrict} from './voskhod-district.mjs';
 import {library} from './pimenov-plan.mjs';
 import {buildPimenovSquare} from './pimenov-square.mjs';
@@ -21,7 +23,7 @@ import {fleet} from './traffic.mjs';
 import {venuePlan,insideVenue,districtDriveways,districtTrees} from './district-plan.mjs';
 import {buildDistrict} from './district-details.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
-import {BUILDINGS,CLUB,PORT,HOME,PICKUP,ROAD_X,ROAD_Z,SOLIDS,VILLA,START,ISLAND,landAt} from './world.mjs';
+import {BUILDINGS,CLUB,HOME,PICKUP,ROAD_X,ROAD_Z,SOLIDS,VILLA,START,ISLAND,landAt} from './world.mjs';
 import {createOwnedVehicle} from './vehicle.mjs';
 import {createOutdoors} from './outdoors.mjs';
 import {buildEstate} from './estate.mjs';
@@ -82,20 +84,21 @@ export async function createCityScene(canvas,onProgress,garage={}){
  const asphalt=groundTexture('road');
  function road(x,z,w,d,top=.025){registerSurface(x,z,w,d,top);const mesh=new T.Mesh(new T.BoxGeometry(w,.05,d),new T.MeshStandardMaterial({map:asphalt,roughness:1}));mesh.position.set(x,top-.025,z);mesh.receiveShadow=true;scene.add(mesh);dynamic.push(mesh);}
  for(const x of ROAD_X){road(x,-9,14,208);for(const sign of [-1,1]){
-  const cuts=x===0&&sign===1||x===72&&sign===-1?[[36.9,41.3],[45.1,49.6]]:x===72&&sign===1?[[26.4,29.3],[57.9,60.8]]:[];
+  const cuts=x===0&&sign===1||x===72&&sign===-1?[[36.9,41.3],[45.1,49.6]]:x===72&&sign===1?[[-110.3,-107.0],[-67.8,-64.3],[-60.8,-57.4],[-54.7,-28.33],[26.4,29.3],[57.9,60.8]]:[];
   let start=-113;
   for(const [lo,hi] of [...cuts,[95,95]]){
    box('#d8cbb2',x+sign*7.3,.08,(start+lo)/2,.4,.2,lo-start);start=hi;
   }
  }for(let z=-105;z<91;z+=8)if(!ROAD_Z.some(v=>Math.abs(z-v)<10))box('#f0dfb5',x,.033,z,.12,.012,3.7);}
- function horizontalCurb(z,side){const cuts=z===70&&side===-1?districtDriveways(BUILDINGS).filter(d=>d.end>60).map(d=>[d.x-d.width/2-.2,d.x+d.width/2+.2]).sort((a,b)=>a[0]-b[0]):[];let start=-97;for(const [a,b]of cuts){if(a>start)box('#d8cbb2',(start+a)/2,.08,z+side*7.3,a-start,.2,.4);box('#c6bda2',(a+b)/2,.015,z+side*7.3,b-a,.04,.6);start=b;}if(start<95)box('#d8cbb2',(start+95)/2,.08,z+side*7.3,95-start,.2,.4);}
- for(const z of ROAD_Z){road(-1,z,192,14,.03);for(const sign of [-1,1])horizontalCurb(z,sign);for(let x=-90;x<93;x+=8)if(!ROAD_X.some(v=>Math.abs(x-v)<10))box('#f0dfb5',x,.04,z,3.7,.012,.12);}
- for(const x of ROAD_X)for(const z of ROAD_Z){road(x,z,16,16,.035);for(let i=-5;i<=5;i+=2){for(const side of [-1,1]){box('#e9e1cf',x+i,.05,z+side*10,1.1,.02,3);box('#e9e1cf',x+side*10,.05,z+i,3,.02,1.1);}}}
+ function horizontalCurb(z,side){const cuts=z===70&&side===-1?districtDriveways(BUILDINGS).filter(d=>d.end>60).map(d=>[d.x-d.width/2-.2,d.x+d.width/2+.2]).sort((a,b)=>a[0]-b[0]):[];const end=z===-75?64.7:95;let start=-97;for(const [a,b]of cuts){if(a>start)box('#d8cbb2',(start+a)/2,.08,z+side*7.3,a-start,.2,.4);box('#c6bda2',(a+b)/2,.015,z+side*7.3,b-a,.04,.6);start=b;}if(start<end)box('#d8cbb2',(start+end)/2,.08,z+side*7.3,end-start,.2,.4);}
+ for(const z of ROAD_Z){const end=z===-75?legacyCrossStreetEast:95;road((end-97)/2,z,end+97,14,.03);for(const sign of [-1,1])horizontalCurb(z,sign);for(let x=-90;x<end-2;x+=8)if(!ROAD_X.some(v=>Math.abs(x-v)<10))box('#f0dfb5',x,.04,z,3.7,.012,.12);}
+ for(const x of ROAD_X)for(const z of ROAD_Z){if(x===72&&z===-75)continue;road(x,z,16,16,.035);for(let i=-5;i<=5;i+=2){for(const side of [-1,1]){box('#e9e1cf',x+i,.05,z+side*10,1.1,.02,3);box('#e9e1cf',x+side*10,.05,z+i,3,.02,1.1);}}}
  // Mounted on the verge, facing drivers coming from the villa.
  roadSign(47,111.4,[['ЦЕНТР','right']]);
  roadSign(82,79,[['ГПНТБ','up'],['ул. Кирова','up']],{width:2.15});
  roadSign(66,51,[['ул. Восход','left'],['ГПНТБ','right']],{width:2});
- roadSign(82,11,[['КЛУБ','left'],['ПОРТ','up']]);
+ roadSign(82,11,[['КЛУБ','left'],['ПОРТ','up'],['МОСКОВСКАЯ','up']]);
+ roadSign(77.05,-62.7,[['КРЕМС','right'],['ПАРКОВКА','right']],{width:2.15});
  const customFacades=new Set();
  // Textured façades, recessed glazing, balcony rails and entrances give buildings scale.
  for(const [index,b]of BUILDINGS.entries()){
@@ -139,10 +142,10 @@ export async function createCityScene(canvas,onProgress,garage={}){
  for(const x of [-35,-13]){box('#b49350',x,1,-7,2,2,2);palm(x,-7,6,2);}
  // Keep the doorway clear for the chase camera; the HUD already marks the exit.
  // Port buildings, shipping yard, crane, quay and water.
- box('#768f8e',PORT.x,5,PORT.z,PORT.w,10,PORT.d);box('#566e70',PORT.x,10.2,PORT.z,PORT.w+1,.45,PORT.d+1);box('#3c5556',PORT.x,2.6,PORT.z+PORT.d/2+.12,6,5.2,.2);label('ПРИЧАЛ ВИЛЛЫ',PORT.x,7.5,PORT.z+PORT.d/2+.23,11,2);
- for(const [i,z]of [-33,-14].entries()){const x=i===1?88:89,w=i===1?12:10,d=i===2?13:10;box(['#9a5147','#2a7377','#b28d4d'][i],x,2,z,w,4,d);for(let xx=x-w/2+.5;xx<x+w/2;xx+=.8)box('#b7b0a0',xx,2,z+d/2+.02,.08,3.6,.04);}
- for(let z=-100;z<=83;z+=5){if(z>61&&z<78)continue;cylinder('#536c6d',118.5,.8,z,.09,1.6);box('#657b79',118.5,1.4,z+2.5,.1,.09,5);}
- box('#bcaa8b',120,.04,-8,4,.6,220);box('#4e7174',123,-1.2,-8,2,3,222);
+ box('#2a7377',88,2,-14,12,4,10);
+ for(let x=82.5;x<94;x+=.8)box('#b7b0a0',x,2,-8.98,.08,3.6,.04);
+ for(let z=-45;z<=83;z+=5){if(z>61&&z<78)continue;cylinder('#536c6d',118.5,.8,z,.09,1.6);box('#657b79',118.5,1.4,z+2.5,.1,.09,5);}
+ box('#bcaa8b',120,.04,28.5,4,.6,147);box('#4e7174',123,-1.2,28.5,2,3,147);
  for(const x of [108,117]){cylinder('#d4a257',x,10,-98,.6,20);box('#d4a257',x,15,-95,.55,.5,17);}box('#d4a257',112.5,20,-99,15,.8,1);box('#617a7a',112.5,17,-88,.1,6,.1);
  const seaGeo=new T.PlaneGeometry(9000,9000,48,40);seaGeo.rotateX(-PI/2);const sea=new T.Mesh(seaGeo,new T.MeshStandardMaterial({color:'#368b91',roughness:.27,metalness:.42,transparent:true,opacity:.92}));sea.position.set(160,-.8,30);scene.add(sea);dynamic.push(sea);const seaPos=seaGeo.attributes.position,seaBase=Float32Array.from(seaPos.array);
  for(let i=0;i<16;i++){const x=151+(i%5)*21,z=-95+Math.floor(i/5)*61;if(landAt(x,z))continue;box('#dbe4ce',x,1,z,2,.5,6);box('#436b77',x,1.7,z-1,1.5,1.2,2);cylinder('#cbb993',x,4,z,.06,6);}
@@ -194,6 +197,8 @@ export async function createCityScene(canvas,onProgress,garage={}){
  buildQuayBlock({box,cylinder,label,outdoors,glaze,cafeModel,
   buildShop:b=>buildQuayShop(b,{scene,box,cylinder,batch,label,glaze,textures,mergeParts})});
  buildVillaWaterfront({scene,box,cylinder,batch,label,roadSign,outdoors,mergeParts,registerSurface});
+ buildStreetRouteDetails({scene,box,batch,cylinder,groundHeight});
+ finishStreetRoute({box,cylinder,batch,outdoors,groundHeight});
  // Commit all static architecture to material/shape batches.
  const villa=buildVilla({box,cylinder,batch,label,scene,textures,hall:garage.hall});
  const awards=createAwardInteraction({root:villa.root,scene,camera,canvas});
@@ -285,7 +290,7 @@ export async function createCityScene(canvas,onProgress,garage={}){
    const running=s.driving?0:T.MathUtils.smoothstep(moving,4.8,7);
    jog+=(running-jog)*(1-Math.exp(-simulationDt*12));
    if(!s.driving)walk+=Math.min(moving,8)*simulationDt*(2.64-.54*jog);
-  }avatar.visible=!s.driving||!playerCar.closedCabin;avatar.position.set(s.player.x,s.driving?0:Math.max(quayHeight(s.player.x,s.player.z),waterfrontWalkHeight(s.player.x,s.player.z)),s.player.z);avatar.rotation.y=s.player.yaw;hero.root.scale.setScalar(s.driving?playerCar.seat.scale:.60);hero.root.position.y=s.driving?playerCar.seat.height:1.12;if(s.driving){avatar.position.set(s.car.x+Math.cos(s.car.yaw)*playerCar.seat.side+Math.sin(s.car.yaw)*playerCar.seat.forward,groundHeight(s.car.x,s.car.z),s.car.z-Math.sin(s.car.yaw)*playerCar.seat.side+Math.cos(s.car.yaw)*playerCar.seat.forward);avatar.rotation.y=s.car.yaw;}shadowBlob.visible=!s.driving;shadowBlob.position.y=Math.max(quayHeight(s.player.x,s.player.z),waterfrontWalkHeight(s.player.x,s.player.z))+.008;shadowBlob.position.x=s.player.x;shadowBlob.position.z=s.player.z;
+  }avatar.visible=!s.driving||!playerCar.closedCabin;const onKremsBlock=s.player.x>=kremsGround.minX&&s.player.x<=kremsGround.maxX&&s.player.z>=kremsGround.minZ&&s.player.z<=kremsGround.maxZ;const walkingHeight=onKremsBlock?groundHeight(s.player.x,s.player.z):Math.max(quayHeight(s.player.x,s.player.z),waterfrontWalkHeight(s.player.x,s.player.z));avatar.position.set(s.player.x,s.driving?0:walkingHeight,s.player.z);avatar.rotation.y=s.player.yaw;hero.root.scale.setScalar(s.driving?playerCar.seat.scale:.60);hero.root.position.y=s.driving?playerCar.seat.height:1.12;if(s.driving){avatar.position.set(s.car.x+Math.cos(s.car.yaw)*playerCar.seat.side+Math.sin(s.car.yaw)*playerCar.seat.forward,groundHeight(s.car.x,s.car.z),s.car.z-Math.sin(s.car.yaw)*playerCar.seat.side+Math.cos(s.car.yaw)*playerCar.seat.forward);avatar.rotation.y=s.car.yaw;}shadowBlob.visible=!s.driving;shadowBlob.position.y=walkingHeight+.008;shadowBlob.position.x=s.player.x;shadowBlob.position.z=s.player.z;
   {
    hero.rig.update(s.time,.45,simulationDt);
    const bones=hero.rig.bones,idle=1-stride;
@@ -342,8 +347,12 @@ export async function createCityScene(canvas,onProgress,garage={}){
   if(intro){camera.position.set(VILLA.x-58,36,VILLA.z+64);camera.lookAt(VILLA.x-6,2,VILLA.z-12);}
   const waterfront=!sheltered&&pos.x>=4&&pos.x<=92&&pos.z>-31&&pos.z<171;
   headlights.update({x:s.car.x,y:groundHeight(s.car.x,s.car.z),z:s.car.z,a:s.car.yaw},0,s.driving&&waterfront);
-  hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:waterfront?.96:1.45,4,dt);
-  sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:waterfront?.78:1.9,4,dt);
+  const alongVoskhod=pos.z>=22&&pos.z<=65&&pos.x>=-128&&pos.x<=137;
+  const northOfSquare=pos.x>=28&&pos.x<=137&&pos.z>=-255&&pos.z<22;
+  const districtLight=!sheltered&&(alongVoskhod||northOfSquare);
+  hemi.intensity=T.MathUtils.damp(hemi.intensity,indoors?1.35:districtLight?1.19:waterfront?.96:1.45,4,dt);
+  sun.intensity=T.MathUtils.damp(sun.intensity,indoors?1.4:districtLight?1.72:waterfront?.78:1.9,4,dt);
+  scene.environmentIntensity=T.MathUtils.damp(scene.environmentIntensity,districtLight?.68:.55,3,dt);
   // Refresh the shadow from the same interpolated transform as the visible car.
   const carPoseChanged=s.driving&&(!shadowCar.equals(playerCar.root.position)||shadowYaw!==s.car.yaw||shadowSteer!==s.car.steer);
   if(!s.driving||carPoseChanged||s.time<lastShadowTime||s.time-lastShadowTime>=.085){

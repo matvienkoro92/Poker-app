@@ -1,3 +1,4 @@
+import {weatheredMaterial,streetRibbon} from './voskhod-materials.mjs';
 import * as T from '../../vendor/three/three.module.min.js';
 import {outlines} from './pimenov-survey.mjs';
 import {library,kiosk,basins,boulevardTrees} from './pimenov-plan.mjs';
@@ -5,12 +6,15 @@ import {library,kiosk,basins,boulevardTrees} from './pimenov-plan.mjs';
 export function buildPimenovSquare({scene,box,cylinder,label,outdoors}){
  const stone='#d6d1bf',glass='#365c61',granite='#9a6458';
  const {x,z,w,d,h}=library,front=x-w/2;
+ const masonry=weatheredMaterial(outdoors.facadeMap,'#e8e2d1',.52,.028);
+ const street=weatheredMaterial(outdoors.asphaltMap,'#c6cac5',.44,.023);
+ const paving=weatheredMaterial(outdoors.stoneMap,'#e2d7c6',.55,.016);
  // Extrude in the XZ plane, retaining the measured returns and basin outlines.
- function polygon(points,base,height,color){
+ function polygon(points,base,height,color,material=null){
   const shape=new T.Shape(points.slice(0,-1).map(([px,pz])=>new T.Vector2(px,-pz)));
   const geo=new T.ExtrudeGeometry(shape,{depth:height,bevelEnabled:false});
   geo.rotateX(-Math.PI/2);
-  const mesh=new T.Mesh(geo,new T.MeshStandardMaterial({color,roughness:.86}));
+  const mesh=new T.Mesh(geo,material??new T.MeshStandardMaterial({color,roughness:.86}));
   mesh.position.y=base;mesh.receiveShadow=true;mesh.castShadow=height>.3;scene.add(mesh);
  }
  // Both one-way carriageways of Voskhod terminate at Kirova.
@@ -20,7 +24,7 @@ export function buildPimenovSquare({scene,box,cylinder,label,outdoors}){
  for(const tree of boulevardTrees)outdoors.tree(tree.x,tree.z,tree.h);
  outdoors.paving(116.5,41.5,15,37,.045);
  outdoors.paving(95.2,43.4,31,31.5,.06);
- polygon(outlines[25643643],0,h,stone);
+ polygon(outlines[25643643],0,h,stone,masonry);
  polygon(outlines[25643643],h,.19,'#dcd8cc');
  for(const [id,points] of Object.entries(outlines)){
   if(!id.startsWith('4083182'))continue;
@@ -32,16 +36,17 @@ export function buildPimenovSquare({scene,box,cylinder,label,outdoors}){
  }
  for(const id of [34126327,79887436,697808464,697808465]){
   const pts=outlines[id],drive=id===79887436||id===34126327;
-  for(let i=1;i<pts.length;i++){
-   const [ax,az]=pts[i-1],[bx,bz]=pts[i];
-   box(drive?'#66676a':'#c4bba6',(ax+bx)/2,drive?.083:.072,(az+bz)/2,drive?2.7:.78,.024,Math.hypot(bx-ax,bz-az)+.12,Math.atan2(bx-ax,bz-az));
-  }
+  const segments=pts.slice(1).map((end,index)=>[pts[index],end,drive?2.7:.78]);
+  streetRibbon(scene,segments,drive?street:paving,drive?.096:.085);
  }
  for(let bay=-5;bay<=5;bay++){
   const cz=z+bay*2.52;
-  box(glass,front-.04,7.1,cz,.12,7.3,2.22);
-  for(const y of [4.8,6.45,8.1,9.75])box('#89918a',front-.13,y,cz,.09,.065,2.23);
-  box('#92998e',front-.13,7.1,cz,.08,7.28,.062);
+  box('#949b94',front-.096,7.1,cz,.24,7.44,2.34);
+  box(glass,front-.228,7.1,cz,.048,7.3,2.22);
+  box(bay%3===0?'#aebbbb':'#6e909c',front-.254,8.15,cz,.017,2.2,2.17);
+  box('#b5b7aa',front-.38,3.45,cz,.54,.105,2.29);
+  for(const y of [4.8,6.45,8.1,9.75])box('#89918a',front-.259,y,cz,.055,.065,2.23);
+  box('#92998e',front-.259,7.1,cz,.056,7.28,.062);
   box('#e7e1cc',front-.26,7.1,cz-1.24,.55,8.35,.28);
  }
  for(const side of [-1,1])for(let col=0;col<4;col++)for(let level=0;level<3;level++)

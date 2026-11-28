@@ -5,43 +5,6 @@ body:not(.city-started) .city-mission,body:not(.city-started) .city-minimap,body
 .city-award-dialog{width:min(520px,calc(100% - 28px));padding:22px;background:#101b1b;border-color:#aa8d51}.city-award-dialog header{display:flex;align-items:center;justify-content:space-between;gap:14px}.city-award-dialog header button{width:42px;min-height:42px;margin:0;padding:0;font-size:28px}.city-award-art{height:clamp(190px,34svh,340px);margin:14px 0;background:radial-gradient(ellipse at center,#82704736,transparent 70%);display:grid;place-items:center}.city-award-art img{display:block;max-width:100%;max-height:100%;width:auto;height:100%;object-fit:contain;filter:drop-shadow(0 10px 16px #0007)}.city-award-dialog h2{font-size:clamp(24px,6vw,34px);line-height:1.15;margin:15px 0 10px;overflow-wrap:anywhere}.city-award-dialog [data-award-summary]{font-size:17px;font-weight:700;color:#f4d696;line-height:1.45}.city-award-dialog [data-award-description]{font-size:15px;line-height:1.6}.city-award-dialog dl{margin:16px 0}.city-award-dialog dl div{border-top:1px solid #b69c6433;padding:10px 0}.city-award-dialog dt{font-size:11px;color:#aaa997;margin-bottom:4px}.city-award-dialog dd{font-size:15px;margin:0;overflow-wrap:anywhere}.city-award-dialog nav{display:flex;align-items:center;justify-content:space-between;gap:18px}.city-award-dialog nav button{width:64px;margin:0;font-size:24px}.city-award-dialog nav span{font-size:13px;color:#c9bd9c}.city-award-dialog button:disabled{opacity:.3}
 .city-award-art{display:block;overflow:hidden;min-height:0}.city-award-art img{width:100%;height:100%;min-width:0;min-height:0;max-height:100%;object-fit:contain}
 
-.city-steering {
- position:absolute;
- right:max(12px,env(safe-area-inset-right));
- bottom:calc(12px + env(safe-area-inset-bottom));
- display:flex;
- gap:6px;
-}
-.city-steering[hidden] {display:none}
-.city-steering button {
- width:clamp(54px,22vw,104px);
- height:54px;
- border:1px solid #e9bd76;
- border-radius:14px;
- background:#102f32dc;
- color:#f5e8d0;
- font-size:25px;
- pointer-events:auto;
- touch-action:none;
-}
-.city-steering button:active {background:#477b80}
-.city-controls-driving .city-actions {bottom:calc(76px + env(safe-area-inset-bottom))}
-.city-controls-driving .city-pedals {
- position:fixed;
- left:max(12px,env(safe-area-inset-left));
- bottom:calc(12px + env(safe-area-inset-bottom));
- display:flex;
- flex-direction:column-reverse;
-}
-.city-controls-driving .city-pedals button,
-.city-controls-driving .city-pedals #cityGas {
- width:76px;
- height:49px;
-}
-.city-controls-driving .city-camera-hint {display:none}
-.city-controls-driving .city-pedals button {background:#102f32dc}
-.city-controls-driving .city-pedals #cityGas {background:#174c49e8;border-color:#80d5a2}
-.city-controls-driving .city-pedals #cityBrake {border-color:#ed9a83}
-.city-controls-driving button[data-held] {background:#477b80}
+.city-pedals button[data-held] {background:#477b80}
 
 .city-minimap {top:max(16px,env(safe-area-inset-top));z-index:21}

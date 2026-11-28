@@ -29,5 +29,5 @@ const alleyFurniture=alleyBenchStations.flatMap(x=>[
  ...[42.25,44.15].map(z=>({x,z,w:1.5,d:.49,h:1.08})),
  {x:x+2,z:42.05,w:.3,d:.3,h:3.28},{x:x+1.13,z:42.12,w:.32,d:.32,h:.76}
 ]);
-export const squareFixtures=[kiosk,...alleyFurniture,{x:108,z:-80.73,w:18.8,d:.57,h:3.6},...[[81.7,-74.25],[90.8,-72.15],[81.7,-67.95]].map(([x,z])=>({x,z,w:2.68,d:1.36,h:1.06})),...boulevardTrees.map(tree=>({...tree,w:.32,d:.32})),...footprintSlices(outlines[25643643],library.h),
+export const squareFixtures=[kiosk,...alleyFurniture,...boulevardTrees.map(tree=>({...tree,w:.32,d:.32})),...footprintSlices(outlines[25643643],library.h),
  ...basins.flatMap(b=>footprintSlices(outlines[b.id],.64))];
