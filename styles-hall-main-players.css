@@ -3190,3 +3190,124 @@ button.home-player-month__medal:focus-visible{outline:2px solid #ffe1a0;outline-
 @media(max-width:650px){
   #homePlayerMonth .home-reward-table .home-reward-table__cards {grid-auto-columns: minmax(166px,46%);}
 }
+
+/* Three club challenges share the same layout and have their own accent colors. */
+#homePlayerMonth .home-reward-table .reward-ace[data-home-month-achievement] {
+  --reward-accent: #a6d9a7;
+  --reward-edge: #477d62;
+  --reward-glow: #30624d;
+  --reward-base: #102820;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  justify-items: stretch;
+  align-items: center;
+  align-content: stretch;
+  gap: 8px;
+  padding: 12px 9px 9px;
+  aspect-ratio: auto;
+  border: 1px solid var(--reward-edge);
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 38%, var(--reward-glow), transparent 69%), linear-gradient(155deg, var(--reward-base), #0c1110);
+  box-shadow: inset 0 0 0 2px #080b0a80, inset 0 1px 0 #fff2, 0 4px 10px #0005;
+  color: #fff0cf;
+
+  &[data-home-month-achievement="pokermankiKnockout"] {
+    --reward-accent: #ffbf91;
+    --reward-edge: #a76145;
+    --reward-glow: #753923;
+    --reward-base: #301912;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  }
+
+  &[data-home-month-achievement="collectSevenCups"] {
+    --reward-accent: #f4d78f;
+    --reward-edge: #8c6b3e;
+    --reward-glow: #5a4327;
+    --reward-base: #2d2318;
+  }
+
+  h3 {
+    min-height: 2.2em;
+    height: auto;
+    padding: 0 0 0 17px;
+    font: 800 clamp(12px, 7.7cqw, 22px)/1.1 system-ui !important;
+    letter-spacing: -.025em;
+  }
+
+  .reward-ace__corner { top: 12px; left: 8px; color: var(--reward-accent); font-size: 14px; }
+  .reward-ace__corner b { font-size: 12px; }
+  .reward-divider { display: none; }
+  .reward-ace__bonus { height: auto; gap: 2px; padding: 5px 0; border-block: 1px solid #f9e3ab2b; }
+  .reward-ace__bonus small { color: var(--reward-accent); font-size: clamp(9px, 6.2cqw, 14px); }
+  .reward-ace__bonus strong,
+  .reward-ace__bonus strong > span { color: #ffe0a1; font-size: clamp(20px, 14.4cqw, 38px); }
+
+  .reward-ace__symbol {
+    position: relative;
+    display: block;
+    min-height: 64px;
+    height: 100%;
+  }
+
+  .reward-ace__symbol i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(29px, 26cqw, 57px);
+    height: clamp(42px, 36cqw, 78px);
+    margin: 0;
+    border: 1px solid #d8b567;
+    border-radius: 6px;
+    background: linear-gradient(140deg, #fff8dc, #dec08a);
+    color: #4e3a22;
+    box-shadow: 0 5px 10px #0006;
+    transform: translate(-96%, -48%) rotate(-17deg);
+  }
+
+  .reward-ace__symbol i:nth-child(2) { z-index: 1; color: #9f352c; transform: translate(-50%, -55%); }
+  .reward-ace__symbol i:nth-child(3) { transform: translate(-4%, -48%) rotate(17deg); }
+  .reward-ace__knockout-art { height: auto; border: 1px solid #d8925a88; border-radius: 7px; }
+  .reward-ace__knockout-art img { height: auto; aspect-ratio: 3/2; object-fit: cover; }
+  .reward-ace__condition--knockout { margin: 0; color: #ffe6cf; font-size: clamp(8px, 5.5cqw, 13px); line-height: 1.25; }
+
+  .reward-ace__cups {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    align-items: end;
+    gap: 6px 2px;
+    padding-inline: 2px;
+  }
+
+  .reward-ace__cups img {
+    grid-column: span 2;
+    width: 100%;
+    height: clamp(32px, 29cqw, 72px);
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 2px 3px #0008);
+  }
+
+  .reward-ace__cups img:nth-child(5) { grid-column: 2 / span 2; }
+
+  .reward-ace__action {
+    width: 100%;
+    height: auto;
+    min-height: 29px;
+    margin: 0;
+    border: 1px solid var(--reward-edge);
+    border-radius: 7px;
+    background: linear-gradient(160deg, var(--reward-glow), var(--reward-base));
+    box-shadow: inset 0 1px 0 #fff2;
+    color: #fff0cf;
+    font-size: clamp(10px, 6.9cqw, 16px);
+  }
+}
+
+/* Keep the scroll rail at one consistent height as cards enter the viewport. */
+#homePlayerMonth .home-reward-table .home-reward-table__cards {
+  grid-template-rows: clamp(298px, 49cqw, 416px);
+}
+#homePlayerMonth .home-reward-table .reward-ace {
+  height: 100%;
+  min-height: 0;
+}

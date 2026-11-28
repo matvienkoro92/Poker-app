@@ -1934,34 +1934,6 @@ function hallFishPlayerMonthSpec(data,monthKey) {
   return {key:'playerMonth',title:'Игрок месяца',sectionTitle:'Игрок месяца',description:'Одна итоговая награда за первое место в каждой категории ниже. Число побед внутри категории не увеличивает этот счёт. При равенстве количества наград выше игрок с большей суммой призовых за месяц. При равенстве обеих величин — совместное лидерство.',rows:rows};
 }
 
-function hallFishWeekdayEveningLeaders() {
-  var history = typeof HOME_TOURNAMENT_HISTORY_BY_WEEKDAY !== 'undefined' ? HOME_TOURNAMENT_HISTORY_BY_WEEKDAY : {};
-  var options = typeof window.pokerGetEveningTournamentOptions === 'function' ? window.pokerGetEveningTournamentOptions() : [];
-  return options.map(function(tournament) {
-    var scheduled = typeof pokerGetHomeTournamentItem === 'function' && pokerGetHomeTournamentItem(tournament.weekday);
-    var source = history[tournament.historyKey || scheduled?.historyKey || tournament.weekday];
-    var buyin = Number(String(tournament.buyin || '').replace(/\D/g,''));
-    var results = source?.buyin === buyin && Array.isArray(source.results) ? source.results : [];
-    var players = new Map();
-    results.forEach(function(entry) {
-      entry[1].forEach(function(player) {
-        if (player[0] !== 1) return;
-        var nick = player[1];
-        if (!players.has(nick)) players.set(nick,{nick:nick,wins:0,prize:0,fifth:Infinity});
-        var record = players.get(nick);
-        record.wins += 1;
-        record.prize += player[2];
-        if (record.wins === 5) record.fifth = hallFishDateStamp(entry[0]);
-      });
-    });
-    var leader = Array.from(players.values()).sort(function(a,b) {
-      return (a.fifth === b.fifth ? 0 : a.fifth - b.fifth) ||
-        b.wins - a.wins || b.prize - a.prize || a.nick.localeCompare(b.nick,'ru');
-    })[0];
-    return {label:tournament.day,leader:leader};
-  });
-}
-
 function hallFishRenderHomePlayerMonth(data) {
   var root = document.getElementById('homePlayerMonth');
   if (!root || !data) return;
@@ -1975,25 +1947,25 @@ function hallFishRenderHomePlayerMonth(data) {
     {key:'dayHero',title:'Герой дня',bonus:'30 000',suit:'♥',leader:hero,description:'Больше всего званий «Герой дня» за месяц.'},
     {key:'threeRebuys',title:'Выиграть 3 турнира DV-ребай подряд',bonus:'25 000',suit:'♣',condition:'Три победы. Одна серия.',description:'Выиграть 3 турнира DV-ребай подряд. Бонус — 25 000 ₽.'},
     {key:'pokermankiKnockout',title:'Выбить ПокерМанки',bonus:'5 000',suit:'♦',description:'Выбей ПокерМанки после окончания регистрации в турнире вечера в понедельник, среду, пятницу или субботу. Награда — билет за 5 000 ₽.'},
-    {key:'fiveWeekdayEvenings',title:'Выиграть 5 турниров вечера одного дня недели',bonus:'25 000',suit:'♠',standings:hallFishWeekdayEveningLeaders(),description:'Бонус 25 000 ₽ получит игрок, который первым займёт первое место в пяти главных турнирах вечера одного и того же дня недели. Например, первым выиграет пять вечерних турниров понедельника. Зачёт по всей сохранённой истории турнира. При равном числе побед выше игрок с большей суммой призовых за первые места. Прочерк означает, что для этого турнира нет сохранённого первого места.'}
+    {key:'collectSevenCups',title:'Собери все 7 кубков',bonus:'25 000',suit:'♠',condition:'По одному кубку за каждый день недели',description:'Займи первое место в турнире вечера каждого дня недели, с понедельника по воскресенье, и собери все 7 кубков.'}
   ];
   var monthLabel = ['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'][Number(month.split('.')[0])-1];
   var heading = 'Награды клуба в ' + monthLabel;
   root.innerHTML = '<section class="home-reward-table" aria-label="'+heading+'"><header class="home-reward-table__heading"><span>'+heading+'</span><small>Бонусы за достижения</small></header><div class="home-reward-table__cards" tabindex="0" aria-label="Карты наград, прокрутка по горизонтали">'+rewards.map(function(reward,index){
     var knockout = reward.key === 'pokermankiKnockout';
-    var hasConditions = knockout || Boolean(reward.condition || reward.standings);
+    var hasConditions = knockout || Boolean(reward.condition);
     var heroSrc = reward.leader && window.pokerGetClubNewsPersonalArt?.(reward.leader.nick);
     var image = heroSrc ? {src:heroSrc,kind:'art'} : reward.leader ? hallFishLevelPlayerImage(reward.leader) : null;
     var art = knockout ? '<span class="reward-ace__knockout-art"><img src="./assets/home-reward-pokermanki-boxing-v1.webp" width="720" height="480" alt="ПокерМанки уворачивается от боксёрской перчатки" decoding="async"></span>' : image ? '<span class="reward-ace__hologram'+(image.kind==='avatar'?' reward-ace__hologram--avatar':'')+'"><img src="'+hallFishEsc(image.src)+'" alt="Голограмма '+hallFishEsc(reward.leader.nick)+'" decoding="async"></span>' : '<span class="reward-ace__symbol" aria-hidden="true">'+(reward.key==='threeRebuys'?'<i>A♠</i><i>A♥</i><i>A♣</i>':reward.suit)+'</span>';
-    if (reward.standings) {
-      art = '<span class="reward-ace__standings"><small>Лидеры · победы</small>'+reward.standings.map(function(day) {
-        return '<span><span>'+hallFishEsc(day.label)+'</span><strong>'+(day.leader?hallFishEsc(day.leader.nick):'Нет данных')+'</strong><span>'+(day.leader?.wins ?? '—')+'</span></span>';
-      }).join('')+'</span>';
+    if (reward.key === 'collectSevenCups') {
+      art = '<span class="reward-ace__cups" aria-hidden="true">' + HOME_TOURNAMENT_WEEK_ORDER.map(function(weekday) {
+        return '<img src="./assets/player-hall/trophy-' + PLAY_TROPHY_ART[weekday] + '-thumb-v2.webp" alt="" width="48" height="55" decoding="async">';
+      }).join('') + '</span>';
     }
     return '<button type="button" class="reward-ace'+(/[♥♦]/.test(reward.suit)?' reward-ace--red':'')+'" '+(hasConditions?'data-home-month-achievement="'+reward.key+'"':'data-home-reward-tab="'+reward.key+'"')+' title="'+hallFishEsc(reward.title)+'" data-description="'+hallFishEsc(reward.description)+'" aria-haspopup="dialog">'+
       '<span class="reward-ace__corner" aria-hidden="true">A<b>'+reward.suit+'</b></span><h3>'+(reward.key === 'threeRebuys' ? 'Три победы' : reward.title)+'</h3><span class="reward-divider" aria-hidden="true">◇</span>'+
       '<span class="reward-ace__bonus"><small>'+(knockout?'Билет':'Бонус')+'</small><strong>'+reward.bonus+' <span>₽</span></strong></span>'+art+
-      (knockout?'<span class="reward-ace__condition reward-ace__condition--knockout">После конца регистрации<br>Пн, ср, пт, сб · турнир вечера</span>':reward.condition?'':reward.standings?'':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
+      (knockout?'<span class="reward-ace__condition reward-ace__condition--knockout">После конца регистрации<br>Пн, ср, пт, сб · турнир вечера</span>':reward.condition?'':'<span class="reward-ace__leader"><small>Лидер '+hallFishEsc(monthName)+'</small><strong>'+(reward.leader?hallFishEsc(reward.leader.nick):'Пока не определён')+'</strong></span>')+
       '<span class="reward-ace__action">'+(hasConditions?'Условия':'Смотреть')+' <span aria-hidden="true">↗</span></span><span class="reward-ace__corner reward-ace__corner--bottom" aria-hidden="true">A<b>'+reward.suit+'</b></span></button>';
   }).join('')+'</div></section>'+
     '<dialog class="home-month-award-dialog" aria-labelledby="homeMonthAwardTitle"><form method="dialog"><button aria-label="Закрыть" autofocus>×</button></form><div class="home-month-award-dialog__art"></div><h2 id="homeMonthAwardTitle"></h2><p></p></dialog>';
