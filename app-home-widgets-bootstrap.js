@@ -22,6 +22,11 @@
       domain: "home-widget-club-choice",
       opener: "openClubChoiceVoteModal",
     },
+    hallFishAchievements: {
+      selector: "[data-hall-fish-achievements-open]",
+      domain: "hall",
+      opener: "openHallFishAchievementsModal",
+    },
     hallFishPlayers: {
       selector: "#headerPokerStatus, .header-greeting--status, [data-hall-fish-open]",
       domain: "hall",

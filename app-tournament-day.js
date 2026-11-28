@@ -2498,7 +2498,7 @@ function renderPlayTrophyShelf(now, eveningWeekday, selectedWeekday) {
   var shelf = document.querySelector("[data-play-trophy-shelf]");
   if (!shelf) return;
 
-  if (!shelf.firstElementChild.matches("button")) {
+  if (!shelf.querySelector("[data-weekday]")) {
     var ring = shelf.firstElementChild;
     HOME_TOURNAMENT_WEEK_ORDER.forEach(function (weekday) {
       var button = document.createElement("button");
@@ -2526,7 +2526,7 @@ function renderPlayTrophyShelf(now, eveningWeekday, selectedWeekday) {
   }
 
   var eveningLabel = eveningWeekday === getPlayMskWeekday(now) ? "Сегодня" : "Завтра";
-  shelf.querySelectorAll("button").forEach(function (button) {
+  shelf.querySelectorAll("[data-weekday]").forEach(function (button) {
     var weekday = Number(button.dataset.weekday);
     var tournament = pokerGetHomeTournamentItem(weekday, now);
     var caption = button.querySelector("strong");
