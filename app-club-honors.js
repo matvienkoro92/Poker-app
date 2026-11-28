@@ -158,11 +158,12 @@
   [4,'Турнир Четверга'],[5,'Пятница Прогрессив'],[6,'Big Boss'],[0,'Воскресный турнир']
  ];
  function multiplier(count){return count>1?'<b class="home-award-count">×'+count+'</b>':'';}
- window.pokerHydrateClubHonorsBadges=async function(root){
-  const slots=[...root.querySelectorAll('[data-club-honors-nick]')];
-  if(!slots.length)return;
+ let weeklyCupIndex=null;
+ function getWeeklyCupIndex(){
   const history=window.HOME_TOURNAMENT_HISTORY_BY_WEEKDAY,catalog=window.PokerHallTrophies;
-  const cups=history&&catalog?weeklyCups.map(([day,name])=>{
+  if(!history||!catalog)return [];
+  if(weeklyCupIndex?.history===history&&weeklyCupIndex.catalog===catalog)return weeklyCupIndex.cups;
+  const cups=weeklyCups.map(([day,name])=>{
    const wins=new Map();
    for(const [,podium] of history[day]?.results||[]){
     for(const [place,nick] of podium)if(place===1){
@@ -170,7 +171,14 @@
     }
    }
    return {day,name,wins,art:catalog.assets[catalog.family(name)]};
-  }):[];
+  });
+  weeklyCupIndex={history,catalog,cups};
+  return cups;
+ }
+ window.pokerHydrateClubHonorsBadges=async function(root){
+  const slots=[...root.querySelectorAll('[data-club-honors-nick]')];
+  if(!slots.length)return;
+  const cups=getWeeklyCupIndex();
   function render(issues){
    for(const slot of slots){
     if(!slot.isConnected)continue;
@@ -187,7 +195,7 @@
      const count=wins.get(nick)||0,title=name+' · побед: '+count;
      return '<button type="button" data-week-cup="'+day+'" class="home-week-cup'+(count?'':' is-unearned')+'" aria-label="'+esc(title)+'" title="'+esc(title)+'"><img loading="lazy" src="'+esc(art.replace('.webp','-thumb-v2.webp'))+'" alt="">'+multiplier(count)+'</button>';
     }).join('');
-    if(slot.innerHTML!==html)slot.innerHTML=html;
+    if(slot._clubHonorsMarkup!==html||(html&&!slot.firstChild)){slot.innerHTML=html;slot._clubHonorsMarkup=html;}
    }
   }
   render(publicData?.issues||[]);

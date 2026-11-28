@@ -3001,6 +3001,8 @@
               cursor = current.nextSibling;
               return;
             }
+            var keepHonors = current.hasAttribute("data-club-honors-nick") &&
+              current.getAttribute("data-club-honors-nick") === desired.getAttribute("data-club-honors-nick");
             Array.prototype.slice.call(current.attributes).forEach(function (attr) {
               if (!desired.hasAttribute(attr.name) && !(attr.name === "open" && current.hasAttribute("data-month-ranking"))) current.removeAttribute(attr.name);
             });
@@ -3009,7 +3011,7 @@
             });
             // These values are maintained by the user or the separate admin
             // lookup, not by the feed's HTML snapshot.
-            if (!/^(INPUT|TEXTAREA)$/.test(current.nodeName) &&
+            if (!keepHonors && !/^(INPUT|TEXTAREA)$/.test(current.nodeName) &&
                 !(current.hasAttribute("data-news-admin-telegram") && !desired.textContent)) children(current, desired);
           }
         }
