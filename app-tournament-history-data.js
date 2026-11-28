@@ -1162,6 +1162,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             23660
           ]
         ]
+      ],
+      [
+        "26.11.2026",
+        [
+          [
+            3,
+            "Ksuha🐉",
+            5220
+          ]
+        ]
       ]
     ]
   },
@@ -1505,6 +1515,16 @@ var HOME_TOURNAMENT_HISTORY_BY_WEEKDAY = {
             1,
             "FrankL",
             52992.98
+          ]
+        ]
+      ],
+      [
+        "27.11.2026",
+        [
+          [
+            3,
+            "kriak",
+            8364.38
           ]
         ]
       ]
