@@ -2695,7 +2695,7 @@
       }[friendProfileKey];
       if (portrait) personalArt = visualUrl = portrait;
     }
-    var visual = inlineLook || (visualUrl
+    var visual = inlineLook + (visualUrl
       ? '<img class="home-friend-news__avatar' + (personalArt ? ' home-friend-news__avatar--personal-art' : '') + '" src="' + esc(visualUrl) + '"' +
         (visualFallbackUrl ? ' data-news-image-fallback="' + esc(visualFallbackUrl) + '"' : '') +
         ' alt="" loading="lazy" decoding="async">'
@@ -2762,7 +2762,7 @@
       (ticker ? "" : ' data-home-news-event-id="' + esc(feedbackEventId(row)) + '"') +
       (shareToken ? ' data-home-news-share-token="' + esc(shareToken) + '"' : "") + playerAttrs + playerStyle + ">" +
       '<span class="' + (ticker ? "home-friend-news__event-icon" : "home-friend-news-modal__icon") +
-      ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") +
+      ' home-friend-news--' + esc(row.type) + (visualUrl ? " home-friend-news__event-icon--avatar" : "") + (inlineLook ? " home-friend-news-modal__icon--showcase" : "") +
       '" aria-hidden="' + (inlineLook || (!ticker && isDayHero) ? 'false' : 'true') + '">' + visual +
       "</span>" +
       '<span class="' + (ticker ? "home-friend-news__event-text" : "home-friend-news-modal__copy") + '">' +

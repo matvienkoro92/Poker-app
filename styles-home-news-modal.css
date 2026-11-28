@@ -3482,3 +3482,14 @@ body .home-friend-news-modal.home-friend-news-modal--club .home-friend-news-moda
   .garage-showcase--inline .garage-showcase__news-art {inset:auto 2% 9% auto;width:96%;height:62%;transform:none;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 2px 2px #140610cc);}
   background-image:radial-gradient(ellipse at 13% 91%,#99344760,transparent 29%),url('./assets/club-news-personal/awards-grain.png'),linear-gradient(108deg,#350e1b,#1b0910 48%,#310c18);
 }
+
+.home-friend-news-modal__icon--showcase > .garage-showcase--inline:not(.garage-showcase--character-ready) {
+  position:absolute;
+  inset:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+.home-friend-news-modal__icon--showcase > .garage-showcase--inline[hidden],
+.home-friend-news-modal__icon--showcase > .garage-showcase--character-ready:not([hidden]) ~ * {
+  display:none;
+}
