@@ -610,3 +610,14 @@ test('X-Poker button offers to edit a linked ID or link an account',async()=>{
   assert.ok(buttons.some(b=>b.callback_data==='support:resolve'));
  }
 });
+
+test('paused Cashera mirrors a queued 3000 RUB request without manager buttons',async()=>{
+ const f=fixture();
+ await f.setup();
+ const promptId=91;
+ await f.mirrorBotMessage(LEAD,promptId,f.pm().message.from,{casheraChoice:true});
+ const mirrored=f.calls.find(call=>call.method==='copyMessage'&&call.body.message_id===promptId);
+ assert.equal(mirrored.body.message_thread_id,f.client.threadId);
+ assert.equal(mirrored.body.reply_markup,undefined);
+ assert.equal(f.client.depositChoiceMessageId,undefined);
+});
