@@ -17,6 +17,7 @@ const sources = [
   ["summer-rating-data-november.js", "SUMMER_RATING_TOURNAMENTS_NOVEMBER_BY_DATE"],
 ];
 const tournaments = {
+  saturdayKnockout1000: { buyin: 1000, name: /^(?:Фаст[- ]Трек|Нокаут(?:\s+прогрессив)?)(?:\s*🚀)?$/iu, weekdays: [6] },
   monthly3000: { buyin: 3000, name: /^Турнир Месяца/iu, weekdays: [0, 1, 2, 3, 4, 5, 6], historyDays: "Турнир месяца" },
   sundayMagic5000: { buyin: 5000, name: /^(?:🏆\s*)?(?:М[еэ]джик|Волшебный\s+Пятак)(?:\s*🏆)?$/iu, weekdays: [0] },
   0: { buyin: 2000, name: /^Воскресн[ыи]й турнир(?:\s|$)/iu },
@@ -71,7 +72,7 @@ for (const [, variable] of sources) {
       const target = Object.entries(tournaments).find(([day, config]) =>
         (config.weekdays || [Number(day)]).includes(weekday) &&
         entry && entry.time === "18:00" && Number(entry.buyin) === config.buyin &&
-        config.name.test(String(entry.name || "")));
+        config.name.test(String(entry.name || "").trim()));
       if (!target) continue;
       const podium = (Array.isArray(entry.players) ? entry.players : [])
         .filter((player) => player && Number.isInteger(Number(player.place)) &&

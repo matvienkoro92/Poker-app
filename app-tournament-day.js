@@ -84,6 +84,7 @@ var TOURNAMENT_OF_DAY_BY_WEEKDAY = [
     hour: 18,
     minute: 0,
     time: "18:00 МСК",
+    historyKey: "saturdayKnockout1000",
     banner: "home-tournament-saturday-fast-track-square-1.webp",
     bannerAlt: "Нокаут — суббота, 18:00 МСК, вход 1 000 ₽, гарантия 150 000 ₽, уровни по 8 минут",
     bannerWidth: 1000,
